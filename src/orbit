@@ -1,0 +1,48 @@
+#!/usr/bin/env lua51
+
+-------------------------------------------------------------------------------
+--
+-- Starts the orbit server
+--
+-- orbit app.rb [port]
+--
+-------------------------------------------------------------------------------
+
+local app = select(1, ...)
+
+if not app then
+  print("Usage: orbit app.lua [port]")
+  os.exit(1)
+end
+
+local app_name = string.match(app, "([%w_-]+).lua")
+local app_path = string.match(app, "(.*)/") or "."
+
+package.path = package.path .. ";" .. app_path .. "/?.lua;" .. app_path .. "/?/?.lua"
+
+local port = tonumber(select(2, ...) or 8080)
+
+require "xavante"
+require "xavante.httpd"
+require "xavante.vhostshandler"
+require "xavante.urlhandler"
+require "wsapi.xavante"
+
+local app = require(app_name)
+
+xavante.httpd.handle_request = xavante.vhostshandler {
+	[""] = xavante.urlhandler {
+                ["/"] = wsapi.xavante.makeHandler (app.run),
+	}
+}
+
+xavante.httpd.register ("*", port, "Xavante 2.0")
+
+xavante.start_message(function (ports)
+			        print(string.format("Starting Orbit server at port %s",
+				 table.concat(ports, ", "))) 
+	    	      end)
+
+xavante.start()
+
+

@@ -1,0 +1,31 @@
+This is a proof of concept for a Camping-like Orbit. Current
+functionality is very minimal (routes and dispatching, basic
+views with layout support, no processing of query strings or
+post data).
+
+Installation:
+
+Make sure your Lua interpreter is called lua51 and it is in
+your path, then do:
+
+configure
+make all
+make install
+
+You may have to do the last step as root.
+
+To run the supplied example, go to the samples directory
+of this distribution and do:
+
+orbit hello.lua
+
+After the server is running go to your web browser. Some sample
+urls for hello.lua:
+
+http://127.0.0.1:8080/ will show "Hello World!"
+http://127.0.0.1:8080/say/foo will show "Hello foo!"
+http://127.0.0.1:8080/anythingelse will show "Not found!"
+
+Feel free to change hello.lua while the server is running, changes
+are automatically loaded. Currently there is no error treatment, though.
+
