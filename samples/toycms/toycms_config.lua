@@ -7,9 +7,14 @@ database = {
 
 template_name = "blog"
 
--- url_prefix = "/solazer
--- template_vpath = "/template"
--- image_vpath = "/image"
+-- Uncomment the following line for CGI
+--url_prefix = "/cgi-bin/toycms.cgi"
+-- Uncomment the following line for FastCGI
+--url_prefix = "/cgi-bin/toycms.fcgi"
+
+-- The next two lines are for statically served templates and images
+-- template_vpath = "/templates"
+-- image_vpath = "/images"
 
 strings = {}
 

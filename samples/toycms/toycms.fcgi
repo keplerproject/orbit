@@ -1,6 +1,8 @@
 #!/usr/bin/env lua51
 
-package.path = "/path/to/toycms/?.lua;" .. package.path
+require"lfs"
+
+lfs.chdir("/path/to/toycms")
 
 require"wsapi.fastcgi"
 
