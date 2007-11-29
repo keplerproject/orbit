@@ -129,7 +129,7 @@ function plugins.index_view(app)
       end
       if #section_ids == 0 then return "" end
       local date_start, date_end
-      if arg.archive and app.input.month and app.input.year then
+      if arg and arg.archive and app.input.month and app.input.year then
         date_start = os.time({ year = app.input.year, 
 			    month = app.input.month, day = 1 })
         date_end = os.time({ year = app.input.year + 
