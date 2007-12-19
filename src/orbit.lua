@@ -22,14 +22,14 @@ function make_tag(name, data, class)
     local attrs = {}
     for k, v in pairs(data) do
       if type(k) == "string" then
-	table.insert(attrs, k .. '="' .. tostring(v) .. '"')
+        table.insert(attrs, k .. '="' .. tostring(v) .. '"')
       end
     end
     local open_tag = "<" .. name .. class .. " " ..
       table.concat(attrs, " ") .. ">"
     local close_tag = "</" .. name .. ">"
-    return open_tag .. table.concat(data) .. close_tag	     
-  end	   
+    return open_tag .. table.concat(data) .. close_tag       
+  end      
 end
 
 function app(app_module)
@@ -38,35 +38,35 @@ function app(app_module)
     app_module[k] = v
   end
   app_module.run = function (wsapi_env) 
-		     return app_module_methods.run(app_module, wsapi_env)
-		   end
+                     return app_module_methods.run(app_module, wsapi_env)
+                   end
   app_module.mapper = orbit.model.new(app_module._NAME .. "_")
   app_module.controllers = {}
   app_module.views = {}
   app_module.models = {}
   app_module.not_found = {
-      get = function (self)
-	      self.status = "404 Not Found"
-	      self.response = [[<html>
-		  <head><title>Not Found</title></head>
-		  <body><p>Not found!</p></body></html>]]
-	    end  
+    get = function (self)
+            self.status = "404 Not Found"
+            self.response = [[<html>
+                  <head><title>Not Found</title></head>
+                  <body><p>Not found!</p></body></html>]]
+          end  
   }
   app_module.server_error = {
-      get = function (self, msg)
-	      self.status = "500 Server Error"
-	      self.response = [[<html>
-		  <head><title>Server Error</title></head>
-		  <body><p>]] .. msg .. [[</p></body></html>]]
-	    end  
+    get = function (self, msg)
+            self.status = "500 Server Error"
+            self.response = [[<html>
+                  <head><title>Server Error</title></head>
+                  <body><p>]] .. msg .. [[</p></body></html>]]
+          end  
   }
   app_module.methods = app_instance_methods
 end
 
 function app_module_methods.new(app_module)
   local app_object = { status = "200 Ok", response = "",
-    headers = { ["Content-Type"]= "text/html" },
-    cookies = {} }
+                       headers = { ["Content-Type"]= "text/html" },
+                       cookies = {} }
   app_object.controllers = app_module.controllers
   app_object.views = app_module.views
   app_object.models = app_module.models
@@ -74,8 +74,8 @@ function app_module_methods.new(app_module)
   app_object.server_error = app_module.server_error
   app_object.prefix = app_module.prefix 
   app_object.run = function (wsapi_env) 
-		     return app_instance_methods.run(app_object, wsapi_env)
-		   end
+                     return app_instance_methods.run(app_object, wsapi_env)
+                   end
   setmetatable(app_object, { __index = app_instance_methods })
   return app_object
 end
@@ -86,35 +86,50 @@ function app_module_methods.add_controllers(app_module, cs)
   end
 end
 
+local function newtag(name)
+  local tag = {}
+  setmetatable(tag, {
+                 __call = function (_, data)
+                            return make_tag(name, data)
+                          end,
+                 __index = function(_, class)
+                             return function (data)
+                                      return make_tag(name, data, class)
+                                    end
+                           end
+               })
+  return tag
+end
+
 function app_module_methods.add_views(app_module, vs)
   for k, v in pairs(vs) do
+    local tags = {}
     local env = { view = function ()
-		           local res = coroutine.yield()
-			   if type(res) == "table" then
-			     res = table.concat(res)
-			   end
-			   return res
-                         end }
+                           local res = coroutine.yield()
+                           if type(res) == "table" then
+                             res = table.concat(res)
+                           end
+                           return res
+                         end,
+                  H = function (name)
+                        local tag = tags[name]
+                        if not tag then
+                          tag = newtag(name)
+                          tags[name] = tag
+                        end
+                        return tag
+                      end
+                }
     local old_env = getfenv(v)
     setmetatable(env, { __index = function (env, name)
-      if old_env[name] then
-	return old_env[name]
-      else
-	local tag = {}
-	setmetatable(tag, {
-		       __call = function (_, data)
-       	                          return make_tag(name, data)
-				end,
-		       __index = function(_, class)
-				   return function (data)
-					    return make_tag(name, data, class)
-					  end
-				 end
-		     })
-	rawset(env, name, tag)
-	return tag
-      end
-    end })
+                                    if old_env[name] then
+                                      return old_env[name]
+                                    else
+                                      local tag = newtag(name)
+                                      rawset(env, name, tag)
+                                      return tag
+                                    end
+                                  end })
     setfenv(v, env)
     app_module.views[k] = v
   end
@@ -184,18 +199,18 @@ function app_instance_methods.dispatch(app_object, path, method)
   for name, con in pairs(app_object.controllers) do
     if not con[1] then
       if path == "/" .. name then
-	con[method](app_object)
-	return true
+        con[method](app_object)
+        return true
       end
     else
       for _, pattern in ipairs(con) do
-	local captures = { string.match(path, "^" .. pattern .. "$") }
-	if #captures > 0 then
-	  con[method](app_object, unpack(captures))
-	  return true
-	end
+        local captures = { string.match(path, "^" .. pattern .. "$") }
+        if #captures > 0 then
+          con[method](app_object, unpack(captures))
+          return true
+        end
       end
-    end			      
+    end                       
   end
   return false
 end
@@ -204,14 +219,14 @@ function app_instance_methods.run(app_object, wsapi_env)
   local req = wsapi.request.new(wsapi_env)
   local res = wsapi.response.new(app_object.status, app_object.headers)
   app_object.set_cookie = function (_, name, value)
-			    res:set_cookie(name, value)
-			  end
+                            res:set_cookie(name, value)
+                          end
   app_object.delete_cookie = function (_, name)
-			       res:delete_cookie(name)
-			     end
+                               res:delete_cookie(name)
+                             end
   app_object.input, app_object.cookies = req.params, req.cookies
   local ok, found = xpcall(function () return app_object:dispatch(req.path_info,
-    string.lower(req.method)) end, debug.traceback)
+                                                                  string.lower(req.method)) end, debug.traceback)
   if not ok then
     app_object.server_error.get(app_object, found)
   elseif not found then
