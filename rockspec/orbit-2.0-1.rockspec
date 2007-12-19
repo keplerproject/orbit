@@ -15,7 +15,8 @@ description = {
 dependencies = { }
 
 source = {
-  url = "cvs://:pserver:anonymous@cvs.luaforge.net:/cvsroot/orbit"
+  url = "cvs://:pserver:anonymous@cvs.luaforge.net:/cvsroot/orbit",
+  cvs_tag = "HEAD"
 }
 
 build = {
