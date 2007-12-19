@@ -1,8 +1,11 @@
-# $Id: Makefile,v 1.1 2007/11/26 17:12:24 mascarenhas Exp $
+# $Id: Makefile,v 1.2 2007/12/19 23:46:51 mascarenhas Exp $
 
 include config
 
 all:
+
+config:
+	touch config
 
 install:
 	mkdir -p $(LUA_DIR)
@@ -14,5 +17,13 @@ install:
 	if [ -f ./wsapi/Makefile ]; then \
 	  cd wsapi && make install; \
 	fi
+
+install-rocks: install
+	mkdir -p $(PREFIX)/samples
+	cp -r samples/* $(PREFIX)/samples
+	mkdir -p $(PREFIX)/doc
+	cp -r doc/* $(PREFIX)/doc
+	mkdir -p $(PREFIX)/test
+	cp -r test/* $(PREFIX)/test
 
 clean:
