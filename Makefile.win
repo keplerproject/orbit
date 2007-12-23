@@ -1,11 +1,20 @@
-# $Id: Makefile.win,v 1.1 2007/11/26 18:28:15 mascarenhas Exp $
+# $Id: Makefile.win,v 1.2 2007/12/23 16:41:45 mascarenhas Exp $
 
-LUA_BINDIR= c:\usr\local\bin
-LUA_DIR= c:\usr\local\share\lua\5.1
-LUA_LIBDIR= c:\usr\local\lib\lua\5.1
+LUA_DIR= c:\lua5.1\lua
+BIN_DIR= c:\lua5.1\bin
+
+all:
 
 install:
 	IF NOT EXIST $(LUA_DIR)\orbit mkdir $(LUA_DIR)\orbit
-	copy src\orbit.lua $(LUA_DIR)\
-	copy src\model.lua $(LUA_DIR)\orbit
-	copy src\orbit $(LUA_BINDIR)\
+	copy src\orbit.lua $(LUA_DIR)
+	copy src\model.lua $(LUA_DIR)/orbit
+	IF NOT EXIST $(BIN_DIR) mkdir $(BIN_DIR)
+	copy src\orbit $(BIN_DIR)
+
+install-rocks: install
+	xcopy /E samples $(PREFIX)\
+	xcopy /E doc $(PREFIX)\
+	xcopy /E test $(PREFIX)\
+
+clean:
