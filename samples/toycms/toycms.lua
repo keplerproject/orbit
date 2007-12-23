@@ -56,7 +56,7 @@ toycms:add_models{
 
 function toycms.methods:load_template(name)
   local template_file = io.open("templates/" ..
-				template_name .. "/" .. name)
+				template_name .. "/" .. name, "rb")
   if template_file then
     local template = template_file:read("*a")     
     template_file:close()
@@ -327,7 +327,7 @@ toycms:add_controllers{
   style = { "/template/(.-%.css)",
     get = function (app, file_name)
       local style_file = io.open("templates/" .. 
-				 template_name .. "/" .. file_name)
+				 template_name .. "/" .. file_name, "rb")
       if style_file then
 	local style = style_file:read("*a")
 	style_file:close()
@@ -341,7 +341,7 @@ toycms:add_controllers{
   images_gif = { "/template/images/(.-%.gif)",
     get = function (app, file_name)
       local image_file = io.open("templates/" .. 
-				 template_name .. "/images/" .. file_name)
+				 template_name .. "/images/" .. file_name, "rb")
       if image_file then
 	local image = image_file:read("*a")
 	image_file:close()
@@ -355,7 +355,7 @@ toycms:add_controllers{
   images_jpg = { "/template/images/(.-%.jpg)",
     get = function (app, file_name)
       local image_file = io.open("templates/" ..
-				 template_name .. "/images/" .. file_name)
+				 template_name .. "/images/" .. file_name, "rb")
       if image_file then
 	local image = image_file:read("*a")
 	image_file:close()
@@ -369,7 +369,7 @@ toycms:add_controllers{
   images_png = { "/template/images/(.-%.png)",
     get = function (app, file_name)
       local image_file = io.open("templates/" ..
-				 template_name .. "/images/" .. file_name)
+				 template_name .. "/images/" .. file_name, "rb")
       if image_file then
 	local image = image_file:read("*a")
 	image_file:close()
@@ -382,7 +382,7 @@ toycms:add_controllers{
   },
   images_post = { "/post/(%d+)/(.-%.jpg)",
     get = function (app, post_id, file_name)
-      local image_file = io.open("images/" .. post_id .. "/" .. file_name)
+      local image_file = io.open("images/" .. post_id .. "/" .. file_name, "rb")
       if image_file then
 	local image = image_file:read("*a")
 	image_file:close()
@@ -395,7 +395,7 @@ toycms:add_controllers{
   },
   javascript = { "/javascripts/(.-%.js)",
     get = function (app, file_name)
-      local js_file = io.open("scriptaculous/" .. file_name)
+      local js_file = io.open("scriptaculous/" .. file_name, "rb")
       if js_file then
 	local js = js_file:read("*a")
 	js_file:close()

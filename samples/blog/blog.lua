@@ -139,7 +139,7 @@ blog:add_controllers{
   background = { "/(head)%.(jpg)",
     get = function (self, name, ext)
       self.headers["Content-Type"] = "image/" .. ext
-      local img = io.open(name .. "." .. ext)
+      local img = io.open(name .. "." .. ext, "rb")
       self.response = img:read("*a")
       img:close()
     end
