@@ -15,8 +15,10 @@ blogroll = {
 }
 
 database = {
+--  driver = "mysql",
+--  conn_data = { "blog", "root", "rfc8000" }
   driver = "sqlite3",
-  conn_string = "blog.db"
+  conn_data = { "blog.db" }
 }
 
 recent_count = 7

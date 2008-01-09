@@ -1,5 +1,4 @@
 require "orbit"
-require "luasql.sqlite3"
 require "markdown"
 
 --
@@ -15,8 +14,9 @@ require"blog_config"
 --
 -- Initializes DB connection for Orbit's default model mapper
 --
+require("luasql." .. database.driver)
 local env = luasql[database.driver]()
-mapper.conn = env:connect(database.conn_string)
+mapper.conn = env:connect(unpack(database.conn_data))
 
 --
 -- Models for this application. Orbit calls mapper:new for each model,
@@ -29,7 +29,7 @@ blog:add_models{
       return models.comment:find_all_by_post_id{ self.id }
     end,
     find_recent = function (self)
-      return self:find_all("published_at not null",
+      return self:find_all("published_at is not null",
 			   { order = "published_at desc",
 			     count = recent_count })
     end,

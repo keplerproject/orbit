@@ -10,7 +10,15 @@ function convert.integer(v)
   return tonumber(v)
 end
 
+function convert.number(v)
+  return tonumber(v)
+end
+
 function convert.varchar(v)
+  return tostring(v)
+end
+
+function convert.string(v)
   return tostring(v)
 end
 
@@ -20,6 +28,10 @@ end
 
 function convert.boolean(v)
   return v == "t"
+end
+
+function convert.binary(v)
+  return convert.text(v)
 end
 
 function convert.datetime(v)
@@ -44,8 +56,16 @@ function escape.integer(v)
   return tostring(v)
 end
 
+function escape.number(v)
+  return escape.integer(v)
+end
+
 function escape.varchar(v)
   return "'" .. string.gsub(v, "'", "''") .. "'"
+end
+
+function escape.string(v)
+  return escape.varchar(v)
 end
 
 function escape.text(v)
@@ -62,6 +82,10 @@ function escape.boolean(v)
   else
     return "'f'"
   end
+end
+
+function escape.binary(v)
+  return escape.text(v)
 end
 
 local function escape_values(row)
