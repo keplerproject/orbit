@@ -4,14 +4,14 @@ CREATE TABLE toycms_post
        `body` TEXT DEFAULT '',
        `abstract` TEXT DEFAULT '',
        `image` VARCHAR(255) DEFAULT '',
+       `external_url` VARCHAR(255) DEFAULT '',
+       `comment_status` VARCHAR(30) DEFAULT 'closed',
        `n_comments` INTEGER DEFAULT 0,
        `section_id` INTEGER DEFAULT NULL,
        `user_id` INTEGER DEFAULT NULL,
        `in_home` BOOLEAN DEFAULT FALSE,
        `published` BOOLEAN DEFAULT FALSE,
-       `published_at` DATETIME DEFAULT NULL,
-       `external_url` VARCHAR(255) DEFAULT '',
-       `comment_status` VARCHAR(30) DEFAULT 'closed');
+       `published_at` DATETIME DEFAULT NULL);
 
 CREATE TABLE toycms_comment
        (`id` INTEGER PRIMARY KEY NOT NULL,
@@ -20,8 +20,8 @@ CREATE TABLE toycms_comment
        `email` VARCHAR(255) DEFAULT '',
        `url` VARCHAR(255) DEFAULT '',
        `body` TEXT DEFAULT '',
-       `created_at` DATETIME DEFAULT NULL,
-       `approved` BOOLEAN DEFAULT FALSE);
+       `approved` BOOLEAN DEFAULT FALSE,
+       `created_at` DATETIME DEFAULT NULL);
 
 CREATE TABLE toycms_section
        (`id` INTEGER PRIMARY KEY NOT NULL,

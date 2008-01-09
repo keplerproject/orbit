@@ -324,8 +324,8 @@ function dao_methods.find_all(dao, condition, args)
 		    (args and args.count) or (condition and condition.count))
 end
 
-function dao_methods.new(dao)
-  local row = {}
+function dao_methods.new(dao, row)
+  row = row or {}
   setmetatable(row, { __index = dao })
   return row
 end
