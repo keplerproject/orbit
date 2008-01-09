@@ -2,7 +2,9 @@ module("toycms", package.seeall)
 
 database = {
   driver = "sqlite3",
-  conn_string = "blog.db"
+  conn_data = { "blog.db" }
+--  driver = "mysql",
+--  conn_data = { "blog", "root", "password" }
 }
 
 template_name = "blog"

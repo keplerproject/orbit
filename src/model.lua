@@ -4,6 +4,20 @@ model_methods = {}
 
 dao_methods = {}
 
+local type_names = {}
+
+function type_names.sqlite3(t)
+  return string.lower(string.match(t, "(%a+)"))
+end
+
+function type_names.mysql(t)
+  if t == "number(1)" then
+    return "boolean"
+  else
+    return string.lower(string.match(t, "(%a+)"))
+  end
+end
+
 local convert = {}
 
 function convert.integer(v)
@@ -26,8 +40,14 @@ function convert.text(v)
   return tostring(v)
 end
 
-function convert.boolean(v)
-  return v == "t"
+function convert.boolean(v, driver)
+  if driver == "sqlite3" then
+    return v == "t"
+  elseif driver == "mysql" then
+    return tonumber(v) == 1
+  else
+    return toboolean(v)
+  end
 end
 
 function convert.binary(v)
@@ -42,10 +62,10 @@ function convert.datetime(v)
 		   min = tonumber(min), sec = tonumber(sec) })
 end
 
-local function convert_types(row, meta)
+local function convert_types(row, meta, driver)
   for k, v in pairs(row) do
     if meta[k] then
-      row[k] = convert[meta[k].type](v)
+      row[k] = convert[meta[k].type](v, driver)
     end
   end
 end
@@ -76,11 +96,11 @@ function escape.datetime(v)
   return "'" .. os.date("%Y-%m-%d %H:%M:%S", v) .. "'"
 end
 
-function escape.boolean(v)
+function escape.boolean(v, driver)
   if v then
-    return "'t'"
+    if driver == "sqlite3" then return "'t'" else return tostring(v) end
   else
-    return "'f'"
+    if driver == "sqlite3" then return "'f'" else return tostring(v) end
   end
 end
 
@@ -94,7 +114,7 @@ local function escape_values(row)
     if row[m.name] == nil then
       row_escaped[m.name] = "NULL" 
     else
-      row_escaped[m.name] = escape[m.type](row[m.name])
+      row_escaped[m.name] = escape[m.type](row[m.name], row.driver)
     end
   end
   return row_escaped
@@ -106,7 +126,7 @@ local function fetch_row(dao, sql)
   local row = cursor:fetch({}, "a")
   cursor:close()
   if row then
-    convert_types(row, dao.meta)
+    convert_types(row, dao.meta, dao.driver)
     setmetatable(row, { __index = dao })
   end
   return row
@@ -118,7 +138,7 @@ local function fetch_rows(dao, sql, count)
   if not cursor then error(err) end
   local row, fetched = cursor:fetch({}, "a"), 1
   while row and (not count or fetched <= count) do
-    convert_types(row, dao.meta)
+    convert_types(row, dao.meta, dao.driver)
     setmetatable(row, { __index = dao })
     rows[#rows + 1] = row
     row, fetched = cursor:fetch({}, "a"), fetched + 1
@@ -138,11 +158,11 @@ local function parse_condition(dao, condition, args)
     elseif type(args[i]) == "table" then
       local values = {}
       for _, value in ipairs(args[i]) do
-	values[#values + 1] = escape[dao.meta[field].type](value)
+	values[#values + 1] = escape[dao.meta[field].type](value, dao.driver)
       end
       pairs[i] = field .. " IN (" .. table.concat(values,", ") .. ")"
     else
-      value = escape[dao.meta[field].type](args[i])
+      value = escape[dao.meta[field].type](args[i], dao.driver)
       pairs[i] = field .. " = " .. value
     end
   end
@@ -212,8 +232,8 @@ end
 
 function model_methods:new(name, dao)
   dao = dao or {}
-  dao.model, dao.name, dao.table_name, dao.meta = self, name, 
-    self.table_prefix .. name, {}
+  dao.model, dao.name, dao.table_name, dao.meta, dao.driver = self, name, 
+    self.table_prefix .. name, {}, self.driver
   setmetatable(dao, { __index = dao_index })
   local sql = "select * from " .. dao.table_name
   local cursor, err = self.conn:execute(sql)
@@ -222,15 +242,16 @@ function model_methods:new(name, dao)
   cursor:close()
   for i = 1, #names do
     local colinfo = { name = names[i],
-    type = string.lower(string.match(types[i], "(%a+)")) }
+    type = type_names[self.driver](types[i]) }
     dao.meta[i] = colinfo
     dao.meta[colinfo.name] = colinfo
   end
   return dao
 end
 
-function new(table_prefix, conn)
-  local app_model = { table_prefix = table_prefix, conn = conn, models = {} }
+function new(table_prefix, conn, driver)
+  driver = driver or "sqlite3"
+  local app_model = { table_prefix = table_prefix, conn = conn, driver = driver, models = {} }
   setmetatable(app_model, { __index = model_methods })
   return app_model
 end
@@ -263,12 +284,12 @@ local function build_query(dao, condition, args)
 		      local values = {}
 		      for j, value in ipairs(args[i]) do
 			values[#values + 1] = field .. " " .. op .. " " ..
-		          escape[dao.meta[field].type](value)
+		          escape[dao.meta[field].type](value, dao.driver)
                       end
 		      return "(" .. table.concat(values, " or ") .. ")"
                     else
 		      return field .. " " .. op .. " " ..
-		        escape[dao.meta[field].type](args[i])
+		        escape[dao.meta[field].type](args[i], dao.driver)
                     end
 		  end)
   end
@@ -315,7 +336,7 @@ local function update(row)
   if row.meta["updated_at"] then
     local now = os.time()
     row.updated_at = now
-    row_escaped.updated_at = escape.datetime(now)
+    row_escaped.updated_at = escape.datetime(now, row.driver)
   end
   for k, v in pairs(row_escaped) do
     table.insert(updates, k .. "=" .. v)
@@ -331,11 +352,11 @@ local function insert(row)
   local now = os.time()
   if row.meta["created_at"] then
     row.created_at = now
-    row_escaped.created_at = escape.datetime(now)
+    row_escaped.created_at = escape.datetime(now, row.driver)
   end
   if row.meta["updated_at"] then
     row.updated_at = now
-    row_escaped.updated_at = escape.datetime(now)
+    row_escaped.updated_at = escape.datetime(now, row.driver)
   end
   local columns, values = {}, {}
   for k, v in pairs(row_escaped) do

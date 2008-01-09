@@ -1,5 +1,4 @@
 require"orbit"
-require"luasql.sqlite3"
 require"markdown"
 require"cosmo"
 
@@ -7,8 +6,10 @@ module("toycms", package.seeall, orbit.app)
 
 require"toycms_config"
 
+require("luasql." .. database.driver)
 local env = luasql[database.driver]()
-mapper.conn = env:connect(database.conn_string)
+mapper.conn = env:connect(unpack(database.conn_data))
+mapper.driver = database.driver
 
 toycms.prefix = url_prefix 
 

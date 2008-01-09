@@ -16,7 +16,7 @@ blogroll = {
 
 database = {
 --  driver = "mysql",
---  conn_data = { "blog", "root", "rfc8000" }
+--  conn_data = { "blog", "root", "password" }
   driver = "sqlite3",
   conn_data = { "blog.db" }
 }

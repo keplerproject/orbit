@@ -17,6 +17,7 @@ require"blog_config"
 require("luasql." .. database.driver)
 local env = luasql[database.driver]()
 mapper.conn = env:connect(unpack(database.conn_data))
+mapper.driver = database.driver
 
 --
 -- Models for this application. Orbit calls mapper:new for each model,
