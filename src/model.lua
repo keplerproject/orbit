@@ -235,7 +235,7 @@ function model_methods:new(name, dao)
   dao.model, dao.name, dao.table_name, dao.meta, dao.driver = self, name, 
     self.table_prefix .. name, {}, self.driver
   setmetatable(dao, { __index = dao_index })
-  local sql = "select * from " .. dao.table_name
+  local sql = "select * from " .. dao.table_name .. " limit 0"
   local cursor, err = self.conn:execute(sql)
   if not cursor then error(err) end
   local names, types = cursor:getcolnames(), cursor:getcoltypes()
@@ -351,11 +351,11 @@ local function insert(row)
   local row_escaped = escape_values(row)
   local now = os.time()
   if row.meta["created_at"] then
-    row.created_at = now
+    row.created_at = row.created_at or now
     row_escaped.created_at = escape.datetime(now, row.driver)
   end
   if row.meta["updated_at"] then
-    row.updated_at = now
+    row.updated_at = row.updated_at or now
     row_escaped.updated_at = escape.datetime(now, row.driver)
   end
   local columns, values = {}, {}
@@ -367,11 +367,15 @@ local function insert(row)
     " (" .. table.concat(columns, ", ") .. ") values (" ..
     table.concat(values, ", ") .. ")"
   local ok, err = row.model.conn:execute(sql)
-  if ok then row.id = row.model.conn:getlastautoid() else error(err) end
+  if ok then 
+    row.id = row.id or row.model.conn:getlastautoid()
+  else 
+    error(err)
+  end
 end
 
-function dao_methods.save(row)
-  if row.id then
+function dao_methods.save(row, force_insert)
+  if row.id and (not force_insert) then
     update(row)
   else
     insert(row)
