@@ -73,6 +73,7 @@ function app_module_methods.new(app_module)
   app_object.not_found = app_module.not_found
   app_object.server_error = app_module.server_error
   app_object.prefix = app_module.prefix 
+  app_object.suffix = app_module.suffix
   app_object.run = function (wsapi_env) 
                      return app_instance_methods.run(app_object, wsapi_env)
                    end
@@ -171,14 +172,15 @@ end
 function app_instance_methods.link(app_object, url, params)
   local link = {}
   local prefix = app_object.prefix or ""
+  local suffix = app_object.suffix or ""
   for k, v in pairs(params or {}) do
     link[#link + 1] = k .. "=" .. wsapi.util.url_encode(v)
   end
   local qs = table.concat(link, "&")
   if qs and qs ~= "" then
-    return prefix .. url .. "?" .. qs
+    return prefix .. url .. suffix .. "?" .. qs
   else
-    return prefix .. url
+    return prefix .. url .. suffix
   end
 end
 
@@ -224,6 +226,7 @@ function app_instance_methods.run(app_object, wsapi_env)
   app_object.delete_cookie = function (_, name)
                                res:delete_cookie(name)
                              end
+  app_object.path_info = req.path_info
   app_object.input, app_object.cookies = req.params, req.cookies
   local ok, found = xpcall(function () return app_object:dispatch(req.path_info,
                                                                   string.lower(req.method)) end, debug.traceback)
