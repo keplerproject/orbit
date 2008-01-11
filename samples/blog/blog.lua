@@ -180,7 +180,7 @@ blog:add_views{
 	  meta{ ["http-equiv"] = "Content-Type",
 	    content = "text/html; charset=utf-8" },
           link{ rel = 'stylesheet', type = 'text/css', 
-               href = '/style.css', media = 'screen' }
+               href = self:link('/style.css'), media = 'screen' }
         },
 	body{
 	  div{ id = "container",
@@ -198,9 +198,9 @@ blog:add_views{
       } 
   end,
   _menu = function (self, args)
-    local res = { li(a{ href= "/", strings.home_page_name }) }
+    local res = { li(a{ href= self:link("/"), strings.home_page_name }) }
     for _, page in pairs(args.pages) do
-      res[#res + 1] = li(a{ href = "/page/" .. page.id, page.title })
+      res[#res + 1] = li(a{ href = self:link("/page/" .. page.id), page.title })
     end
     return ul(res)
   end,
@@ -226,15 +226,15 @@ blog:add_views{
   _recent = function (self, args)
     local res = {}
     for _, post in ipairs(args.recent) do
-      res[#res + 1] = li(a{ href="/post/" .. post.id, post.title })
+      res[#res + 1] = li(a{ href=self:link("/post/" .. post.id), post.title })
     end
     return ul(res)
   end,
   _archives = function (self, args)
     local res = {}
     for _, month in ipairs(args.months) do
-      res[#res + 1] = li(a{ href="/archive/" .. month.year .. "/" ..
-			   month.month, blog.month(month) })
+      res[#res + 1] = li(a{ href=self:link("/archive/" .. month.year .. "/" ..
+			   month.month), blog.month(month) })
     end
     return ul(res)
   end,
@@ -262,7 +262,7 @@ blog:add_views{
       p.posted{ 
         strings.published_at .. " " .. 
           os.date("%H:%M", post.published_at), " | ",
-	a{ href = "/post/" .. post.id .. "#comments", strings.comments ..
+	a{ href = self:link("/post/" .. post.id .. "#comments"), strings.comments ..
              " (" .. (post.n_comments or "0") .. ")" }
       }
     }
@@ -300,7 +300,7 @@ blog:add_views{
     end
     res[#res + 1] = form{
       method = "post",
-      action = "/post/" .. args.post.id .. "/addcomment",
+      action = self:link("/post/" .. args.post.id .. "/addcomment"),
       p{ strings.form_name, br(), input{ type="text", name="author" },
          br(), br(),
          strings.form_email, br(), input{ type="text", name="email" },

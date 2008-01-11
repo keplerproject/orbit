@@ -218,6 +218,7 @@ function app_instance_methods.dispatch(app_object, path, method)
 end
 
 function app_instance_methods.run(app_object, wsapi_env)
+  app_object.prefix = app_object.prefix or wsapi_env.SCRIPT_NAME
   local req = wsapi.request.new(wsapi_env)
   local res = wsapi.response.new(app_object.status, app_object.headers)
   app_object.set_cookie = function (_, name, value)
