@@ -7,6 +7,8 @@ cosmo = require "template.cosmo"
 module("toycms", package.seeall, orbit.new)
 
 require "toycms_config"
+require "toycms_plugins"
+require "toycms_admin"
 
 require("luasql." .. database.driver)
 local env = luasql[database.driver]()
@@ -183,8 +185,6 @@ function new_comment_env(web, comment)
   return env
 end
 
-require "toycms_plugins"
-
 function home_page(web)
    local template = load_template("home.html")
    if template then
@@ -352,4 +352,3 @@ function check_user(web)
   return models.user:find_by_id_and_password{ user_id, password }
 end
 
-require"toycms_admin"
