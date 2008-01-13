@@ -6,6 +6,8 @@ cosmo = require "template.cosmo"
 
 module("toycms", package.seeall, orbit.new)
 
+plugins = {}
+
 require "toycms_config"
 require "toycms_plugins"
 require "toycms_admin"
@@ -66,7 +68,7 @@ function load_template(name)
       local template_file = io.open("templates/" ..
 				    template_name .. "/" .. name, "rb")
       if template_file then
-	 template = template_file:read("*a")     
+  	 template = cosmo.compile(template_file:read("*a"))
 	 template_cache[name] = template
 	 template_file:close()
       end
@@ -74,18 +76,30 @@ function load_template(name)
    return template
 end
 
+function load_plugin(name)
+  local plugin, err = loadfile("plugins/" .. name .. ".lua")
+  if not plugin then
+    error("Error loading plugin " .. name .. ": " .. err)
+  end
+  return plugin
+end
+
 function new_template_env(web)
   local template_env = {}
 
   template_env.template_vpath = template_vpath or web:link("/template")
-  template_env.js_vpath = js_vpath or web:link("/javascripts")
   template_env.today = date(os.time())
   template_env.home_url = web:link("/")
   template_env.home_url_xml = web:link("/xml")
 
   function template_env.import(arg)
     local plugin_name = arg[1]
-    for fname, f in pairs(plugins[plugin_name](web)) do
+    local plugin = plugins[plugin_name]
+    if not plugin then
+      plugin = load_plugin(plugin_name)
+      plugins[plugin_name] = plugin
+    end
+    for fname, f in pairs(plugin(web)) do
       template_env[fname] = f
     end
     return ""
@@ -146,20 +160,23 @@ function new_post_env(web, post, section)
   env.if_error_comment = cosmo.cond(not web:empty_param("error_comment"), env)
   env.if_comments = cosmo.cond((post.n_comments or 0) > 0, env)
   env.comments = function (arg, has_block)
-    local do_list = function ()
-      local comments = post:find_comments()
-      for _, comment in ipairs(comments) do
-        cosmo.yield(new_comment_env(web, comment))
-      end
-    end
-    if has_block then do_list()
-    else
-      local template_file = (arg and arg.template) or "comment.html"
-      local template = load_template(template_file)
-      return cosmo.fill("$do_list[[" .. template .. "]]",
-        { do_list = do_list })
-    end
-  end
+		   local comments = post:find_comments()
+		   local out, template
+		   if not has_block then
+		     local out = {}
+		     local template = load_template((arg and arg.template) or 
+						  "comment.html")
+		   end
+		   for _, comment in ipairs(comments) do
+		     if has_block then
+		       cosmo.yield(new_comment_env(web, comment))
+		     else
+		       local tdata = template(new_comment_env(web, comment))
+		       table.insert(out, tdata)
+		     end
+		   end
+		   if not has_block then return table.concat(out, "\n") end
+		 end
   env.add_comment_uri = web:link("/post/" .. post.id .. "/addcomment")
   return env
 end
@@ -188,7 +205,7 @@ end
 function home_page(web)
    local template = load_template("home.html")
    if template then
-      return layout(web, cosmo.fill(template, new_template_env(web)))
+      return layout(web, template(new_template_env(web)))
    else
       return not_found(web)
    end
@@ -200,7 +217,7 @@ function home_xml(web)
    local template = load_template("home.xml")
    if template then
       web.headers["Content-Type"] = "text/xml"
-      return cosmo.fill(template, new_template_env(web))
+      return template(new_template_env(web))
    else
       return not_found(web)
    end
@@ -213,16 +230,17 @@ function view_section(type)
 	     local section = models.section:find(tonumber(section_id))
 	     if not section then return not_found(web) end
 	     local template = load_template("section_" .. 
-					    tostring(section.tag) .. "." .. type) or
-		load_template("section." .. type)
+					    tostring(section.tag) ..
+					    "." .. type) or
+	                      load_template("section." .. type)
 	     if template then
 		web.input.section_id = tonumber(section_id)
 		local env = new_section_env(web, section)
 		if type == "xml" then
 		   web.headers["Content-Type"] = "text/xml"
-		   return cosmo.fill(template, env)
+		   return template(env)
 		else
-		   return layout(web, cosmo.fill(template, env))
+		   return layout(web, template(env))
 		end
 	     else
 		return not_found(web)
@@ -239,17 +257,18 @@ function view_post(type)
 	     if not post then return not_found(web) end
 	     local section = models.section:find(post.section_id)
 	     local template = load_template("post_" .. 
-					    tostring(section.tag) .. "." .. type) or
-		load_template("post." .. type)
+					    tostring(section.tag) ..
+					    "." .. type) or
+	                      load_template("post." .. type)
 	     if template then
 		web.input.section_id = post.section_id
 		web.input.post_id = tonumber(post_id)
 		local env = new_post_env(web, post, section)
 		if type == "xml" then
 		   web.headers["Content-Type"] = "text/xml"
-		   return cosmo.fill(template, env)
+		   return template(env)
 		else
-		   return layout(web, cosmo.fill(template, env))
+		   return layout(web, template(env))
 		end
 	     else
 		return not_found(web)
@@ -270,7 +289,7 @@ function archive(web, year, month)
       env.archive_month_name = month_names[web.input.month]
       env.archive_year = web.input.year
       env.archive_month_padded = month
-      return layout(web, cosmo.fill(template, env))
+      return layout(web, template(env))
    else
       not_found(web)
    end
@@ -340,7 +359,7 @@ function layout(web, inner_html)
    if layout_template then
       local env = new_template_env(web)
       env.view = inner_html
-      return cosmo.fill(layout_template, env)
+      return layout_template(env)
    else
       return inner_html
    end
