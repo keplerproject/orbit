@@ -248,7 +248,10 @@ function app_module_methods.dispatch_static(app_module, ...)
 end
 
 function app_module_methods.serve_static(app_module, web, filename)
+   local ext = string.match(filename, "%.([^%.]+)$")
    if app_module.use_xsendfile then
+      web.headers["Content-Type"] = mime_types[ext] or 
+	 "application/octet-stream"
       web.headers["X-Sendfile"] = filename
       return "xsendfile"
    else
@@ -256,7 +259,6 @@ function app_module_methods.serve_static(app_module, web, filename)
       if not file then
 	 return app_module.not_found(web)
       else
-	 local ext = string.match(filename, "%.([^%.]+)$")
 	 web.headers["Content-Type"] = mime_types[ext] or 
 	    "application/octet-stream"
 	 local contents = file:read("*a")
