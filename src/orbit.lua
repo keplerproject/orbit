@@ -392,10 +392,17 @@ end
 function dispatch(app_module, web)
    local path = web.path_info
    local method = web.method
-   for _, item in ipairs(app_module.dispatch_table[method]) do
-      local captures = { string.match(path, "^" .. item.pattern .. "$") }
-      if #captures > 0 then
-	 return item.handler(web, unpack(captures))
+   if #app_module.dispatch_table[method] == 0 then
+      local handler = app_module["handle" .. method]
+      if handler then
+	 return handler(web)
+      end
+   else
+      for _, item in ipairs(app_module.dispatch_table[method]) do
+	 local captures = { string.match(path, "^" .. item.pattern .. "$") }
+	 if #captures > 0 then
+	    return item.handler(web, unpack(captures))
+	 end
       end
    end
 end
