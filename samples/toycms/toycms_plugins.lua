@@ -52,6 +52,7 @@ function plugins.section_list(web)
   return {
     section_list = function (arg, has_block)
       arg = arg or {}
+      local template_name = arg.template
       if arg.include_tags then
         arg = { arg.include_tags }
         arg.condition = "tag like ?"
@@ -59,7 +60,7 @@ function plugins.section_list(web)
       local out, template
       if not has_block then
 	out = {}
-	template = load_template(arg.template or 
+	template = load_template(template_name or 
 				 "section_list.html")
       end
       local sections = models.section:find_all(arg.condition, arg)
