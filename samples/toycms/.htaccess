@@ -1,0 +1,11 @@
+
+<FilesMatch "\.(lua|db|sql|mysql|cgi|fcgi)$">
+  Deny from all
+  Allow from none
+</FilesMatch>
+
+<Files "toycms.lua">
+  Allow from all
+  Deny from none
+  XSendFile on
+</Files>

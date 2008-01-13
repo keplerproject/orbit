@@ -1,3 +1,5 @@
+
+-- Puts all the definitions below in blog's namespace
 module("blog", package.seeall)
 
 blog_title = "Blog"
@@ -13,6 +15,9 @@ blogroll = {
   { "http://news.google.com", "Google News" },
   { "http://www.wikipedia.org", "Wikipedia" },
 }
+
+-- Uncomment this to send static files through X-Sendfile
+-- use_xsendfile = true
 
 database = {
 --  driver = "mysql",

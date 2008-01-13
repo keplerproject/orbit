@@ -1,61 +1,54 @@
-require"orbit"
-require"cosmo"
+#!/usr/bin/env wsapi
 
-module("songs", package.seeall, orbit.app)
+local orbit = require"orbit"
+local cosmo = require"template.cosmo"
 
-songs:add_controllers{
-  index = { "/",
-    get = function(self)
-	    local songs = {
-	      "Sgt. Pepper's Lonely Hearts Club Band",
-              "With a Little Help from My Friends",
-              "Lucy in the Sky with Diamonds",
-              "Getting Better",
-              "Fixing a Hole",
-              "She's Leaving Home",
-              "Being for the Benefit of Mr. Kite!",
-              "Within You Without You",
-              "When I'm Sixty-Four",
-              "Lovely Rita",
-              "Good Morning Good Morning",
-              "Sgt. Pepper's Lonely Hearts Club Band (Reprise)",
-              "A Day in the Life"
-	    }
-            self:render("index", songs)
-          end
+local songs = orbit.new()
+
+function songs.index(web)
+   local songlist = {
+      "Sgt. Pepper's Lonely Hearts Club Band",
+      "With a Little Help from My Friends",
+      "Lucy in the Sky with Diamonds",
+      "Getting Better",
+      "Fixing a Hole",
+      "She's Leaving Home",
+      "Being for the Benefit of Mr. Kite!",
+      "Within You Without You",
+      "When I'm Sixty-Four",
+      "Lovely Rita",
+      "Good Morning Good Morning",
+      "Sgt. Pepper's Lonely Hearts Club Band (Reprise)",
+      "A Day in the Life"
+   }
+   return songs.render_index(songlist)
+end
+
+songs:dispatch_get(songs.index, "/")
+
+function songs.layout(inner_html)
+  return html{
+    head{ title"Song List" },
+    body{ inner_html }
   }
-}
+end
 
-local cache
+orbit.htmlify(songs, "layout")
 
-songs:add_views{
-  layout = function (self)
-             return html{
-                       head{ title"Song List" },
-                       body{ view() }
-                    }
-           end,
---[[  index = function (self, songs)
-	    local tr_songs = {}
-            for _, song in ipairs(songs) do
-              table.insert(tr_songs, tr(td(song)))
-            end
-	    return h1"Songs" .. H"table"{ table.concat(tr_songs, "\n") }
-          end ]]
-      index = function (self, songs)
-		local template = [[
-		    <h1>Songs</h1>
-		    <table>
-		      $songs[=[<tr><td>$title</td></tr>]=]
-		    </table>  
-		]]
-	        return cosmo.fill(template, {
-				    songs = function ()
-					      for _, song in ipairs(songs) do
-						cosmo.yield{ title = song }
-					      end
-					    end
-				  })
-	      end
-}
+function songs.render_index(songlist)
+   local template = [[
+	 <h1>Songs</h1>
+	    <table>
+	    $songs[=[<tr><td>$title</td></tr>]=]
+	 </table>  
+      ]]
+   return cosmo.fill(template, {
+			songs = function ()
+				   for _, song in ipairs(songlist) do
+				      cosmo.yield{ title = song }
+				   end
+				end
+		     })
+end
 
+return songs.run

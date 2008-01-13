@@ -3,7 +3,7 @@ require "luasql.mysql"
 require "orbit.model"
 
 local env = luasql.mysql()
-local conn = env:connect("blog", "root", "password")
+local conn = env:connect("blog", "root", "")
 
 local mapper = orbit.model.new("blog_", conn, "mysql")
 

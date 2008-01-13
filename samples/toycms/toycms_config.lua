@@ -1,5 +1,8 @@
 module("toycms", package.seeall)
 
+-- Uncomment next line to enable X-Sendfile for sending static files
+-- use_xsendfile = true
+
 database = {
   driver = "sqlite3",
   conn_data = { "blog.db" }
@@ -9,12 +12,13 @@ database = {
 
 template_name = "blog"
 
--- Uncomment the following line for CGI
---url_prefix = "/cgi-bin/toycms.cgi"
--- Uncomment the following line for FastCGI
---url_prefix = "/cgi-bin/toycms.fcgi"
+-- Uncomment the following line to set a url prefix
+-- prefix = "/foobar"
 
--- The next two lines are for statically served templates and images
+-- The next two lines are if you want the templates' static files
+-- and post images to be served by the web server instead of ToyCMS
+-- template_vpath should point to the folder where the template you use is,
+-- image_vpath to the folder where ToyCMS stores post's images
 -- template_vpath = "/templates"
 -- image_vpath = "/images"
 
