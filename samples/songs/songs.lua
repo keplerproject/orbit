@@ -21,7 +21,7 @@ function songs.index(web)
       "Sgt. Pepper's Lonely Hearts Club Band (Reprise)",
       "A Day in the Life"
    }
-   return songs.render_index(songlist)
+   return songs.layout(songs.render_index({ songs = songlist }))
 end
 
 songs:dispatch_get(songs.index, "/")
@@ -35,20 +35,11 @@ end
 
 orbit.htmlify(songs, "layout")
 
-function songs.render_index(songlist)
-   local template = [[
+songs.render_index = cosmo.compile[[
 	 <h1>Songs</h1>
 	    <table>
-	    $songs[=[<tr><td>$title</td></tr>]=]
+	    $songs[=[<tr><td>$it</td></tr>]=]
 	 </table>  
       ]]
-   return cosmo.fill(template, {
-			songs = function ()
-				   for _, song in ipairs(songlist) do
-				      cosmo.yield{ title = song }
-				   end
-				end
-		     })
-end
 
 return songs.run
