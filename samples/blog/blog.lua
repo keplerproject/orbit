@@ -60,7 +60,8 @@ function posts:find_months()
       local date = os.date("*t", post.published_at)
       if previous_month.month ~= date.month or
 	 previous_month.year ~= date.year then
-	 previous_month = { month = date.month, year = date.year }
+	 previous_month = { month = date.month, year = date.year,
+	    date_str = os.date("%Y/%m", post.published_at) }
 	 months[#months + 1] = previous_month
       end
    end
@@ -94,7 +95,7 @@ function index(web)
 			  recent = ps, pages = pgs })
 end
 
-blog:dispatch_get(cache(index), "/", "/index") 
+blog:dispatch_get(cache(index), "/") 
 
 function view_post(web, post_id, comment_missing)
    local post = posts:find(tonumber(post_id))
@@ -134,7 +135,9 @@ function add_comment(web, post_id)
       local post = posts:find(tonumber(post_id))
       post.n_comments = (post.n_comments or 0) + 1
       post:save()
+      cache:invalidate("/")
       cache:invalidate("/post/" .. post_id)
+      cache:invalidate("/archive/" .. os.date("%Y/%m", post.published_at))
       return web:redirect(web:link("/post/" .. post_id))
    end
 end
@@ -151,7 +154,7 @@ function view_archive(web, year, month)
 			  recent = recent, pages = pgs })
 end
 
-blog:dispatch_get(cache(view_archive), "/archive/(%d+)/(%d+)")
+blog:dispatch_get(cache(view_archive), "/archive/(%d%d%d%d)/(%d%d)")
 
 blog:dispatch_static("/head%.jpg", "/style%.css")
 
@@ -239,8 +242,8 @@ end
 function _archives(web, args)
    local res = {}
    for _, month in ipairs(args.months) do
-      res[#res + 1] = li(a{ href=web:link("/archive/" .. month.year .. "/" ..
-					  month.month), blog.month(month) })
+      res[#res + 1] = li(a{ href=web:link("/archive/" .. month.date_str), 
+			    blog.month(month) })
    end
    return ul(res)
 end
