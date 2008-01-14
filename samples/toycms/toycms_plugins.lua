@@ -110,7 +110,7 @@ function plugins.home(web)
   return {
     headlines = function (arg, has_block)
 		  local template
-		  if has_block then 
+		  if not has_block then 
 		    template = load_template("home_short_info.html")
 		  end
 		  return get_posts(web, "in_home = ? and published = ?",

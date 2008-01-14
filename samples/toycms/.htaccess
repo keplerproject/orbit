@@ -21,4 +21,4 @@
   <IfModule mod_xsendfile.c>
     XSendFile on
   </IfModule>
-</Files>
+</FilesMatch>

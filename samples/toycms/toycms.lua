@@ -87,7 +87,7 @@ end
 function new_template_env(web)
   local template_env = {}
 
-  template_env.template_vpath = template_vpath or web:link("/template")
+  template_env.template_vpath = template_vpath or web:static_link("/templates/" .. template_name)
   template_env.today = date(os.time())
   template_env.home_url = web:link("/")
   template_env.home_url_xml = web:link("/xml")
@@ -124,7 +124,7 @@ function new_post_env(web, post, section)
   env.title = post.title
   env.abstract = post.abstract
   env.body = cosmo.fill(post.body,
-    { image_vpath = (image_vpath or web:link("/post")) .. "/" .. post.id })
+    { image_vpath = (image_vpath or web:static_link("/images")) .. "/" .. post.id })
   env.markdown_body = markdown(env.body)
   env.day_padded = os.date("%d", post.published_at)
   env.day = tonumber(env.day_padded)
@@ -148,7 +148,7 @@ function new_post_env(web, post, section)
   env.section_uri = web:link("/section/" .. post.section_id)
   section = section or models.section:find(post.section_id) 
   env.section_title = section.title
-  env.image_uri = (image_vpath or web:link("/post")) .. "/" .. post.id ..
+  env.image_uri = (image_vpath or web:static_link("/images")) .. "/" .. post.id ..
     "/" .. (post.image or "")
   env.if_image = cosmo.cond(not web:empty(post.image), env)
   local form_env = {}
@@ -333,26 +333,7 @@ end
 
 toycms:dispatch_post(add_comment, "/post/(%d+)/addcomment")
 
-function get_template_style(web, file_name)
-   return toycms:serve_static(web, "templates/" .. 
-			      template_name .. "/" .. file_name)
-end
- 
-toycms:dispatch_get(get_template_style, "/template/(.-%.css)", "/template/(.-%.js)")
-
-function get_template_images(web, file_name)
-   return toycms:serve_static(web, "templates/" .. 
-			      template_name .. "/images/" .. file_name)
-end
-
-toycms:dispatch_get(get_template_images, "/template/images/(.-%.gif)",
-		    "/template/images/(.-%.jpg)", "/template/images/(.-%.png)")
-
-function get_post_images(web, post_id, file_name)
-   return toycms:serve_static(web, "images/" .. post_id .. "/" .. file_name)
-end
-
-toycms:dispatch_get(get_post_images, "/post/(%d+)/(.-%.jpg)")
+toycms:dispatch_static("/templates/.+", "/images/.+")
 
 function layout(web, inner_html)
    local layout_template = load_template("layout.html")

@@ -184,7 +184,7 @@ function layout(web, args, inner_html)
 	 meta{ ["http-equiv"] = "Content-Type",
 	    content = "text/html; charset=utf-8" },
 	 link{ rel = 'stylesheet', type = 'text/css', 
-	    href = web:link('/style.css'), media = 'screen' }
+	    href = web:static_link('/style.css'), media = 'screen' }
       },
       body{
 	 div{ id = "container",

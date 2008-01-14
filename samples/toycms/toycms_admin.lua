@@ -295,9 +295,7 @@ end
 
 toycms:dispatch_post(delete_comment, "/comment/(%d+)/delete")
 
-toycms:dispatch_get(function (web)
-		       return toycms:serve_static(web, "admin_style.css")
-		    end, "/admin/style%.css")
+toycms:dispatch_static("/admin_style%.css")
 
 local function error_message(msg)
   return "<span style = \"color: red\">" ..  msg .. "</span>"
@@ -310,7 +308,7 @@ function admin_layout(web, inner_html)
 	 meta{ ["http-equiv"] = "Content-Type",
 	    content = "text/html; charset=utf-8" },
 	 link{ rel = 'stylesheet', type = 'text/css', 
-	    href = web:link('/admin/style.css'), media = 'screen' }
+	    href = web:static_link('/admin_style.css'), media = 'screen' }
       },
       body{
 	 div{ id = "container",

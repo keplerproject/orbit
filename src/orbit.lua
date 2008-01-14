@@ -348,6 +348,14 @@ function web_methods:link(url, params)
   end
 end
 
+function web_methods:static_link(url)
+  local prefix = self.prefix or ""
+  local is_script = prefix:match("(%.%w+)$")
+  if not is_script then return self:link(url) end
+  local vpath = prefix:match("(.*)/")
+  return vpath .. url
+end
+
 function web_methods:empty(s)
   return not s or string.match(s, "^%s*$")
 end
