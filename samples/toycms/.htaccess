@@ -1,11 +1,24 @@
 
+<IfModule mod_cgi.c>
+  <IfModule !mod_fcgid.c>
+    AddHandler cgi-script .lua
+  </IfModule>
+</IfModule>
+
+<IfModule mod_fcgid.c>
+  AddHandler fcgid-script .lua
+  FCGIWrapper /usr/bin/wsapi.fcgi .lua
+</IfModule>
+
 <FilesMatch "\.(lua|db|sql|mysql|cgi|fcgi)$">
   Deny from all
   Allow from none
 </FilesMatch>
 
-<Files "toycms.lua">
+<FilesMatch "(toycms|index)\.lua">
   Allow from all
   Deny from none
-  XSendFile on
+  <IfModule mod_xsendfile.c>
+    XSendFile on
+  </IfModule>
 </Files>
