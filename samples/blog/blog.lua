@@ -1,6 +1,7 @@
 #!/usr/bin/env wsapi
 
 require "orbit"
+require "orbit.cache"
 require "markdown"
 
 --
@@ -20,6 +21,9 @@ require("luasql." .. database.driver)
 local env = luasql[database.driver]()
 mapper.conn = env:connect(unpack(database.conn_data))
 mapper.driver = database.driver
+
+-- Initializes page cache
+local cache = orbit.cache.new("page_cache")
 
 --
 -- Models for this application. Orbit calls mapper:new for each model,
@@ -85,12 +89,12 @@ pages = blog:model "page"
 function index(web)
    local ps = posts:find_recent()
    local ms = posts:find_months()
-   local pgs = pages:find_all()
+   local pgs = pgs or pages:find_all()
    return render_index(web, { posts = ps, months = ms,
 			  recent = ps, pages = pgs })
 end
 
-blog:dispatch_get(index, "/", "/index") 
+blog:dispatch_get(cache(index), "/", "/index") 
 
 function view_post(web, post_id, comment_missing)
    local post = posts:find(tonumber(post_id))
@@ -107,7 +111,7 @@ function view_post(web, post_id, comment_missing)
    end
 end
 
-blog:dispatch_get(view_post, "/post/(%d+)")
+blog:dispatch_get(cache(view_post), "/post/(%d+)")
 
 function add_comment(web, post_id)
    local input = web.input
@@ -130,6 +134,7 @@ function add_comment(web, post_id)
       local post = posts:find(tonumber(post_id))
       post.n_comments = (post.n_comments or 0) + 1
       post:save()
+      cache:invalidate("/post/" .. post_id)
       return web:redirect(web:link("/post/" .. post_id))
    end
 end
@@ -146,7 +151,7 @@ function view_archive(web, year, month)
 			  recent = recent, pages = pgs })
 end
 
-blog:dispatch_get(view_archive, "/archive/(%d+)/(%d+)")
+blog:dispatch_get(cache(view_archive), "/archive/(%d+)/(%d+)")
 
 blog:dispatch_static("/head%.jpg", "/style%.css")
 
@@ -156,14 +161,14 @@ function view_page(web, page_id)
       local recent = posts:find_recent()
       local months = posts:find_months()
       local pgs = pages:find_all()
-      render_page(web, { page = page, months = months,
+      return render_page(web, { page = page, months = months,
 		     recent = recent, pages = pgs })
    else
       not_found(web)
    end
 end
 
-blog:dispatch_get(view_page, "/page/(%d+)")
+blog:dispatch_get(cache(view_page), "/page/(%d+)")
 
 --
 -- Views for this application

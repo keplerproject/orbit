@@ -1,4 +1,4 @@
-# $Id: Makefile.win,v 1.4 2007/12/23 16:52:08 mascarenhas Exp $
+# $Id: Makefile.win,v 1.5 2008/01/14 02:07:38 mascarenhas Exp $
 
 LUA_DIR= c:\lua5.1\lua
 BIN_DIR= c:\lua5.1\bin
@@ -9,6 +9,7 @@ install:
 	IF NOT EXIST "$(LUA_DIR)\orbit" mkdir "$(LUA_DIR)\orbit"
 	copy src\orbit.lua "$(LUA_DIR)"
 	copy src\model.lua "$(LUA_DIR)\orbit"
+	copy src\cache.lua "$(LUA_DIR)\orbit"
 	IF NOT EXIST "$(BIN_DIR)" mkdir "$(BIN_DIR)"
 	copy src\orbit "$(BIN_DIR)"
 

@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.2 2007/12/19 23:46:51 mascarenhas Exp $
+# $Id: Makefile,v 1.3 2008/01/14 02:07:38 mascarenhas Exp $
 
 include config
 
@@ -12,6 +12,7 @@ install:
 	cp src/orbit.lua $(LUA_DIR)
 	mkdir -p $(LUA_DIR)/orbit
 	cp src/model.lua $(LUA_DIR)/orbit
+	cp src/cache.lua $(LUA_DIR)/orbit
 	mkdir -p $(BIN_DIR)
 	cp src/orbit $(BIN_DIR)
 	if [ -f ./wsapi/Makefile ]; then \
