@@ -12,6 +12,9 @@ database = {
 
 template_name = "blog"
 
+-- Comment this for in-memory caching
+cache_path = "page_cache"
+
 -- Uncomment the following line to set a url prefix
 -- prefix = "/foobar"
 
