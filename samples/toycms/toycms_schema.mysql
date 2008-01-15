@@ -1,5 +1,5 @@
 CREATE TABLE toycms_post
-       (`id` INTEGER PRIMARY KEY NOT NULL,
+       (`id` INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT,
        `title` VARCHAR(255) DEFAULT '',
        `body` TEXT DEFAULT '',
        `abstract` TEXT DEFAULT '',
@@ -14,7 +14,7 @@ CREATE TABLE toycms_post
        `published_at` DATETIME DEFAULT NULL);
 
 CREATE TABLE toycms_comment
-       (`id` INTEGER PRIMARY KEY NOT NULL,
+       (`id` INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT,
        `post_id` INTEGER DEFAULT NULL,
        `author` VARCHAR(255) DEFAULT '',
        `email` VARCHAR(255) DEFAULT '',
@@ -24,13 +24,13 @@ CREATE TABLE toycms_comment
        `created_at` DATETIME DEFAULT NULL);
 
 CREATE TABLE toycms_section
-       (`id` INTEGER PRIMARY KEY NOT NULL,
+       (`id` INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT,
         `title` VARCHAR(255) DEFAULT '',
 	`description` TEXT DEFAULT '',
 	`tag` VARCHAR(255) DEFAULT '');
 
 CREATE TABLE toycms_user
-       (`id` INTEGER PRIMARY KEY NOT NULL,
+       (`id` INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT,
         `login` VARCHAR(255) DEFAULT '',
 	`password` VARCHAR(30) DEFAULT '',
 	`name` VARCHAR(255) DEFAULT '');
