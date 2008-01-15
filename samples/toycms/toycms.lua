@@ -160,6 +160,8 @@ function new_post_env(web, post, section)
   form_env.url = web.input.url or ""
   setmetatable(form_env, { __index = env })
   env.if_comment_open = cosmo.cond(post.comment_status ~= "closed", form_env)
+  env.if_comment_moderated = cosmo.cond(post.comment_status = "moderated", form_env)
+  env.if_comment_closed = cosmo.cond(post.comment_status = "closed", form_env)
   env.if_error_comment = cosmo.cond(not web:empty_param("error_comment"), env)
   env.if_comments = cosmo.cond((post.n_comments or 0) > 0, env)
   env.comments = function (arg, has_block)

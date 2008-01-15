@@ -295,6 +295,11 @@ function delete_comment(web, id)
   	    local post = models.post:find(comment.post_id)
 	    post.n_comments = post.n_comments - 1
 	    post:save()
+	    cache:invalidate("/", "/xml", "/section/" .. post.section_id,
+			     "/section/" .. post.section_id .. "/xml",
+			     "/post/" .. post.id, "/post/" .. post.id .. "/xml",
+			     "/archive/" .. 
+				string.format("%Y/%m", post.published_at))
 	 end
 	 comment:delete()
 	 return web:redirect(web:link("/comments"))
