@@ -22,3 +22,23 @@
     XSendFile on
   </IfModule>
 </Files>
+
+<IfModule mod_rewrite.c>
+RewriteEngine on
+
+RewriteCond %{REQUEST_FILENAME} ^(.*)/blog\.lua$
+RewriteCond %1/page_cache/index.html -f
+RewriteRule ^blog\.lua/?$ page_cache/index.html [L]
+
+RewriteCond %{REQUEST_FILENAME} ^(.*)/blog\.lua$
+RewriteCond %1/page_cache/post-$1.html -f
+RewriteRule ^blog\.lua/post/(.+)$ page_cache/post-$1.html
+
+RewriteCond %{REQUEST_FILENAME} ^(.*)/blog\.lua$
+RewriteCond %1/page_cache/archive-$1-$2.html -f
+RewriteRule ^blog\.lua/archive/([^/]+)/([^/]+)$ page_cache/archive-$1-$2.html
+
+RewriteCond %{REQUEST_FILENAME} ^(.*)/blog\.lua$
+RewriteCond %1/page_cache/page-$1.html -f
+RewriteRule ^blog\.lua/page/(.+)$ page_cache/page-$1.html
+</IfModule>
