@@ -124,6 +124,7 @@ function edit_section_post(web, section_id)
 	 section.description = web.input.description
 	 section.tag = web.input.tag
 	 section:save()
+	 cache:nuke()
 	 return web:redirect(web:link("/editsection/" .. section.id))
       else
 	 for k, v in pairs(errors) do web.input["error_" .. k] = v end
@@ -148,6 +149,7 @@ function delete_section(web, section_id)
       local section = models.section:find(section_id)
       if section then
 	 section:delete()
+	 cache:nuke()
 	 return web:redirect(web:link("/admin"))
       end
    end   
@@ -164,6 +166,7 @@ function delete_post(web, post_id)
       local post = models.post:find(post_id)
       if post then
 	 post:delete()
+	 cache:nuke()
 	 return web:redirect(web:link("/admin"))
       end
    end   
@@ -223,6 +226,7 @@ function edit_post_post(web, post_id)
 	 post.user_id = check_user(web).id
 	 post.comment_status = web.input.comment_status
 	 post:save()
+	 cache:nuke()
 	 return web:redirect(web:link("/editpost/" .. post.id))
       else
 	 for k, v in pairs(errors) do web.input["error_" .. k] = v end
@@ -268,6 +272,11 @@ function approve_comment(web, id)
 	 local post = models.post:find(comment.post_id)
 	 post.n_comments = (post.n_comments or 0) + 1
 	 post:save()
+	 cache:invalidate("/", "/xml", "/section/" .. post.section_id,
+			  "/section/" .. post.section_id .. "/xml",
+			  "/post/" .. post.id, "/post/" .. post.id .. "/xml",
+			  "/archive/" .. 
+			     string.format("%Y/%m", post.published_at))
 	 return web:redirect(web:link("/comments#" .. id))
       end
    end

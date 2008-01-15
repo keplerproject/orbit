@@ -22,3 +22,35 @@
     XSendFile on
   </IfModule>
 </FilesMatch>
+
+<IfModule mod_rewrite.c>
+RewriteEngine on
+
+RewriteCond %{REQUEST_FILENAME} ^(.*)/(toycms|index)\.lua$
+RewriteCond %1/page_cache/index.html -f
+RewriteRule ^(toycms|index)\.lua/?$ page_cache/index.html [L]
+
+RewriteCond %{REQUEST_FILENAME} ^(.*)/(toycms|index)\.lua$
+RewriteCond %1/page_cache/post-$2.html -f
+RewriteRule ^(toycms|index)\.lua/post/(.+)$ page_cache/post-$2.html [L]
+
+RewriteCond %{REQUEST_FILENAME} ^(.*)/(toycms|index)\.lua$
+RewriteCond %1/page_cache/archive-$2-$3.html -f
+RewriteRule ^(toycms|index)\.lua/archive/([^/]+)/([^/]+)$ page_cache/archive-$2-$3.html [L]
+
+RewriteCond %{REQUEST_FILENAME} ^(.*)/(toycms|index)\.lua$
+RewriteCond %1/page_cache/section-$2.html -f
+RewriteRule ^(toycms|index)\.lua/section/(.+)$ page_cache/section-$2.html [L]
+
+RewriteCond %{REQUEST_FILENAME} ^(.*)/(toycms|index)\.lua$
+RewriteCond %1/page_cache/index.atom -f
+RewriteRule ^(toycms|index)\.lua/xml$ page_cache/index.atom [L]
+
+RewriteCond %{REQUEST_FILENAME} ^(.*)/(toycms|index)\.lua$
+RewriteCond %1/page_cache/post-$2.atom -f
+RewriteRule ^(toycms|index)\.lua/post/([^/]+)/xml$ page_cache/post-$2.atom [L]
+
+RewriteCond %{REQUEST_FILENAME} ^(.*)/(toycms|index)\.lua$
+RewriteCond %1/page_cache/section-$2.atom -f
+RewriteRule ^(toycms|index)\.lua/section/([^/]+)$ page_cache/section-$2.atom [L]
+</IfModule>

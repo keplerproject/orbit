@@ -4,10 +4,19 @@ require "lfs"
 module("orbit.cache", package.seeall)
 
 local function pathinfo_to_file(path_info)
-  path_info = string.sub(path_info, 2, #path_info)
-  path_info = string.gsub(path_info, "/", "-")
-  if path_info == "" then path_info = "index" end
-  return path_info .. '.html'
+   local atom = path_info:find("/xml$")
+   if atom then
+      path_info = path_info:sub(path_info, 2, atom - 1)
+   else
+      path_info = string.sub(path_info, 2, #path_info)
+   end
+   path_info = string.gsub(path_info, "/", "-")
+   if path_info == "" then path_info = "index" end
+   if atom then
+      return path_info .. '.atom'
+   else
+      return path_info .. '.html'
+   end
 end
 
 function get(cache, key)
@@ -51,9 +60,17 @@ local function cached(cache, f)
 	 end
 end
 
-function invalidate(cache, key)
-   local filename = cache.base_path .. "/" .. pathinfo_to_file(key)
-   assert(os.remove(filename))
+function invalidate(cache, ...)
+   for _, key in ipairs{...} do
+      local filename = cache.base_path .. "/" .. pathinfo_to_file(key)
+      assert(os.remove(filename))
+   end
+end
+
+function nuke(cache)
+   for file in lfs.dir(cache.base_path) do
+      if file ~= "." and file ~= ".." then assert(os.remove(file)) end
+   end
 end
 
 function new(app, base_path)

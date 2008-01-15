@@ -32,13 +32,13 @@ RewriteRule ^blog\.lua/?$ page_cache/index.html [L]
 
 RewriteCond %{REQUEST_FILENAME} ^(.*)/blog\.lua$
 RewriteCond %1/page_cache/post-$1.html -f
-RewriteRule ^blog\.lua/post/(.+)$ page_cache/post-$1.html
+RewriteRule ^blog\.lua/post/(.+)$ page_cache/post-$1.html [L]
 
 RewriteCond %{REQUEST_FILENAME} ^(.*)/blog\.lua$
 RewriteCond %1/page_cache/archive-$1-$2.html -f
-RewriteRule ^blog\.lua/archive/([^/]+)/([^/]+)$ page_cache/archive-$1-$2.html
+RewriteRule ^blog\.lua/archive/([^/]+)/([^/]+)$ page_cache/archive-$1-$2.html [L]
 
 RewriteCond %{REQUEST_FILENAME} ^(.*)/blog\.lua$
 RewriteCond %1/page_cache/page-$1.html -f
-RewriteRule ^blog\.lua/page/(.+)$ page_cache/page-$1.html
+RewriteRule ^blog\.lua/page/(.+)$ page_cache/page-$1.html [L]
 </IfModule>

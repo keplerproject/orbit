@@ -2,6 +2,7 @@
 
 require "orbit"
 require "markdown"
+require "orbit.cache"
 cosmo = require "template.cosmo"
 
 module("toycms", package.seeall, orbit.new)
@@ -23,6 +24,8 @@ models = {
    section = toycms:model "section",
    user = toycms:model "user"
 }
+
+cache = orbit.cache.new(toycms, "page_cache")
 
 function models.post:find_comments()
    return models.comment:find_all_by_approved_and_post_id{ true,
@@ -211,7 +214,7 @@ function home_page(web)
    end
 end
 
-toycms:dispatch_get(home_page, "/", "/index")
+toycms:dispatch_get(cache(home_page), "/")
 
 function home_xml(web)
    local template = load_template("home.xml")
@@ -223,7 +226,7 @@ function home_xml(web)
    end
 end
 
-toycms:dispatch_get(home_xml, "/xml")
+toycms:dispatch_get(cache(home_xml), "/xml")
 
 function view_section(type)
    return function (web, section_id)
@@ -237,7 +240,7 @@ function view_section(type)
 		web.input.section_id = tonumber(section_id)
 		local env = new_section_env(web, section)
 		if type == "xml" then
-		   web.headers["Content-Type"] = "text/xml"
+		   web.headers["Content-Type"] = "application/atom+xml"
 		   return template(env)
 		else
 		   return layout(web, template(env))
@@ -248,8 +251,8 @@ function view_section(type)
 	  end
 end
 
-toycms:dispatch_get(view_section("html"), "/section/(%d+)")
-toycms:dispatch_get(view_section("xml"), "/section/(%d+)/xml")
+toycms:dispatch_get(cache(view_section("html")), "/section/(%d+)")
+toycms:dispatch_get(cache(view_section("xml")), "/section/(%d+)/xml")
 
 function view_post(type)
    return function (web, post_id)
@@ -265,7 +268,7 @@ function view_post(type)
 		web.input.post_id = tonumber(post_id)
 		local env = new_post_env(web, post, section)
 		if type == "xml" then
-		   web.headers["Content-Type"] = "text/xml"
+		   web.headers["Content-Type"] = "application/atom+xml"
 		   return template(env)
 		else
 		   return layout(web, template(env))
@@ -276,8 +279,8 @@ function view_post(type)
 	  end
 end
 
-toycms:dispatch_get(view_post("html"), "/post/(%d+)")
-toycms:dispatch_get(view_post("xml"), "/post/(%d+)/xml")
+toycms:dispatch_get(cache(view_post("html")), "/post/(%d+)")
+toycms:dispatch_get(cache(view_post("xml")), "/post/(%d+)/xml")
 
 function archive(web, year, month)
    local template = load_template("archive.html")
@@ -295,7 +298,7 @@ function archive(web, year, month)
    end
 end
   
-toycms:dispatch_get(archive, "/archive/(%d+)/(%d+)")
+toycms:dispatch_get(cache(archive), "/archive/(%d+)/(%d+)")
 
 function add_comment(web, post_id)
    if web:empty_param("comment") then
@@ -324,6 +327,11 @@ function add_comment(web, post_id)
 	    comment.approved = true
 	    post.n_comments = (post.n_comments or 0) + 1
 	    post:save()
+	    cache:invalidate("/", "/xml", "/section/" .. post.section_id,
+			  "/section/" .. post.section_id .. "/xml",
+			  "/post/" .. post.id, "/post/" .. post.id .. "/xml",
+			  "/archive/" .. 
+				string.format("%Y/%m", post.published_at))
 	 else comment.approved = false end
 	 comment:save()
 	 return web:redirect(web:link("/post/" .. post_id))

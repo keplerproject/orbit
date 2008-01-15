@@ -5,7 +5,7 @@ require "orbit.model"
 
 module("orbit", package.seeall)
 
-local mime_types = {
+mime_types = {
   ez = "application/andrew-inset",
   atom = "application/atom+xml",
   hqx = "application/mac-binhex40",
@@ -160,6 +160,8 @@ local mime_types = {
   avi = "video/x-msvideo",
   movie = "video/x-sgi-movie",
   ice = "x-conference/x-cooltalk",
+  rss = "application/rss+xml",
+  atom = "application/atom+xml"
 }
 
 app_module_methods = {}
