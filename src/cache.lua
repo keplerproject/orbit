@@ -78,7 +78,7 @@ end
 function new(app, base_path)
    local dir = lfs.attributes(base_path, "mode")
    if not dir then
-      lfs.mkdir(base_path)
+      assert(lfs.mkdir(base_path))
    elseif dir ~= "directory" then
       error("base path of cache " .. base_path .. " not a directory")
    end
