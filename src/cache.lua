@@ -69,7 +69,9 @@ end
 
 function nuke(cache)
    for file in lfs.dir(cache.base_path) do
-      if file ~= "." and file ~= ".." then assert(os.remove(file)) end
+      if file ~= "." and file ~= ".." then 
+	 assert(os.remove(cache.base_path .. "/" .. file)) 
+      end
    end
 end
 
