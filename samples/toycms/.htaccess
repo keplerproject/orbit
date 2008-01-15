@@ -43,14 +43,14 @@ RewriteCond %1/page_cache/section-$2.html -f
 RewriteRule ^(toycms|index)\.lua/section/(.+)$ page_cache/section-$2.html [L]
 
 RewriteCond %{REQUEST_FILENAME} ^(.*)/(toycms|index)\.lua$
-RewriteCond %1/page_cache/index.atom -f
-RewriteRule ^(toycms|index)\.lua/xml$ page_cache/index.atom [L]
+RewriteCond %1/page_cache/index.xml -f
+RewriteRule ^(toycms|index)\.lua/xml$ page_cache/index.xml [L]
 
 RewriteCond %{REQUEST_FILENAME} ^(.*)/(toycms|index)\.lua$
-RewriteCond %1/page_cache/post-$2.atom -f
-RewriteRule ^(toycms|index)\.lua/post/([^/]+)/xml$ page_cache/post-$2.atom [L]
+RewriteCond %1/page_cache/post-$2.xml -f
+RewriteRule ^(toycms|index)\.lua/post/([^/]+)/xml$ page_cache/post-$2.xml [L]
 
 RewriteCond %{REQUEST_FILENAME} ^(.*)/(toycms|index)\.lua$
-RewriteCond %1/page_cache/section-$2.atom -f
-RewriteRule ^(toycms|index)\.lua/section/([^/]+)$ page_cache/section-$2.atom [L]
+RewriteCond %1/page_cache/section-$2.xml -f
+RewriteRule ^(toycms|index)\.lua/section/([^/]+)$ page_cache/section-$2.xml [L]
 </IfModule>
