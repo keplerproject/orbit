@@ -6,14 +6,14 @@ module("orbit.cache", package.seeall)
 local function pathinfo_to_file(path_info)
    local atom = path_info:find("/xml$")
    if atom then
-      path_info = path_info:sub(path_info, 2, atom - 1)
+      path_info = path_info:sub(2, atom - 1)
    else
-      path_info = string.sub(path_info, 2, #path_info)
+      path_info = path_info:sub(2, #path_info)
    end
    path_info = string.gsub(path_info, "/", "-")
    if path_info == "" then path_info = "index" end
    if atom then
-      return path_info .. '.atom'
+      return path_info .. '.xml'
    else
       return path_info .. '.html'
    end
