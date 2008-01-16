@@ -4,6 +4,8 @@ module("blog", package.seeall)
 
 blog_title = "Blog"
 
+cache_path = "page_cache"
+
 copyright_notice = "Copyright 2007 Foobar"
 
 about_blurb = [[This is an example of a blog built using Orbit. You
