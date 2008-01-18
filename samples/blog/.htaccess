@@ -7,7 +7,7 @@
 
 <IfModule mod_fcgid.c>
   AddHandler fcgid-script .lua
-  FCGIWrapper /usr/bin/wsapi.fcgi .lua
+  FCGIWrapper /usr/bin/wsapi-fcgi .lua
 </IfModule>
 
 <FilesMatch "\.(lua|db|sql|mysql|cgi|fcgi)$">
