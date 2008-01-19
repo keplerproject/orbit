@@ -1,4 +1,4 @@
-#!/usr/bin/env wsapi
+#!/usr/bin/env wsapi.cgi
 
 require "orbit"
 require "markdown"
