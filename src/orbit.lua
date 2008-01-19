@@ -225,7 +225,7 @@ function new(app_module)
 				web.status = "500 Server Error"
 				return [[<html>
 				      <head><title>Server Error</title></head>
-					 <body><p>]] .. msg .. [[</p></body></html>]]
+					 <body><pre>]] .. msg .. [[</pre></body></html>]]
 			     end
    app_module.dispatch_table = { get = {}, post = {} }
    return app_module

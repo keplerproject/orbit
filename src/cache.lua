@@ -39,12 +39,12 @@ function get(cache, key)
 end
 
 local function writefile(filename, contents)
-  local file = io.open(filename, "wb")
-  if file and lfs.lock(file, "w") then
+  local file = assert(io.open(filename, "wb"))
+  if lfs.lock(file, "w") then
      file:write(contents)
      lfs.unlock(file)
      file:close()
-  elseif file then
+  else
      file:close()
   end
 end
