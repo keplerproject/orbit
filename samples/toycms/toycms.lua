@@ -314,7 +314,7 @@ function add_comment(web, post_id)
       else
 	 local comment = models.comment:new()
 	 comment.post_id = post.id
-	 local body = web.input.comment:gsub("<", "&lt;"):gsub(">", "&gt;")
+	 local body = web:sanitize(web.input.comment)
 	 comment.body = markdown(body)
 	 if not web:empty_param("author") then
 	    comment.author = web.input.author

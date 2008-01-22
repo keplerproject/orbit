@@ -366,6 +366,12 @@ function web_methods:empty_param(param)
   return self:empty(self.input[param])
 end
 
+for name, func in pairs(wsapi.util) do
+  web_methods[name] = function (self, ...)
+			return func(...)
+		      end
+end
+
 function run(app_module, wsapi_env)
   local web = { status = "200 Ok", response = "",
      headers = { ["Content-Type"]= "text/html" },
