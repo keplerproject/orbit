@@ -1,7 +1,7 @@
 #!/usr/bin/env wsapi.cgi
 
 local orbit = require"orbit"
-local cosmo = require"template.cosmo"
+local cosmo = require"cosmo"
 
 local songs = orbit.new()
 

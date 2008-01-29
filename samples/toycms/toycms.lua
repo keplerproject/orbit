@@ -3,7 +3,7 @@
 require "orbit"
 require "markdown"
 require "orbit.cache"
-cosmo = require "template.cosmo"
+require "cosmo"
 
 module("toycms", package.seeall, orbit.new)
 
