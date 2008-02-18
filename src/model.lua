@@ -80,16 +80,16 @@ function escape.number(v)
   return escape.integer(v)
 end
 
-function escape.varchar(v)
-  return "'" .. string.gsub(v, "'", "''") .. "'"
+function escape.varchar(v, driver, conn)
+  return "'" .. conn:escape(v) .. "'"
 end
 
 function escape.string(v)
   return escape.varchar(v)
 end
 
-function escape.text(v)
-  return "'" .. string.gsub(v, "'", "''") .. "'"
+function escape.text(v, driver, conn)
+  return "'" .. conn:escape(v) .. "'"
 end
 
 function escape.datetime(v)
@@ -104,8 +104,8 @@ function escape.boolean(v, driver)
   end
 end
 
-function escape.binary(v)
-  return escape.text(v)
+function escape.binary(v, driver, conn)
+  return escape.text(v, driver, conn)
 end
 
 local function escape_values(row)
@@ -114,7 +114,7 @@ local function escape_values(row)
     if row[m.name] == nil then
       row_escaped[m.name] = "NULL" 
     else
-      row_escaped[m.name] = escape[m.type](row[m.name], row.driver)
+      row_escaped[m.name] = escape[m.type](row[m.name], row.driver, row.model.conn)
     end
   end
   return row_escaped
@@ -158,11 +158,11 @@ local function parse_condition(dao, condition, args)
     elseif type(args[i]) == "table" then
       local values = {}
       for _, value in ipairs(args[i]) do
-	values[#values + 1] = escape[dao.meta[field].type](value, dao.driver)
+	values[#values + 1] = escape[dao.meta[field].type](value, dao.driver, dao.model.conn)
       end
       pairs[i] = field .. " IN (" .. table.concat(values,", ") .. ")"
     else
-      value = escape[dao.meta[field].type](args[i], dao.driver)
+      value = escape[dao.meta[field].type](args[i], dao.driver, dao.model.conn)
       pairs[i] = field .. " = " .. value
     end
   end
@@ -284,12 +284,12 @@ local function build_query(dao, condition, args)
 		      local values = {}
 		      for j, value in ipairs(args[i]) do
 			values[#values + 1] = field .. " " .. op .. " " ..
-		          escape[dao.meta[field].type](value, dao.driver)
+		          escape[dao.meta[field].type](value, dao.driver, dao.model.conn)
                       end
 		      return "(" .. table.concat(values, " or ") .. ")"
                     else
 		      return field .. " " .. op .. " " ..
-		        escape[dao.meta[field].type](args[i], dao.driver)
+		        escape[dao.meta[field].type](args[i], dao.driver, dao.model.conn)
                     end
 		  end)
   end
