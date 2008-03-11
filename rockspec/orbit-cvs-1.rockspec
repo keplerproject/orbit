@@ -1,6 +1,6 @@
 package = "Orbit"
 
-version = "2.0-1"
+version = "cvs-1"
 
 description = {
   summary = "MVC for Lua Web Development",
