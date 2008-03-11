@@ -5,7 +5,7 @@ module("toycms", package.seeall)
 
 function admin(web, section_id)
    if not check_user(web) then
-      web:redirect(web:link("/login", { link_to = web:link("/admin") }))
+      return web:redirect(web:link("/login", { link_to = web:link("/admin") }))
    else
       local params = {}
       if tonumber(section_id) then

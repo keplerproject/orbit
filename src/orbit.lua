@@ -245,6 +245,15 @@ function app_module_methods.dispatch_post(app_module, func, ...)
    end
 end
 
+function app_module_methods.dispatch_wsapi(app_module, func, ...)
+   for _, pat in ipairs{ ... } do
+      table.insert(app_module.dispatch_table.post, { pattern = pat, 
+		      handler = func, wsapi = true })
+      table.insert(app_module.dispatch_table.get, { pattern = pat, 
+		      handler = func, wsapi = true })
+   end
+end
+
 function app_module_methods.dispatch_static(app_module, ...)
    app_module:dispatch_get(serve_file(app_module), ...)
 end
@@ -273,7 +282,7 @@ end
 
 function serve_file(app_module)
    return function (web)
-	     local filename = string.sub(web.path_info, 2, #web.path_info)
+	     local filename = web.real_path .. web.path_info
 	     return app_module:serve_static(web, filename)
 	  end
 end
@@ -372,53 +381,67 @@ for name, func in pairs(wsapi.util) do
 		      end
 end
 
-function run(app_module, wsapi_env)
-  local web = { status = "200 Ok", response = "",
-     headers = { ["Content-Type"]= "text/html" },
-     cookies = {} }
-  setmetatable(web, { __index = web_methods })
-  web.prefix = app_module.prefix or wsapi_env.SCRIPT_NAME
-  web.suffix = app_module.suffix
-  local req = wsapi.request.new(wsapi_env)
-  local res = wsapi.response.new(web.status, web.headers)
-  web.set_cookie = function (_, name, value)
-                            res:set_cookie(name, value)
-                          end
-  web.delete_cookie = function (_, name)
-                               res:delete_cookie(name)
-                             end
-  web.path_info = req.path_info
-  web.script_name = wsapi_env.SCRIPT_NAME
-  web.method = string.lower(req.method)
-  web.input, web.cookies = req.params, req.cookies
-  local ok, response = xpcall(function () 
-				 return dispatch(app_module, web) 
-			      end, debug.traceback)
-  if not ok then
-     res:write(app_module.server_error(web, response))
-  elseif not response then
-     res:write(app_module.not_found(web))
-  else
-     res.status = web.status
-     res:write(response)
-  end
-  return res:finish()
-end
-
-function dispatch(app_module, web)
-   local path = web.path_info
-   local method = web.method
+local function dispatcher(app_module, method, path)
    if #app_module.dispatch_table[method] == 0 then
-      local handler = app_module["handle" .. method]
-      if handler then
-	 return handler(web)
-      end
+      return app_module["handle" .. method], {}
    else
       for _, item in ipairs(app_module.dispatch_table[method]) do
 	 local captures = { string.match(path, "^" .. item.pattern .. "$") }
 	 if #captures > 0 then
-	    return item.handler(web, unpack(captures))
+	    return item.handler, captures, item.wsapi
 	 end
       end
    end
+end
+
+local function make_web_object(app_module, wsapi_env)
+  local web = { status = "200 Ok", response = "",
+		headers = { ["Content-Type"]= "text/html" },
+		cookies = {} }
+  setmetatable(web, { __index = web_methods })
+  web.prefix = app_module.prefix or wsapi_env.SCRIPT_NAME
+  web.suffix = app_module.suffix
+  web.real_path = app_module.real_path or wsapi_env.APP_PATH or "."
+  local req = wsapi.request.new(wsapi_env)
+  local res = wsapi.response.new(web.status, web.headers)
+  web.set_cookie = function (_, name, value)
+		     res:set_cookie(name, value)
+		   end
+  web.delete_cookie = function (_, name)
+			res:delete_cookie(name)
+		      end
+  web.path_info = req.path_info
+  web.script_name = wsapi_env.SCRIPT_NAME
+  web.method = string.lower(req.method)
+  web.input, web.cookies = req.params, req.cookies
+  return web, res
+end
+
+function run(app_module, wsapi_env)
+  local handler, captures, wsapi_handler = dispatcher(app_module,
+						      string.lower(wsapi_env.REQUEST_METHOD),
+						      wsapi_env.PATH_INFO)
+  handler = handler or app_module.not_found
+  captures = captures or {}
+  if wsapi_handler then
+    local ok, status, headers, res = xpcall(function () 
+					      return handler(wsapi_env, unpack(captures)) 
+					    end, debug.traceback)
+    if ok then
+      return status, headers, res
+    else
+      handler, captures = app_module.server_error, { status }
+    end
+  end
+  local web, res = make_web_object(app_module, wsapi_env)
+  local ok, response = xpcall(function () 
+				return handler(web, unpack(captures)) 
+			      end, debug.traceback)
+  if not ok then
+    res:write(app_module.server_error(web, response))
+  else
+    res.status = web.status
+    res:write(response)
+  end
+  return res:finish()
 end
