@@ -417,6 +417,7 @@ local function make_web_object(app_module, wsapi_env)
   web.prefix = app_module.prefix or wsapi_env.SCRIPT_NAME
   web.suffix = app_module.suffix
   web.real_path = app_module.real_path or wsapi_env.APP_PATH or "."
+  web.doc_root = wsapi_env.DOCUMENT_ROOT
   local req = wsapi.request.new(wsapi_env)
   local res = wsapi.response.new(web.status, web.headers)
   web.set_cookie = function (_, name, value)
