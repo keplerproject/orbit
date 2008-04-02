@@ -426,6 +426,8 @@ local function make_web_object(app_module, wsapi_env)
 			res:delete_cookie(name)
 		      end
   web.path_info = req.path_info
+  web.path_translated = wsapi_env.PATH_TRANSLATED
+  if web.path_translated == "" then web.path_translated = wsapi_env.SCRIPT_FILENAME end
   web.script_name = wsapi_env.SCRIPT_NAME
   web.method = string.lower(req.method)
   web.input, web.cookies = req.params, req.cookies
