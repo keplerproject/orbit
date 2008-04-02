@@ -12,7 +12,7 @@ description = {
   homepage = "http://www.keplerproject.org/orbit"
 }
 
-dependencies = { 'wsapi cvs', 'luafilesystem cvs', 'cosmo' }
+dependencies = { 'wsapi cvs', 'luafilesystem cvs', 'cosmo current' }
 
 source = {
   url = "cvs://:pserver:anonymous@cvs.luaforge.net:/cvsroot/orbit",
