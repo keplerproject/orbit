@@ -43,6 +43,7 @@ local function env_index(env, key)
 	     local template = 
 	       load_template(env.web.real_path .. "/" .. key .. ".op")
 	     if not template then return "$" .. key end
+	     arg = arg or {}
 	     if arg[1] then arg.it = arg[1] end
 	     local subt_env = setmetatable(arg, { __index = env })
 	     return template(subt_env)
