@@ -414,6 +414,7 @@ local function make_web_object(app_module, wsapi_env)
 		headers = { ["Content-Type"]= "text/html" },
 		cookies = {} }
   setmetatable(web, { __index = web_methods })
+  web.vars = wsapi_env
   web.prefix = app_module.prefix or wsapi_env.SCRIPT_NAME
   web.suffix = app_module.suffix
   web.real_path = app_module.real_path or wsapi_env.APP_PATH or "."
@@ -432,6 +433,7 @@ local function make_web_object(app_module, wsapi_env)
   web.script_name = wsapi_env.SCRIPT_NAME
   web.method = string.lower(req.method)
   web.input, web.cookies = req.params, req.cookies
+  web.GET, web.POST = req.GET, req.POST
   return web, res
 end
 

@@ -49,6 +49,7 @@ local function env_index(env, key)
 	     return template(subt_env)
 	   end
   end
+  return val
 end
 
 function handle_get(web)
@@ -57,7 +58,8 @@ function handle_get(web)
   local filename = web.path_translated
   web.real_path = splitpath(filename)
   function env.lua(arg)
-    local f = loadstring(arg[1])
+    local f, err = loadstring(arg[1])
+    if not f then error(err .. " in \n" .. arg[1]) end
     setfenv(f, env)
     local res = f()
     return res or ""
