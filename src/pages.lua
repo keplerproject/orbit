@@ -64,6 +64,13 @@ function handle_get(web)
     local res = f()
     return res or ""
   end
+  env["if"] = function (arg)
+		if arg[1] then
+		  cosmo.yield{ it = arg[1], _template = 1 }
+		else
+		  cosmo.yield{ _template = 2 }
+		end
+	      end
   function env.redirect(arg)
     web:redirect(arg[1])
     return ""
