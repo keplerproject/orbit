@@ -251,7 +251,7 @@ end
 
 function new(table_prefix, conn, driver)
   driver = driver or "sqlite3"
-  local app_model = { table_prefix = table_prefix, conn = conn, driver = driver, models = {} }
+  local app_model = { table_prefix = table_prefix or "", conn = conn, driver = driver or "sqlite3", models = {} }
   setmetatable(app_model, { __index = model_methods })
   return app_model
 end

@@ -386,6 +386,11 @@ function web_methods:empty(s)
   return not s or string.match(s, "^%s*$")
 end
 
+function web_methods:page(name, env)
+  local filename = self.real_path .. "/" .. name
+  return orbit.pages.fill(self, filename, env)
+end
+
 function web_methods:empty_param(param)
   return self:empty(self.input[param])
 end

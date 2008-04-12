@@ -39,10 +39,10 @@ end
 local function env_index(env, key)
   local val = _G[key]
   if not val and type(key) == "string" then
+    local template = 
+      load_template(env.web.real_path .. "/" .. key .. ".op")
+    if not template then return nil end
     return function (arg)
-	     local template = 
-	       load_template(env.web.real_path .. "/" .. key .. ".op")
-	     if not template then return "$" .. key end
 	     arg = arg or {}
 	     if arg[1] then arg.it = arg[1] end
 	     local subt_env = setmetatable(arg, { __index = env })
@@ -52,11 +52,11 @@ local function env_index(env, key)
   return val
 end
 
-function handle_get(web)
-  local env = setmetatable({}, { __index = env_index })
+local function make_env(web, initial)
+  local env = setmetatable(initial or {}, { __index = env_index })
+  env._G = env
+  env.app = _G
   env.web = web
-  local filename = web.path_translated
-  web.real_path = splitpath(filename)
   function env.lua(arg)
     local f, err = loadstring(arg[1])
     if not f then error(err .. " in \n" .. arg[1]) end
@@ -97,12 +97,29 @@ function handle_get(web)
     end
     return template(subt_env)
   end
-  function env.model(arg)
-    return _M:model(arg[1])
+  env.mapper = orbit.model.new()
+  function env.model(name, dao)
+    if type(name) == "table" then
+      name, dao = name[1], name[2]
+    end
+    return env.mapper:new(name, dao)
   end
+  return env
+end
+
+function fill(web, filename, env)
   local template = load_template(filename)
   if template then
-     return template(env)
+     return template(make_env(web, env))
+  end
+end
+
+function handle_get(web)
+  local filename = web.path_translated
+  web.real_path = splitpath(filename)
+  local res = fill(web, filename)
+  if res then
+    return res
   else
      web.status = 404
      return [[<html>
