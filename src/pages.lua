@@ -52,8 +52,8 @@ local function env_index(env, key)
   return val
 end
 
-local function abort()
-  error(abort)
+local function abort(res)
+  error{ abort, res or "abort" }
 end
 
 local function make_env(web, initial)
@@ -67,12 +67,12 @@ local function make_env(web, initial)
     if not f then error(err .. " in \n" .. arg[1]) end
     setfenv(f, env)
     local ok, res = pcall(f)
-    if not ok and res ~= abort then 
+    if not ok and (type(res)~= "table" or res[1] ~= abort) then 
       error(res .. " in \n" .. arg[1]) 
     elseif ok then
       return res or ""
     else
-      abort()
+      abort(res[2])
     end
   end
   env["if"] = function (arg)
@@ -108,6 +108,9 @@ local function make_env(web, initial)
     end
     return template(subt_env)
   end
+  function env.forward(arg)
+    abort(env.include(arg))
+  end
   env.mapper = orbit.model.new()
   function env.model(name, dao)
     if type(name) == "table" then
@@ -123,18 +126,18 @@ function fill(web, filename, env)
   if template then
     local ok, res = xpcall(function () return template(make_env(web, env)) end,
 			   function (msg) 
-			     if msg == abort then 
-			       return msg 
+			     if type(msg) == "table" and msg[1] == abort then 
+			       return msg
 			     else 
 			       return traceback(msg) 
 			     end
 			   end)
-    if not ok and res ~= abort then
+    if not ok and (type(res) ~= "table" or res[1] ~= abort) then
       error(res)
     elseif ok then
       return res
     else
-      return "abort"
+      return res[2]
     end
   end
 end
