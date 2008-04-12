@@ -5,7 +5,7 @@ local cosmo = require "cosmo"
 local io, string = io, string
 local setmetatable, loadstring, setfenv = setmetatable, loadstring, setfenv
 local type, error, tostring = type, error, tostring
-local print = print
+local print, pcall, xpcall, traceback = print, pcall, xpcall, debug.traceback
 
 local _G = _G
 
@@ -52,17 +52,28 @@ local function env_index(env, key)
   return val
 end
 
+local function abort()
+  error(abort)
+end
+
 local function make_env(web, initial)
   local env = setmetatable(initial or {}, { __index = env_index })
   env._G = env
   env.app = _G
   env.web = web
+  env.abort = abort
   function env.lua(arg)
     local f, err = loadstring(arg[1])
     if not f then error(err .. " in \n" .. arg[1]) end
     setfenv(f, env)
-    local res = f()
-    return res or ""
+    local ok, res = pcall(f)
+    if not ok and res ~= abort then 
+      error(res .. " in \n" .. arg[1]) 
+    elseif ok then
+      return res or ""
+    else
+      abort()
+    end
   end
   env["if"] = function (arg)
 		if arg[1] then
@@ -73,7 +84,7 @@ local function make_env(web, initial)
 	      end
   function env.redirect(arg)
     web:redirect(arg[1])
-    return ""
+    abort()
   end
   function env.fill(arg)
     cosmo.yield(arg[1])
@@ -110,7 +121,21 @@ end
 function fill(web, filename, env)
   local template = load_template(filename)
   if template then
-     return template(make_env(web, env))
+    local ok, res = xpcall(function () return template(make_env(web, env)) end,
+			   function (msg) 
+			     if msg == abort then 
+			       return msg 
+			     else 
+			       return traceback(msg) 
+			     end
+			   end)
+    if not ok and res ~= abort then
+      error(res)
+    elseif ok then
+      return res
+    else
+      return "abort"
+    end
   end
 end
 
