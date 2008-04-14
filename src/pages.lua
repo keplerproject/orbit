@@ -22,16 +22,20 @@ local function splitpath(filename)
   return path, file
 end
 
-local function load_template(filename)
+function load(filename, contents)
+  filename = filename or contents
   local template = template_cache[filename]
   if not template then
-     local file = io.open(filename)
-     if not file then
-	return nil
+     if not contents then
+       local file = io.open(filename)
+       if not file then
+	 return nil
+       end
+       contents = file:read("*a")
+       file:close()
      end
-     template = cosmo.compile(remove_shebang(file:read("*a")))
+     template = cosmo.compile(remove_shebang(contents))
      template_cache[filename] = template
-     file:close()
   end
   return template
 end
@@ -40,7 +44,7 @@ local function env_index(env, key)
   local val = _G[key]
   if not val and type(key) == "string" then
     local template = 
-      load_template(env.web.real_path .. "/" .. key .. ".op")
+      load(env.web.real_path .. "/" .. key .. ".op")
     if not template then return nil end
     return function (arg)
 	     arg = arg or {}
@@ -101,7 +105,7 @@ local function make_env(web, initial)
     else
       filename = web.real_path .. "/" .. name
     end
-    local template = load_template(filename)
+    local template = load(filename)
     if not template then return "" end
     if subt_env then
       if type(subt_env) ~= "table" then subt_env = { it = subt_env } end
@@ -124,8 +128,7 @@ local function make_env(web, initial)
   return env
 end
 
-function fill(web, filename, env)
-  local template = load_template(filename)
+function fill(web, template, env)
   if template then
     local ok, res = xpcall(function () return template(make_env(web, env)) end,
 			   function (msg) 
@@ -148,7 +151,7 @@ end
 function handle_get(web)
   local filename = web.path_translated
   web.real_path = splitpath(filename)
-  local res = fill(web, filename)
+  local res = fill(web, load(filename))
   if res then
     return res
   else

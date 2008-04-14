@@ -214,6 +214,7 @@ function new(app_module)
 		       return run(app_module, wsapi_env)
 		    end
    local table_prefix = (app_module._NAME and app_module._NAME .. "_") or ""
+   app_module.real_path = wsapi.app_path
    app_module.mapper = orbit.model.new(table_prefix)
    app_module.not_found = function (web)
 			     web.status = "404 Not Found"
@@ -387,8 +388,29 @@ function web_methods:empty(s)
 end
 
 function web_methods:page(name, env)
-  local filename = self.real_path .. "/" .. name
-  return orbit.pages.fill(self, filename, env)
+  if not orbit.pages then
+    require "orbit.pages"
+  end
+  local filename
+  if name:sub(1, 1) == "/" then
+    filename = self.doc_root .. name
+  else
+    filename = self.real_path .. "/" .. name
+  end
+  local template = orbit.pages.load(filename)
+  if template then
+    return orbit.pages.fill(self, template, env)
+  end
+end
+
+function web_methods:template(contents, env)
+  if not orbit.pages then
+    require "orbit.pages"
+  end
+  local template = orbit.pages.load(nil, contents)
+  if template then
+    return orbit.pages.fill(self, template, env)
+  end
 end
 
 function web_methods:empty_param(param)
@@ -422,7 +444,11 @@ local function make_web_object(app_module, wsapi_env)
   web.vars = wsapi_env
   web.prefix = app_module.prefix or wsapi_env.SCRIPT_NAME
   web.suffix = app_module.suffix
-  web.real_path = app_module.real_path or wsapi_env.APP_PATH or "."
+  if wsapi_env.APP_PATH == "" then
+    web.real_path = app_module.real_path or "."
+  else
+    web.real_path = wsapi_env.APP_PATH
+  end
   web.doc_root = wsapi_env.DOCUMENT_ROOT
   local req = wsapi.request.new(wsapi_env)
   local res = wsapi.response.new(web.status, web.headers)
