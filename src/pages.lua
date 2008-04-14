@@ -61,7 +61,7 @@ local function make_env(web, initial)
   env._G = env
   env.app = _G
   env.web = web
-  env.abort = abort
+  env.finish = abort
   function env.lua(arg)
     local f, err = loadstring(arg[1])
     if not f then error(err .. " in \n" .. arg[1]) end
@@ -82,16 +82,20 @@ local function make_env(web, initial)
 		  cosmo.yield{ _template = 2 }
 		end
 	      end
-  function env.redirect(arg)
+  function env.redirect(target)
+    if type(target) == "table" then target = target[1] end
     web:redirect(arg[1])
     abort()
   end
   function env.fill(arg)
     cosmo.yield(arg[1])
   end
-  function env.include(arg)
+  function env.include(name, subt_env)
     local filename
-    local name = arg[1]
+    if type(name) == "table" then 
+      name = name[1] 
+      subt_env = name[2]
+    end
     if name:sub(1, 1) == "/" then
       filename = web.doc_root .. name
     else
@@ -99,17 +103,16 @@ local function make_env(web, initial)
     end
     local template = load_template(filename)
     if not template then return "" end
-    local subt_env
-    if arg[2] then
-      if type(arg[2]) ~= "table" then arg[2] = { it = arg[2] } end
-      subt_env = setmetatable(arg[2], { __index = env })
+    if subt_env then
+      if type(subt_env) ~= "table" then subt_env = { it = subt_env } end
+      subt_env = setmetatable(subt_env, { __index = env })
     else
       subt_env = env
     end
     return template(subt_env)
   end
-  function env.forward(arg)
-    abort(env.include(arg))
+  function env.forward(...)
+    abort(env.include(...))
   end
   env.mapper = orbit.model.new()
   function env.model(name, dao)
