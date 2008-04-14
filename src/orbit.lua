@@ -349,8 +349,8 @@ function htmlify(app_module, ...)
    end
 end
 
-function app_module_methods.model(app_module, name, dao)
-   return app_module.mapper:new(name, dao)
+function app_module_methods.model(app_module, ...)
+   return app_module.mapper:new(...)
 end
 
 function web_methods:redirect(url)
