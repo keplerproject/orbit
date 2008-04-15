@@ -15,7 +15,7 @@ description = {
 dependencies = { 'wsapi 1.0rc1', 'luafilesystem 1.4.1rc1', 'cosmo 8.04.14' }
 
 source = {
-  url = "http://orbit.luaforge.net:/orbit-2.0rc1.tar.gz",
+  url = "http://orbit.luaforge.net/orbit-2.0rc1.tar.gz",
 }
 
 build = {
