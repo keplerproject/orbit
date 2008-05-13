@@ -2,7 +2,7 @@
 
 Orbit is an MVC web framework for Lua. The design is inspired by lightweight Ruby
 frameworks such as [Camping](http://code.whytheluckystiff.net/camping/). It completely
-abandons the current CGILua model of "scripts" in favor of applications. Each Orbit
+abandons the current CGILua model of "scripts" in favor of applications, where each Orbit
 application can fit in a single file, but you can split it into multiple files if you want.
 All Orbit applications follow the [WSAPI](http://wsapi.luaforge.net) protocol, so currently
 work with Xavante,
@@ -14,105 +14,113 @@ development.
 Below is a very simple Orbit application:
 
 <pre>
+#!/usr/bin/env wsapi.cgi
+
 require"orbit"
 
--- An application must be a module
--- orbit.app adds the controllers, views and new methods
--- to the module.
+-- Orbit applications are usually modules,
+-- orbit.new does the necessary initialization
 
-module("hello", package.seeall, orbit.app)
+module("hello", package.seeall, orbit.new)
 
--- Numerical indexes for controllers have routes (^ and $ are
--- appended to the patterns automatically). If there are no
--- patterns Orbit assumes /controller_name
---
--- HTTP methods are the functions, they receive any
--- captures in the pattern. app is a reference to the application
--- object (instance of an application). app.controllers is the
--- table of controllers
---
--- render is one of the methods that application instances
--- respond to. It renders a view with optional arguments
---
+-- These are the controllers, each receives a web object
+-- that is the request/response, plus any extra captures from the
+-- dispatch pattern. The controller sets any extra headers and/or
+-- the status if it's not 200, then return the response. It's
+-- good form to delegate the generation of the response to a view
+-- function
 
-hello:add_controllers{
-  index = { "/",
-    get = function (app)
-            app:render("index")
-          end
-  },
+function index(web)
+  return render_index()
+end
 
-  say = { "/say/(%a+)",
-    get = function (app, name)
-            app:render("say", { name = name })
-          end
-  }
-}
+function say(web, name)
+  return render_say(web, name)
+end
 
--- Each view is a function that optionally takes a table
--- of arguments. layout is a special view that, if present,
--- is always called, and has the call to view() inside
--- it replaced with the text from the view.
---
--- HTML functions are created on demand. They either take
+-- Builds the application's dispatch table, you can
+-- pass multiple patterns, and any captures get passed to
+-- the controller
+
+hello:dispatch_get(index, "/", "/index")
+hello:dispatch_get(say, "/say/(%a+)")
+
+-- These are the view functions referenced by the controllers.
+-- orbit.htmlify does through the functions in the table passed
+-- as the first argument and tries to match their name against
+-- the provided patterns (with an implicit ^ and $ surrounding
+-- the pattern. Each function that matches gets an environment
+-- where HTML functions are created on demand. They either take
 -- nil (empty tags), a string (text between opening and
 -- closing tags), or a table with attributes and a list
 -- of strings that will be the text. The indexing the
 -- functions adds a class attribute to the tag. Functions
 -- are cached.
 --
--- html generator functions are part of the global
--- environment of each view function. app is a reference
--- to the application instance. Use the render_partial method
--- to call another view. It does not use layout.
---
 
-hello:add_views{
-  layout = function (app)
-             return html{
-                       head{ title"Hello" },
-                       body{ view() }
-                    }
-           end,
+-- This is a convenience function for the common parts of a page
 
-  index = function (app)
-            return p.hello"Hello World!"
-          end,
+function render_layout(inner_html)
+   return html{
+     head{ title"Hello" },
+     body{ inner_html }
+   }
+end
 
-  say = function(app, args)
-          return app:render_partial("index") .. 
-  	        p.hello((self.input.greeting or "Hello") .. " ".. args.name .. "!")
-        end
-}
+function render_hello()
+   return p.hello"Hello World!"
+end
+
+function render_index()
+   return render_layout(render_hello())
+end
+
+function render_say(web, name)
+   return render_layout(render_hello() .. 
+     p.hello((web.input.greeting or "Hello ") .. name .. "!"))
+end
+
+orbit.htmlify(hello, "render_.+")
 </pre>
 
-The example uses Orbit's built-in html generation, but you are free to use any method of generating HTML that you want. One of Orbit's sample applications uses the [Cosmo](http://www.freewisdom.org/projects/sputnik/Cosmo) template library, for instance.
+The example uses Orbit's built-in html generation, but you are free to use any method of generating HTML. 
+One of Orbit's sample applications uses the [Cosmo](http://cosmo.luaforge.net) template library, for instance.
 
 ## OR Mapping
 
-Orbit also includes a basic OR mapper that currently only works with [LuaSQL's](http://luaforge.net/projects/luasql) SQLite3 driver. The mapper provides dynamic search methods, a la Rails' ActiveRecord (find\_by\_field1\_and\_field2{val1, val2}), as well as templates for conditions (find_by("field1 = ? or field1 = ?", { val1, val2 })). The sample applications use this mapper.
+Orbit also includes a basic OR mapper that currently only works with 
+[LuaSQL's](http://luaforge.net/projects/luasql) SQLite3 and MySQL drivers. The mapper provides
+dynamic find methods, a la Rails' ActiveRecord (find\_by\_field1\_and\_field2{val1, val2}),
+as well as templates for conditions (find_by("field1 = ? or field1 = ?", { val1, val2 })). 
+The sample applications use this mapper.
 
-A nice side-effect of the Orbit application model is that we get an "application console" for free. For example, with the blog example we can add a new post like this:
+A nice side-effect of the Orbit application model is that we get an "application console" 
+for free. For example, with the blog example we can add a new post like this:
 
 <pre>
-$ lua51 -i blog.lua
-> p = blog.models.post:new()
+$ lua -l luarocks.require -i blog.lua
+> p = blog.posts:new()
 > p.title = "New Post"
 > p.body = "This is a new blog post. Include *Markdown* markup freely."
 > p.published_at = os.time()
 > p:save()
 </pre>
 
-You can also update or delete any of the model items right from your console, just fetch them from the database, change what you want and call `save()` (or `delete()` if you want to remove it).
+You can also update or delete any of the model items right from your console, just fetch 
+them from the database, change what you want and call `save()` 
+(or `delete()` if you want to remove it).
 
-## Docs and download
+## Download and Installation
 
-There's not much documentation right now, apart from the source code and sample applications. A partial explanation of the Blog application is in [Orbit Blog Example](example.html). 
+The easiest way to download and install Orbit is via [LuaRocks](http://luarocks.org). You 
+can install Orbit with a simple `luarocks install orbit`. Go to the path where LuaRocks
+put Orbit to see the sample apps and this documentation. LuaRocks will automatically fetch
+and install any dependencies you don't already have.
 
-The only real dependency is [WSAPI](http://wsapi.luaforge.net), and it is included in the distribution via svn:externals (and installed together with Orbit). Installing the base Kepler (for Xavante) plus the SQLite3 driver is recommended (otherwise you only get CGI and no ORM). 
-
-You can get the latest version from [LuaForge](http://luaforge.net/projects/orbit). Installing in Unix-like systems is "configure && make && make install". You can also get Orbit using [LuaRocks](http://luarocks.org), with "luarocks install orbit". This is the easiest way.
-
+You can also get Orbit from [LuaForge](http://luaforge.net/projects/orbit). 
+Installing in Unix-like systems is "configure && make && make install", but you have to install
+any dependencies (such as WSAPI and Xavante) yourself.
+ 
 ## Credits
 
 Orbit was designed and developed by Fabio Mascarenhas and André Carregal,
