@@ -232,6 +232,13 @@ function new(app_module)
    return app_module
 end
 
+local function serve_file(app_module)
+   return function (web)
+	     local filename = web.real_path .. web.path_info
+	     return app_module:serve_static(web, filename)
+	  end
+end
+
 function app_module_methods.dispatch_get(app_module, func, ...)
    for _, pat in ipairs{ ... } do
       table.insert(app_module.dispatch_table.get, { pattern = pat, 
@@ -279,13 +286,6 @@ function app_module_methods.serve_static(app_module, web, filename)
       end
    end
 
-end
-
-function serve_file(app_module)
-   return function (web)
-	     local filename = web.real_path .. web.path_info
-	     return app_module:serve_static(web, filename)
-	  end
 end
 
 local function newtag(name)
@@ -349,6 +349,8 @@ function htmlify(app_module, ...)
       end
    end
 end
+
+app_module_methods.htmlify = htmlify
 
 function app_module_methods.model(app_module, ...)
    return app_module.mapper:new(...)
