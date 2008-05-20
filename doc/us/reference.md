@@ -56,9 +56,111 @@ you are using
 
 The *web* objects inherit the functions of module `wsapi.util` as methods.
 
-## Util
+**web.status** - status to be sent to server (default: "200 Ok")
 
-**wsapi.util.url_encode(*s*)** - encodes *s* according to RFC2396
+**web.headers** - headers to be sent to server, a Lua table (default has Content-Type as text/html)
 
-**wsapi.util.url_decode(*s*)** - decodes *s* according to RFC2396
+**web.response** - body to send to the server (default is blank)
+
+**web.vars** - original WSAPI environment
+
+**web.prefix** - app's prefix (if set in the app's module) or SCRIPT_NAME
+
+**web.suffix** - app's suffix (if set in the app's module)
+
+**web.real_path** - location of app in filesystem, taken from wsapi_env.APP_PATH, or app's module real_path, or "."
+ 
+**web.doc_root, web.path_info, web.script_name, web.path_translated, web.method** - server's document root, PATH_INFO,
+SCRIPT_NAME, PATH_TRANSLATED, and REQUEST_METHOD (converted to lowercase)
+
+**web.GET, web.POST** - GET and POST variables
+
+**web.input** - union of web.GET and web.POST
+
+**web.cookies** - cookies sent by the browser
+
+**web:set_cookie(*name*, *value*)** - sets a cookie to be sent back to browser
+
+**web:delete_cookie(*name*)** - deletes a cookie
+
+**web:redirect(*url*)** - sets status and headers to redirect to *url*
+
+**web:link(*part*, [*params*])** - creates intra-app link, using web.prefix and web.suffix, and encoding *params*
+as a query string
+
+**web:static_link(*part*)** - if app's entry point is a script, instead of path, creates a link to the app's vpath
+(e.g. if app.prefix is /foo/app.ws creates a link in /foo/*part*), otherwise same as web:link
+
+**web:empty(*s*)** - returns true if *s* is nil or an empty string (zero or more spaces)
+
+**web:empty_param(*name*)** - returns true if input parameter *name* is empty (as web:empty)
+
+**web:page(*name*, [*env*])** - loads and render Orbit page called *name*. If *name* starts with / it's relative to
+the document root, otherwise it's relative to the app's path. Returns rendered page. *env* is an optional environment
+with extra variables.
+
+**web:template(*contents*, [*env*])** - renders an inline Orbit page
+
+## Module `orbit.cache`
+
+**orbit.cache.new(*app*, [*base_path*])** - creates a page cache for *app*, either in memory or at the filesystem
+path *base_path* (**not** relative to the app's path!), returns the cache object
+
+**a_cache(*handler*)** - caches *handler*, returning a new handler; uses the PATH_INFO as a key to the cache
+
+**a_cache:get(*key*)** - gets value stored in *key*; usually not used, use the previous function instead
+
+**a_cache:set(*key*, *val*)** - stores a value in the cache; use a_cache(*handler*) to encapsulate this behavior
+
+**a_cache:invalidate(*key*)** - invalidates a cache value
+
+**a_cache:nuke()** - clears the cache
+
+## Module `orbit.model`
+
+**orbit.model.new([*table_prefix*], [*conn*], [*driver*])** - creates a new ORM mapper. *table_prefix* (default "")
+is a string added to the start of model names to get table names; *conn* is the database connection (can be set
+later); *driver* is the kind of database (currently "sqlite3", the default, and "mysql"). Returns a mapper instance,
+and all the parameters can be set after this instance is created (via a_mapper.table_prefix, a_mapper.conn 
+and a_mapper.driver)
+
+**a_mapper:new(*name*, [*tab*])** - creates a new model object; *name* is used together with a_mapper.table_prefix to
+form the DB table's name; fields and types are instrospected from the table. *tab* is an optional table that
+is used as the basis for the model object if present
+
+**a_model.model** - the mapper for this model
+
+**a_model.name, a_model.table_name** - the name of the model and its backing table
+
+**a_model.driver** - the DB driver used
+
+**a_model.meta** - metainformation about the model, instorspected from the table
+
+**a_model:find(*id*)** - finds and returns the instance of the model with the passed *id* (keyed using
+the `id` column of the table (must be numeric)
+
+**a_model:find_first(*condition*, *args*)** - finds and returns the first instance of the model that
+matches *condition*; *args* can determine the order (args.order) or inject fields from other tables
+(args.inject)
+
+**a_model:find_all(*condition*, *args*)** - finds and returns all instances of the model that
+matches *condition*; *args* can determine the order (args.order) or inject fields from other tables
+(args.inject)
+
+**a_model:new([*tab*])** - creates a fresh instance of the model, optionally using *tab* as initial
+values
+
+**a_model:find_by_xxx(*args*)** - finds and returns the first instance of the model building the
+condition from the method name, a la Rails' ActiveRecord
+
+**a_model:find_all_by_xxx(*args*)** - finds and returns all instances of the model building the
+condition from the method name, a la Rails' ActiveRecord
+
+**an_instance:save([*force_insert*])** - saves an instance to the DB, commiting changes or creating the backing record if
+the instance is new; if *force_insert* is true always do an insert instead of an update
+
+If there's a row called `created_at` this row is set to the creation date of the record; if there's a row
+called `updated_at` this row is set to the last update's date.
+
+**an_instance:delete()** - deletes an instance from the DB
 
