@@ -316,7 +316,7 @@ local function build_query(dao, condition, args)
 end
 
 function dao_methods.find_first(dao, condition, args)
-  return fetch_row(dao, build_query(dao.condition, args))
+  return fetch_row(dao, build_query(dao, condition, args))
 end
 
 function dao_methods.find_all(dao, condition, args)

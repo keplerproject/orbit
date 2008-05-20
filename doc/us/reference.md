@@ -143,6 +143,8 @@ the `id` column of the table (must be numeric)
 matches *condition*; *args* can determine the order (args.order) or inject fields from other tables
 (args.inject)
 
+Example: `books:find_first("author = ? and year_pub > ?", { "John Doe", 1995, order = "year_pub asc" })`
+
 **a_model:find_all(*condition*, *args*)** - finds and returns all instances of the model that
 matches *condition*; *args* can determine the order (args.order) or inject fields from other tables
 (args.inject)
@@ -155,6 +157,8 @@ condition from the method name, a la Rails' ActiveRecord
 
 **a_model:find_all_by_xxx(*args*)** - finds and returns all instances of the model building the
 condition from the method name, a la Rails' ActiveRecord
+
+Example: `books:find_all_by_author_or_author{ "John Doe", "Jane Doe", order = "year_pub asc" }`
 
 **an_instance:save([*force_insert*])** - saves an instance to the DB, commiting changes or creating the backing record if
 the instance is new; if *force_insert* is true always do an insert instead of an update
