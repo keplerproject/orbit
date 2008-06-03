@@ -1,4 +1,4 @@
-<h1>License</h1>
+<h2>License</h2>
 
 <p>
 Orbit is free software: it can be used for both academic
@@ -27,7 +27,7 @@ somewhere in your product or its documentation.</p>
 The implementation is not derived from licensed software.</p>
 
 <hr/>
-<p>Copyright &copy; 2004-2007 The Kepler Project.</p>
+<p>Copyright &copy; 2007-2008 The Kepler Project.</p>
 
 <p>Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation

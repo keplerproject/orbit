@@ -1,4 +1,4 @@
-## Overview
+## Reference Manual
 
 This is a short reference of all of Orbit's (and Orbit apps) methods.
 
