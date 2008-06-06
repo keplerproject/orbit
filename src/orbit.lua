@@ -405,7 +405,7 @@ function web_methods:page(name, env)
   end
 end
 
-function web_methods:template(contents, env)
+function web_methods:page_inline(contents, env)
   if not orbit.pages then
     require "orbit.pages"
   end
