@@ -1,3 +1,12 @@
+Orbit is an MVC web framework for Lua.
+The design is inspired by lightweight Ruby frameworks such as Camping.
+It completely abandons the current CGILua model of "scripts" in favor of applications,
+where each Orbit application can fit in a single file, but you can split it into
+multiple files if you want.
+All Orbit applications follow the WSAPI protocol, so currently work with Xavante,
+CGI and Fastcgi. It includes a launcher that makes it easy to launch a Xavante
+instance for development.
+
 Installation:
 
 Make sure your Lua interpreter is called lua51 and it is in
@@ -21,3 +30,4 @@ http://127.0.0.1:8080/ will show "Hello World!"
 http://127.0.0.1:8080/say/foo will show "Hello foo!"
 http://127.0.0.1:8080/anythingelse will show "Not found!"
 
+For more information please check http://orbit.luaforge.net
