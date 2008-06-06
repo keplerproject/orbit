@@ -2,6 +2,10 @@ package = "Orbit"
 
 version = "2.0-1"
 
+source = {
+  url = "",
+}
+
 description = {
   summary = "MVC for Lua Web Development",
   detailed = [[
@@ -13,10 +17,6 @@ description = {
 }
 
 dependencies = { 'wsapi >= 1.0', 'luafilesystem >= 1.4.1', 'cosmo >= 8.04.14' }
-
-source = {
-  url = "http://orbit.luaforge.net/orbit-2.0.tar.gz",
-}
 
 build = {
    type = "make",
