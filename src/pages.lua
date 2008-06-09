@@ -88,7 +88,7 @@ local function make_env(web, initial)
 	      end
   function env.redirect(target)
     if type(target) == "table" then target = target[1] end
-    web:redirect(arg[1])
+    web:redirect(target)
     abort()
   end
   function env.fill(arg)
