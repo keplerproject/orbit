@@ -9,6 +9,15 @@ work with Xavante,
 CGI and Fastcgi. It includes a launcher that makes it easy to launch a Xavante instance for
 development.
 
+## History
+
+* Version 2.0.1: bug-fix release, fixed bug in Orbit pages' redirect function (thanks for
+Ignacio Burgueño for finding the bug)
+
+* Version 2.0: Complete rewrite of Orbit
+
+* Version 1.0: Initial release, obsolete
+
 ## Hello World
 
 Below is a very simple Orbit application:
