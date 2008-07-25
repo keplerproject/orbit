@@ -436,6 +436,9 @@ local function dispatcher(app_module, method, path)
       for _, item in ipairs(app_module.dispatch_table[method]) do
 	 local captures = { string.match(path, "^" .. item.pattern .. "$") }
 	 if #captures > 0 then
+	    for i = 1, #captures do
+	      captures[i] = wsapi.util.url_decode(captures[i])
+	    end
 	    return item.handler, captures, item.wsapi
 	 end
       end
