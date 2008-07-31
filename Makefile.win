@@ -1,4 +1,4 @@
-# $Id: Makefile.win,v 1.6 2008/04/04 19:52:07 mascarenhas Exp $
+# $Id: Makefile.win,v 1.7 2008/07/31 18:55:46 mascarenhas Exp $
 
 LUA_DIR= c:\lua5.1\lua
 BIN_DIR= c:\lua5.1\bin
@@ -16,9 +16,9 @@ install:
 	copy src\orbit "$(BIN_DIR)"
 
 install-rocks: install
-	mkdir "$(PREFIX)\samples"
-	mkdir "$(PREFIX)\doc"
-	mkdir "$(PREFIX)\test"
+	IF NOT EXIST "$(PREFIX)\samples" mkdir "$(PREFIX)\samples"
+	IF NOT EXIST "$(PREFIX)\doc" mkdir "$(PREFIX)\doc"
+	IF NOT EXIST "$(PREFIX)\test" mkdir "$(PREFIX)\test"
 	xcopy /E samples "$(PREFIX)\samples\"
 	xcopy /E doc "$(PREFIX)\doc\"
 	xcopy /E test "$(PREFIX)\test\"
