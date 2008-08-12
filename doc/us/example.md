@@ -670,3 +670,24 @@ and all the helpers (the functions starting with `_`).
 
 ## Deployment
 
+For this part of the tutorial it is better if you go to the `samples/blog` folder
+of Orbit's distribution (again, look inside the `rocks` folder if you installed
+with Kepler or LuaRocks). An Orbit application is a WSAPI application, so
+deployment is very easy, you can just copy all the application's files (`blog.lua`,
+`blog_config.lua`, `blog.db`, `head.jpg`, and `style.css`) to a folder in your
+web server's docroot (if you installed Kepler, to a folder inside `kepler/htdocs`),
+and create a launcher script in this folder. The launcher script is simple (call 
+it `blog.ws`):
+
+<pre>
+#!/usr/bin/env wsapi.cgi
+require "blog"
+return blog
+</pre>
+
+Depending on your configuration, you might need to install the `luasql-sqlite3` and
+`markdown` rocks before running the application. Now just start Xavante, and
+point your browser to blog.ws, and you should see the index page of the blog. If you
+created a blog.db from scratch you are not going to see any posts, though. The blog
+application in `samples/blog' includes a blog.db filled with random posts and comments.
+
