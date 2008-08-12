@@ -95,7 +95,7 @@ function index(web)
 			  recent = ps, pages = pgs })
 end
 
-blog:dispatch_get(cache(index), "/") 
+blog:dispatch_get(cache(index), "/", "/index") 
 
 function view_post(web, post_id, comment_missing)
    local post = posts:find(tonumber(post_id))

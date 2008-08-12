@@ -25,7 +25,7 @@ database = {
 --  driver = "mysql",
 --  conn_data = { "blog", "root", "password" }
   driver = "sqlite3",
-  conn_data = { "blog.db" }
+  conn_data = { blog.real_path .. "/blog.db" }
 }
 
 recent_count = 7
