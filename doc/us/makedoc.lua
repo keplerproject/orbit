@@ -5,6 +5,7 @@ local pages = {
   { name = "Home", file = "index", sections = {} },
   { name = "Pages", file = "pages", sections = {} },
   { name = "Reference", file = "reference", sections = {} },
+  { name = "Tutorial", file = "example", sections = {} },
   { name = "License", file = "license", sections = {} }
 }
 
