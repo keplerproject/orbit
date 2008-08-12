@@ -300,6 +300,12 @@ captures the number, and this is passed along to the controller by Orbit. For
 to fetch the corresponding post. Again, HTML rendering is factored out to
 another function, and this controller is cached.
 
+If no post with that id is found then the default controller for missing
+pages gets called, `blog.not_found` (`orbit.app` put it in the `blog` namespace).
+Orbit also calls this controller is it does not find a valid match for the
+path. Another default controller is `server_error`, called when any unprotected
+error happens in controller/view code.
+
 Archives and pages are similar in structure:
 
 <pre>
@@ -400,4 +406,267 @@ This avoids double posting in case the user hits reload.
 The only thing left now is the HTML generation itself. This is the topic of the next section.
 
 ## Views: Generating HTML
+
+Views are the last component of the MVC triad. For Orbit views are just simple functions that
+generate content (usually HTML), and are strictly optional, meaning you can return content
+directly from the controller. But it's still good programming practice to separate controllers
+and views.
+
+How you generate content is up to you: concatenate Lua strings, use `table.concat`, use
+a third-party template library... Orbit provides programmatic HTML/XML generation
+through `orbit.htmlify`, but you are free to use any method you want. In this tutorial
+we will stick with programmatic generation, though, as the other methods (straight
+strings, [Cosmo](http://cosmo.luaforge.net), etc.) are thoroughly documented elsewhere.
+
+When you htmlify a function, Orbit changes the function's environment to let you generate
+HTML by calling the tags as functions. It's better to show how it works than to explain, so
+here is the basic view of the blog application, `layout`:
+
+<pre>
+function layout(web, args, inner_html)
+   return html{
+      head{
+	 title(blog_title),
+	 meta{ ["http-equiv"] = "Content-Type",
+	    content = "text/html; charset=utf-8" },
+	 link{ rel = 'stylesheet', type = 'text/css', 
+	    href = web:static_link('/style.css'), media = 'screen' }
+      },
+      body{
+	 div{ id = "container",
+	    div{ id = "header", title = "sitename" },
+	    div{ id = "mainnav",
+	       _menu(web, args)
+	    }, 
+            div{ id = "menu",
+	       _sidebar(web, args)
+	    },  
+	    div{ id = "contents", inner_html },
+	    div{ id = "footer", copyright_notice }
+	 }
+      }
+   } 
+end
+</pre>
+
+This view is a decorator for other views, and generates the boilerplate for each
+page in the blog (header, footer, sidebar). You can see the HTML-generating functions
+througout the code, such as `title`, `html`, `head`, `div`. Each takes either a string
+or a table, and generates the corresponding HTML. If you pass a table, the array part
+is concatenated and used as the content, while the hash part os used as HTML attributes
+for that tag. A tag with no content generates a self-closing tag (`meta` and `link` in
+the code above).
+
+Of note in the code above are the calls to `web:static_link` and to the `_menu` and
+`_sidebar` functions. The `static_link` method generates a link to a static resource
+of the application, stripping out the SCRIPT_NAME from the URL (for example,
+if the URL is http://myserver.com/myblog/blog.ws/index it will return /myblog/style.css
+as the link).
+
+The `_menu` and `_sidebar` functions are just helper views to generate the blog's menubar
+and sidebar:
+
+<pre>
+function _menu(web, args)
+   local res = { li(a{ href= web:link("/"), strings.home_page_name }) }
+   for _, page in pairs(args.pages) do
+      res[#res + 1] = li(a{ href = web:link("/page/" .. page.id), page.title })
+   end
+   return ul(res)
+end
+
+function _sidebar(web, args)
+   return {
+      h3(strings.about_title),
+      ul(li(about_blurb)),
+      h3(strings.last_posts),
+      _recent(web, args),
+      h3(strings.blogroll_title),
+      _blogroll(web, blogroll),
+      h3(strings.archive_title),
+      _archives(web, args)
+   }
+end
+</pre>
+
+Here you see a mixture of standard Lua idioms (filling a table and passing it
+to a concatenation function) and Orbit's programmatic HTML. They also use
+the `web:link` method, which generates intra-application links. The `sidebar`
+function uses a few more convenience functions, for better factoring:
+
+<pre>
+function _blogroll(web, blogroll)
+   local res = {}
+   for _, blog_link in ipairs(blogroll) do
+      res[#res + 1] = li(a{ href=blog_link[1], blog_link[2] })
+   end
+   return ul(res)
+end
+
+function _recent(web, args)
+   local res = {}
+   for _, post in ipairs(args.recent) do
+      res[#res + 1] = li(a{ href=web:link("/post/" .. post.id), post.title })
+   end
+   return ul(res)
+end
+
+function _archives(web, args)
+   local res = {}
+   for _, month in ipairs(args.months) do
+      res[#res + 1] = li(a{ href=web:link("/archive/" .. month.date_str), 
+			    blog.month(month) })
+   end
+   return ul(res)
+end
+</pre>
+
+Notice how these functions do not call anything in the model, just using
+whichever data was passed by them (all the way from the controller).
+
+We can now get to the main view functions. Let's start with the easiest,
+and smallest, one, to render pages:
+
+<pre>
+function render_page(web, args)
+   return layout(web, args, div.blogentry(markdown(args.page.body)))
+end
+</pre>
+
+This is a straightforward call to `layout`, passing the body
+of the page inside a `div`. The only thing of note
+is the `div.blogentry` syntax, which generates a `div` with
+a `class` attribute equal to "blogentry", instead of a straight
+`div`.
+
+Moving on, we will now write the view for index pages (and archive
+pages):
+
+<pre>
+function render_index(web, args)
+   if #args.posts == 0 then
+      return layout(web, args, p(strings.no_posts))
+   else
+      local res = {}
+      local cur_time
+      for _, post in pairs(args.posts) do
+	 local str_time = date(post.published_at)
+	 if cur_time ~= str_time then
+	    cur_time = str_time
+	    res[#res + 1] = h2(str_time)
+	 end
+	 res[#res + 1] = h3(post.title)
+	 res[#res + 1] = _post(web, post)
+      end
+      return layout(web, args, div.blogentry(res))
+   end
+end
+</pre>
+
+Again we mix Lua with programmatic generation, and factor part
+of the output (the HTML for the body of the posts themselves) to another function
+(we will be able to reuse this function for the single-post view). The
+only unusual piece of logic is to implement fancier dates, the code
+only prints a date when it changes, so several posts made in the same
+day appear under the same date.
+
+The `_post` helper is pretty straightforward:
+
+<pre>
+function _post(web, post)
+   return {
+      markdown(post.body),
+      p.posted{ 
+	 strings.published_at .. " " .. 
+	    os.date("%H:%M", post.published_at), " | ",
+	 a{ href = web:link("/post/" .. post.id .. "#comments"), strings.comments ..
+	    " (" .. (post.n_comments or "0") .. ")" }
+      }
+   }
+end
+</pre>
+
+Now we can finally move to the piece-de-resistance, the view that renders
+single posts, along with their comments, and the "post a comment" form:
+
+<pre>
+function render_post(web, args)
+   local res = { 
+      h2(span{ style="position: relative; float:left", args.post.title }
+	 .. "&nbsp;"),
+      h3(date(args.post.published_at)),
+      _post(web, args.post)
+   }
+   res[#res + 1] = a{ name = "comments" }
+   if #args.post.comments > 0 then
+      res[#res + 1] = h2(strings.comments)
+      for _, comment in pairs(args.post.comments) do
+	 res[#res + 1 ] = _comment(web, comment)
+      end
+   end
+   res[#res + 1] = h2(strings.new_comment)
+   local err_msg = ""
+   if args.comment_missing then
+      err_msg = span{ style="color: red", strings.no_comment }
+   end
+   res[#res + 1] = form{
+      method = "post",
+      action = web:link("/post/" .. args.post.id .. "/addcomment"),
+      p{ strings.form_name, br(), input{ type="text", name="author",
+	 value = web.input.author },
+         br(), br(),
+         strings.form_email, br(), input{ type="text", name="email",
+	 value = web.input.email },
+         br(), br(),
+         strings.form_url, br(), input{ type="text", name="url",
+	 value = web.input.url },
+         br(), br(),
+         strings.comments .. ":", br(), err_msg,
+         textarea{ name="comment", rows="10", cols="60", web.input.comment },
+	 br(),
+         em(" *" .. strings.italics .. "* "),
+         strong(" **" .. strings.bold .. "** "), 
+         " [" .. a{ href="/url", strings.link } .. "](http://url) ",
+         br(), br(),
+         input.button{ type="submit", value=strings.send }
+      }
+   }
+   return layout(web, args, div.blogentry(res))
+end
+</pre>
+
+This is a lot of code to digest at once, so let's go piece by piece. The first few lines
+generate the body of the post, using the `_post` helper. Then we have the list of comments,
+again with the body of each comment generated by a helper, `_comment`. In the middle we
+have an error message that is generated if the user tried to post an empty comment, and
+then the "add a comment" form. A form needs a lot of HTML, so there's quite a lot of
+code, but it should be self-explanatory and is pretty basic HTML (making it pretty is
+the responsibility of the style sheet).
+
+The `_comment` helper is pretty simple:
+
+<pre>
+function _comment(web, comment)
+   return { p(comment.body),
+      p.posted{
+	 strings.written_by .. " " .. comment:make_link(),
+	 " " .. strings.on_date .. " " ..
+	    time(comment.created_at) 
+      }
+   }
+end
+</pre>
+
+Finally, we need to set all of these view functions up for programmatic HTML generation:
+
+<pre>
+orbit.htmlify(blog, "layout", "_.+", "render_.+")
+</pre>
+
+The `orbit.htmlify` function takes a table and a list of patterns, and sets all
+functions in that table with names that match one of the patterns up for
+HTML generation. Here we set the `layout` function, all the `render_` functions,
+and all the helpers (the functions starting with `_`).
+
+## Deployment
 
