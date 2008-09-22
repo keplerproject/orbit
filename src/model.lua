@@ -84,8 +84,8 @@ function escape.varchar(v, driver, conn)
   return "'" .. conn:escape(v) .. "'"
 end
 
-function escape.string(v)
-  return escape.varchar(v)
+function escape.string(v, driver, conn)
+  return escape.varchar(v, driver, conn)
 end
 
 function escape.text(v, driver, conn)
