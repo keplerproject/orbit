@@ -464,8 +464,8 @@ local function make_web_object(app_module, wsapi_env)
   web.set_cookie = function (_, name, value)
 		     res:set_cookie(name, value)
 		   end
-  web.delete_cookie = function (_, name)
-			res:delete_cookie(name)
+  web.delete_cookie = function (_, name, path)
+			res:delete_cookie(name, path)
 		      end
   web.path_info = req.path_info
   web.path_translated = wsapi_env.PATH_TRANSLATED
