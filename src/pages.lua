@@ -13,6 +13,8 @@ module("orbit.pages", orbit.new)
 
 local template_cache = {}
 
+local BOM = string.char(239) .. string.char(187) .. string.char(191)
+
 local function remove_shebang(s)
   return s:gsub("^#![^\n]+", "")
 end
@@ -33,6 +35,7 @@ function load(filename, contents)
        end
        contents = file:read("*a")
        file:close()
+       if contents:sub(1,3) == BOM then contents = contens:sub(4) end
      end
      template = cosmo.compile(remove_shebang(contents))
      template_cache[filename] = template
