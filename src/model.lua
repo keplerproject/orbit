@@ -24,6 +24,10 @@ function convert.integer(v)
   return tonumber(v)
 end
 
+function convert.int(v)
+  return tonumber(v)
+end
+
 function convert.number(v)
   return tonumber(v)
 end
