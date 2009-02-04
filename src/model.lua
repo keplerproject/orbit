@@ -69,7 +69,12 @@ end
 local function convert_types(row, meta, driver)
   for k, v in pairs(row) do
     if meta[k] then
-      row[k] = convert[meta[k].type](v, driver)
+      local conv = convert[meta[k].type]
+      if conv then
+	row[k] = conv(v, driver)
+      else
+	error("no conversion for type " .. meta[k].type)
+      end
     end
   end
 end
@@ -122,7 +127,12 @@ local function escape_values(row)
     if row[m.name] == nil then
       row_escaped[m.name] = "NULL" 
     else
-      row_escaped[m.name] = escape[m.type](row[m.name], row.driver, row.model.conn)
+      local esc = escape[m.type]
+      if esc then
+	row_escaped[m.name] = esc(row[m.name], row.driver, row.model.conn)
+      else
+	error("no escape function for type " .. m.type)
+      end
     end
   end
   return row_escaped
