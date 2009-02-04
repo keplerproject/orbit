@@ -76,6 +76,10 @@ function escape.integer(v)
   return tostring(v)
 end
 
+function escape.int(v)
+  return tostring(v)
+end
+
 function escape.number(v)
   return escape.integer(v)
 end
