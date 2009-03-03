@@ -50,7 +50,7 @@ function convert.boolean(v, driver)
   elseif driver == "mysql" then
     return tonumber(v) == 1
   else
-    return toboolean(v)
+    error("driver not supported")
   end
 end
 
