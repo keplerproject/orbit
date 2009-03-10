@@ -69,19 +69,31 @@
 
 <p>Orbit is an MVC web framework for Lua. The design is inspired by lightweight Ruby
 frameworks such as <a href="http://code.whytheluckystiff.net/camping/">Camping</a>. It completely
-abandons the current CGILua model of "scripts" in favor of applications, where each Orbit
+abandons the CGILua model of "scripts" in favor of applications, where each Orbit
 application can fit in a single file, but you can split it into multiple files if you want.
-All Orbit applications follow the <a href="http://wsapi.luaforge.net">WSAPI</a> protocol, so currently
-work with Xavante,
-CGI and Fastcgi. It includes a launcher that makes it easy to launch a Xavante instance for
-development.</p>
+All Orbit applications follow the <a href="http://wsapi.luaforge.net">WSAPI</a> protocol, so they currently
+work with Xavante, CGI and Fastcgi. It includes a launcher that makes it easy to launch
+a Xavante instance for development.</p>
 
 <h2>History</h2>
 
 <ul>
-    <li><p>Version 2.0.1: bug-fix release, fixed bug in Orbit pages' redirect function (thanks for
+    <li><p>Version 2.0.2 (10/Mar/2009)</p>
+    <ul>
+        <li>url-decodes path captures (suggested by Ignacio Burgueño on a Jul 24 email to the Kepler list)</li>
+        <li>added tutorial and new examples</li>
+        <li>fixed escape.string</li>
+        <li>web:delete_cookie receives a path parameter in order to correctly remove the cookie. Bug report and patch by Ignacio Burgueño</li>
+        <li>stripping UTF-8 BOM from templates read from disk</li>
+        <li>removing SoLazer files in order to make the Orbit package smaller</li>
+        <li>added alternate name for integer (int)</li>
+        <li>better error reporting for missing escape and convert functions</li>
+        <li>removed toboolean</li>
+        <li>fixed bugs 13451 and 25418: setting status 500 on application errors not throwing an error if file not exists when invalidating cache</li>
+    </ul></li>
+    <li><p>Version 2.0.1 (10/Jun/2008): bug-fix release, fixed bug in Orbit pages' redirect function (thanks for
     Ignacio Burgueño for finding the bug)</p></li>
-    <li><p>Version 2.0: Complete rewrite of Orbit</p></li>
+    <li><p>Version 2.0 (06/Jun/2008): Complete rewrite of Orbit</p></li>
     <li><p>Version 1.0: Initial release, obsolete</p></li>
 </ul>
 
@@ -201,7 +213,17 @@ and install any dependencies you don't already have.</p>
 
 <p>You can also get Orbit from <a href="http://luaforge.net/projects/orbit">LuaForge</a>. 
 Installing in Unix-like systems is "configure &amp;&amp; make &amp;&amp; make install", but you have to install
-any dependencies (such as WSAPI and Xavante) yourself.</p>
+any dependencies (such as WSAPI and Cosmo) and Xavante yourself.</p>
+
+<h2>Dependencies</h2>
+
+<p>Orbit depends on these modules:</p>
+
+<ul>
+    <li><a href="http://wsapi.luaforge.net">WSAPI</a> 1.0</li>
+    <li><a href="http://www.keplerproject.org/luafilesystem/">LuaFileSystem</a> 1.4.1</li>
+    <li><a href="http://cosmo.luaforge.net/cosmo-8.04.14.tar.gz">Cosmo</a> 8.04.14</li>
+</ul>
 
 <h2>Credits</h2>
 

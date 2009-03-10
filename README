@@ -1,22 +1,48 @@
-Orbit is an MVC web framework for Lua.
-The design is inspired by lightweight Ruby frameworks such as Camping.
-It completely abandons the current CGILua model of "scripts" in favor of applications,
-where each Orbit application can fit in a single file, but you can split it into
-multiple files if you want.
-All Orbit applications follow the WSAPI protocol, so currently work with Xavante,
-CGI and Fastcgi. It includes a launcher that makes it easy to launch a Xavante
-instance for development.
+Orbit 2.0.2
+http://orbit.luaforge.net/
 
-Installation:
+Orbit is an MVC web framework for Lua. The design is inspired by lightweight
+Ruby frameworks such as Camping. It completely abandons the CGILua model
+of "scripts" in favor of applications, where each Orbit application can fit
+in a single file, but you can split it into multiple files if you want.
+All Orbit applications follow the WSAPI protocol, so they currently work with
+Xavante, CGI and Fastcgi. It includes a launcher that makes it easy to launch
+a Xavante instance for development.
 
-Make sure your Lua interpreter is called lua51 and it is in
-your path, then do:
+History
 
-configure
-make all
-make install
+* Version 2.0.2 (10/Mar/2009)
+  url-decodes path captures (suggested by Ignacio Burgueño on a Jul 24 email to the Kepler list)
+  added tutorial and new examples
+  fixed escape.string
+  web:delete_cookie receives a path parameter in order to correctly remove the cookie. Bug report and patch by Ignacio Burgueño
+  stripping UTF-8 BOM from templates read from disk
+  removing SoLazer files in order to make the Orbit package smaller
+  added alternate name for integer (int)
+  better error reporting for missing escape and convert functions
+  removed toboolean
+  fixed bugs 13451 and 25418: setting status 500 on application errors not throwing an error if file not exists when invalidating cache
 
-You may have to do the last step as root.
+* Version 2.0.1 (10/Jun/2008): bug-fix release, fixed bug in Orbit pages' redirect function (thanks for Ignacio Burgueño for finding the bug)
+
+* Version 2.0 (06/Jun/2008): Complete rewrite of Orbit
+
+* Version 1.0: Initial release, obsolete
+
+Download and Installation
+
+Download and Installation
+
+The easiest way to download and install Orbit is via LuaRocks. You can install Orbit
+with a simple command:
+
+luarocks install orbit
+
+Go to the path where LuaRocks put Orbit to see the sample apps and this documentation.
+LuaRocks will automatically fetch and install any dependencies you don't already have.
+
+You can also get Orbit from LuaForge. Installing in Unix-like systems is done by
+"configure && make && make install", but you have to install any dependencies (such as WSAPI and Xavante) yourself.
 
 To run the supplied example, go to the samples directory
 of this distribution and do:
