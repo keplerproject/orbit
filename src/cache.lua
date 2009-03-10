@@ -81,7 +81,7 @@ function invalidate(cache, ...)
 	 cache.values[key] = nil
       else
 	 local filename = cache.base_path .. "/" .. pathinfo_to_file(key)
-	 assert(os.remove(filename))
+	 os.remove(filename)
       end
    end
 end
@@ -92,7 +92,7 @@ function nuke(cache)
    else
       for file in lfs.dir(cache.base_path) do
 	 if file ~= "." and file ~= ".." then 
-	    assert(os.remove(cache.base_path .. "/" .. file)) 
+	    os.remove(cache.base_path .. "/" .. file) 
 	 end
       end
    end

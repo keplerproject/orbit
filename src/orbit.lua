@@ -498,6 +498,7 @@ function run(app_module, wsapi_env)
 				return handler(web, unpack(captures)) 
 			      end, debug.traceback)
   if not ok then
+    res.status = "500 Internal Server Error"
     res:write(app_module.server_error(web, response))
   else
     res.status = web.status
