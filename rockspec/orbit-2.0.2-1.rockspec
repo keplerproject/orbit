@@ -3,7 +3,7 @@ package = "Orbit"
 version = "2.0.2-1"
 
 source = {
-  url = "http://luaforge.net/frs/download.php/3458/orbit-2.0.2.tar.gz",
+  url = "http://luaforge.net/frs/download.php/3973/orbit-2.0.2.tar.gz",
 }
 
 description = {
@@ -16,7 +16,7 @@ description = {
   homepage = "http://www.keplerproject.org/orbit"
 }
 
-dependencies = { 'wsapi >= 1.0', 'luafilesystem >= 1.4.1', 'cosmo >= 8.04.14' }
+dependencies = { 'wsapi >= 1.1', 'luafilesystem >= 1.4.2', 'cosmo >= 8.04.14' }
 
 build = {
    type = "module",
