@@ -147,8 +147,8 @@ any dependencies (such as WSAPI and Cosmo) and Xavante yourself.
 
 Orbit depends on these modules:
 
-* [WSAPI](http://wsapi.luaforge.net) 1.0
-* [LuaFileSystem](http://www.keplerproject.org/luafilesystem/) 1.4.1
+* [WSAPI](http://wsapi.luaforge.net) 1.1
+* [LuaFileSystem](http://www.keplerproject.org/luafilesystem/) 1.4.2
 * [Cosmo](http://cosmo.luaforge.net/cosmo-8.04.14.tar.gz) 8.04.14
 
 ## Credits
