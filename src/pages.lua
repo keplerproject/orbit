@@ -6,6 +6,7 @@ local io, string = io, string
 local setmetatable, loadstring, setfenv = setmetatable, loadstring, setfenv
 local type, error, tostring = type, error, tostring
 local print, pcall, xpcall, traceback = print, pcall, xpcall, debug.traceback
+local select, unpack = select, unpack
 
 local _G = _G
 
@@ -83,6 +84,7 @@ local function make_env(web, initial)
     end
   end
   env["if"] = function (arg)
+		if type(arg[1] == "function") then arg[1] = arg[1](select(2, unpack(arg))) end
 		if arg[1] then
 		  cosmo.yield{ it = arg[1], _template = 1 }
 		else
