@@ -1,4 +1,4 @@
-Orbit 2.0.2
+Orbit 2.1.0
 http://orbit.luaforge.net/
 
 Orbit is an MVC web framework for Lua. The design is inspired by lightweight
@@ -11,8 +11,11 @@ a Xavante instance for development.
 
 History
 
+* Version 2.1.0 (22/Sep/2009)
+  depends on new Cosmo version, added a "higher-order" to Orbit Pages
+  
 * Version 2.0.2 (10/Mar/2009)
-  url-decodes path captures (suggested by Ignacio Burgueño on a Jul 24 email to the Kepler list)
+  url-decodes path captures (suggested by Ignacio Burgueno on a Jul 24 email to the Kepler list)
   added tutorial and new examples
   fixed escape.string
   web:delete_cookie receives a path parameter in order to correctly remove the cookie. Bug report and patch by Ignacio Burgueño
@@ -21,7 +24,8 @@ History
   added alternate name for integer (int)
   better error reporting for missing escape and convert functions
   removed toboolean
-  fixed bugs 13451 and 25418: setting status 500 on application errors not throwing an error if file not exists when invalidating cache
+  fixed bugs 13451 and 25418: setting status 500 on application errors not throwing an error if file not exists when invalidating
+  cache
 
 * Version 2.0.1 (10/Jun/2008): bug-fix release, fixed bug in Orbit pages' redirect function (thanks for Ignacio Burgueño for finding the bug)
 

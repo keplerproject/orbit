@@ -10,6 +10,9 @@ a Xavante instance for development.
 
 ## History
 
+* Version 2.1.0 (22/Sep/2009)
+    * depends on new Cosmo version, added a "higher-order" to Orbit Pages
+
 * Version 2.0.2 (10/Mar/2009)
     * url-decodes path captures (suggested by Ignacio Burgueño on a Jul 24 email to the Kepler list)
     * added tutorial and new examples
@@ -23,7 +26,7 @@ a Xavante instance for development.
     * fixed bugs 13451 and 25418: setting status 500 on application errors not throwing an error if file not exists when invalidating cache
 
 * Version 2.0.1 (10/Jun/2008): bug-fix release, fixed bug in Orbit pages' redirect function (thanks for
-Ignacio Burgueño for finding the bug)
+Ignacio Burgueno for finding the bug)
 
 * Version 2.0 (06/Jun/2008): Complete rewrite of Orbit
 
@@ -149,7 +152,7 @@ Orbit depends on these modules:
 
 * [WSAPI](http://wsapi.luaforge.net) 1.1
 * [LuaFileSystem](http://www.keplerproject.org/luafilesystem/) 1.4.2
-* [Cosmo](http://cosmo.luaforge.net/cosmo-8.04.14.tar.gz) 8.04.14
+* [Cosmo](http://cosmo.luaforge.net/cosmo-9.09.22.tar.gz) 9.09.22
 
 ## Credits
 
