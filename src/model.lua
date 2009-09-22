@@ -267,6 +267,24 @@ function model_methods:new(name, dao)
   return dao
 end
 
+function recycle(fresh_conn, timeout)
+  local created_at = os.time()
+  local conn = fresh_conn()
+  timeout = timeout or 20000
+  return setmetatable({}, { __index = function (tab, meth)
+					 tab[meth] = function (tab, ...)
+							if created_at + timeout < os.time() then
+							   created_at = os.time()
+							   pcall(conn.close, conn)
+							   conn = fresh_conn()
+							end
+							return conn[meth](conn, ...)
+						     end
+					 return tab[meth]
+				      end
+			 })
+end
+
 function new(table_prefix, conn, driver)
   driver = driver or "sqlite3"
   local app_model = { table_prefix = table_prefix or "", conn = conn, driver = driver or "sqlite3", models = {} }

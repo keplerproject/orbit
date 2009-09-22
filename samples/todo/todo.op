@@ -2,7 +2,7 @@
 
 $lua{[[
   require "luasql.sqlite3"
-  app.conn = app.conn or luasql.sqlite3():connect(web.real_path .. "/todo.db")
+  app.conn = app.conn or recycle(function () return luasql.sqlite3():connect(web.real_path .. "/todo.db") end, 20)
   mapper.conn = app.conn
   todo_list = model("todo_list")
   if web.method == "post" then
