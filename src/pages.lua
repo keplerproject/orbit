@@ -84,7 +84,7 @@ local function make_env(web, initial)
     end
   end
   env["if"] = function (arg)
-		if type(arg[1] == "function") then arg[1] = arg[1](select(2, unpack(arg))) end
+		if type(arg[1]) == "function" then arg[1] = arg[1](select(2, unpack(arg))) end
 		if arg[1] then
 		  cosmo.yield{ it = arg[1], _template = 1 }
 		else
@@ -130,6 +130,7 @@ local function make_env(web, initial)
     end
     return env.mapper:new(name, dao)
   end
+  env.recycle = orbit.model.recycle
   return env
 end
 
