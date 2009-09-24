@@ -15,8 +15,7 @@ description = {
 dependencies = { 'wsapi cvs', 'luafilesystem cvs', 'cosmo current' }
 
 source = {
-  url = "cvs://:pserver:anonymous@cvs.luaforge.net:/cvsroot/orbit",
-  cvs_tag = "HEAD"
+  url = "git://github.com/keplerproject/orbit.git"
 }
 
 build = {
