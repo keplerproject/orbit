@@ -232,7 +232,7 @@ function new(app_module)
 				      <head><title>Server Error</title></head>
 					 <body><pre>]] .. msg .. [[</pre></body></html>]]
 			     end
-   app_module.dispatch_table = { get = {}, post = {} }
+   app_module.dispatch_table = { get = {}, post = {}, put = {}, delete = {} }
    return app_module
 end
 
@@ -257,13 +257,26 @@ function app_module_methods.dispatch_post(app_module, func, ...)
    end
 end
 
-function app_module_methods.dispatch_wsapi(app_module, func, ...)
+function app_module_methods.dispatch_put(app_module, func, ...)
    for _, pat in ipairs{ ... } do
-      table.insert(app_module.dispatch_table.post, { pattern = pat, 
-		      handler = func, wsapi = true })
-      table.insert(app_module.dispatch_table.get, { pattern = pat, 
-		      handler = func, wsapi = true })
+      table.insert(app_module.dispatch_table.put, { pattern = pat, 
+		      handler = func })
    end
+end
+
+function app_module_methods.dispatch_delete(app_module, func, ...)
+   for _, pat in ipairs{ ... } do
+      table.insert(app_module.dispatch_table.delete, { pattern = pat, 
+		      handler = func })
+   end
+end
+
+function app_module_methods.dispatch_wsapi(app_module, func, ...)
+  for _, pat in ipairs{ ... } do
+    for _, tab in pairs(app_module.dispatch_table) do
+      table.insert(tab, { pattern = pat, handler = func, wsapi = true })
+    end
+  end
 end
 
 function app_module_methods.dispatch_static(app_module, ...)
