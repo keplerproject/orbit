@@ -4,7 +4,7 @@
 --
 -- Starts the orbit server
 --
--- orbit app.rb [port]
+-- orbit app.lua [port]
 --
 -------------------------------------------------------------------------------
 
@@ -27,6 +27,8 @@ require "xavante.httpd"
 require "xavante.vhostshandler"
 require "xavante.urlhandler"
 require "wsapi.xavante"
+
+wsapi.app_path = app_path
 
 local app = require(app_name)
 
