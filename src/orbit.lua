@@ -406,6 +406,10 @@ function web_methods:empty(s)
   return not s or string.match(s, "^%s*$")
 end
 
+function web_methods:content_type(s)
+  self.headers["Content-Type"] = s
+end
+
 function web_methods:page(name, env)
   if not orbit.pages then
     require "orbit.pages"
