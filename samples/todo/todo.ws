@@ -49,15 +49,16 @@ end
 todo:dispatch_post(toggle, "/toggle/(%d+)")
 
 todo.index = [===[
+
   <html>
   <head>
   <title>To-do List</title>
-  <script type="text/javascript" src="/jquery/jquery-1.2.3.min.js"></script>
+  <script type="text/javascript" src="jquery-1.2.3.min.js"></script>
   <script>
   function set_callbacks() {
     $(".remove").click(function () {
       $("#items>[item_id=" + $(this).attr("item_id") +"]").slideUp("slow");
-    $("#items").load("todo.ws/remove/" + $(this).attr("item_id")", {},
+    $("#items").load("todo.ws/remove/" + $(this).attr("item_id"), {},
       function () { set_callbacks(); });
     });
     $(".item").click(function () {

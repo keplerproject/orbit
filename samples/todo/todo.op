@@ -28,7 +28,7 @@ $lua{[[
 <html>
 <head>
 <title>To-do List</title>
-<script type="text/javascript" src="/jquery/jquery-1.2.3.min.js"></script>
+<script type="text/javascript" src="jquery-1.2.3.min.js"></script>
 <script>
 function set_callbacks() {
   $(".remove").click(function () {
