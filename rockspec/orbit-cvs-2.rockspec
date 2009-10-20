@@ -12,7 +12,7 @@ description = {
   homepage = "http://www.keplerproject.org/orbit"
 }
 
-dependencies = { 'wsapi cvs', 'luafilesystem cvs', 'cosmo current' }
+dependencies = { 'wsapi-xavante cvs', 'luafilesystem cvs', 'cosmo current' }
 
 source = {
   url = "git://github.com/keplerproject/orbit.git"
