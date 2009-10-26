@@ -4,11 +4,22 @@ Orbit is an MVC web framework for Lua. The design is inspired by lightweight Rub
 frameworks such as [Camping](http://code.whytheluckystiff.net/camping/). It completely
 abandons the CGILua model of "scripts" in favor of applications, where each Orbit
 application can fit in a single file, but you can split it into multiple files if you want.
-All Orbit applications follow the [WSAPI](http://wsapi.luaforge.net) protocol, so they currently
+All Orbit applications follow the [WSAPI](http://keplerproject.github.com/wsapi) protocol, so they currently
 work with Xavante, CGI and Fastcgi. It includes a launcher that makes it easy to launch
 a Xavante instance for development.
 
 ## History
+
+* Version 2.2.0 ()
+    * new options for orbit.model finders: distinct, fields
+    * count option for orbit.model now limits number of rows in the SQL
+    * logging of queries in orbit.model
+    * overhaul of the "orbit" script: better options, --help, sets application paht
+    * content_type method in the web object to set content type
+    * support for PUT and DELETE (methods `dispatch_put` and `dispatch_delete`)
+    * orbit.model.recycle(*conn_builder*, *timeout*) function, to make a connection that
+      automatically reopens after a certain time
+    * more samples in the samples folder
 
 * Version 2.1.0 (22/Sep/2009)
     * depends on new Cosmo version, added a "higher-order" to Orbit Pages
@@ -114,7 +125,7 @@ One of Orbit's sample applications uses the [Cosmo](http://cosmo.luaforge.net) t
 ## OR Mapping
 
 Orbit also includes a basic OR mapper that currently only works with 
-[LuaSQL's](http://luaforge.net/projects/luasql) SQLite3 and MySQL drivers. The mapper provides
+[LuaSQL's](http://github.com/keplerproject/luasql) SQLite3 and MySQL drivers. The mapper provides
 dynamic find methods, a la Rails' ActiveRecord (find\_by\_field1\_and\_field2{val1, val2}),
 as well as templates for conditions (find_by("field1 = ? or field1 = ?", { val1, val2 })). 
 The sample applications use this mapper.
@@ -142,18 +153,6 @@ can install Orbit with a simple `luarocks install orbit`. Go to the path where L
 put Orbit to see the sample apps and this documentation. LuaRocks will automatically fetch
 and install any dependencies you don't already have.
 
-You can also get Orbit from [LuaForge](http://luaforge.net/projects/orbit). 
-Installing in Unix-like systems is "configure && make && make install", but you have to install
-any dependencies (such as WSAPI and Cosmo) and Xavante yourself.
-
-## Dependencies
-
-Orbit depends on these modules:
-
-* [WSAPI](http://wsapi.luaforge.net) 1.1
-* [LuaFileSystem](http://www.keplerproject.org/luafilesystem/) 1.4.2
-* [Cosmo](http://cosmo.luaforge.net/cosmo-9.09.22.tar.gz) 9.09.22
-
 ## Credits
 
 Orbit was designed and developed by Fabio Mascarenhas and André Carregal,
@@ -166,5 +165,3 @@ Comments are welcome!
 
 You can also reach us and other developers and users on the Kepler Project 
 [mailing list](http://luaforge.net/mail/?group_id=104). 
-
-

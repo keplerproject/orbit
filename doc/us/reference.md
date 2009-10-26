@@ -93,6 +93,8 @@ as a query string
 
 **web:empty(*s*)** - returns true if *s* is nil or an empty string (zero or more spaces)
 
+**web:content\_type(*s*)** - sets the content type of the reponse to *s*
+
 **web:empty\_param(*name*)** - returns true if input parameter *name* is empty (as web:empty)
 
 **web:page(*name*, [*env*])** - loads and render Orbit page called *name*. If *name* starts with / it's relative to
@@ -118,11 +120,15 @@ path *base\_path* (**not** relative to the app's path!), returns the cache objec
 
 ## Module `orbit.model`
 
-**orbit.model.new([*table\_prefix*], [*conn*], [*driver*])** - creates a new ORM mapper. *table\_prefix* (default "")
+**orbit.model.new([*table\_prefix*], [*conn*], [*driver*], [*logging*])** - creates a new ORM mapper. *table\_prefix* (default "")
 is a string added to the start of model names to get table names; *conn* is the database connection (can be set
-later); *driver* is the kind of database (currently "sqlite3", the default, and "mysql"). Returns a mapper instance,
-and all the parameters can be set after this instance is created (via a\_mapper.table\_prefix, a\_mapper.conn 
-and a\_mapper.driver)
+later); *driver* is the kind of database (currently "sqlite3", the default, and "mysql");  *logging* 
+sets whether you want logging of all queries to `io.stderr`. Returns a mapper instance,
+and all the parameters can be set after this instance is created (via a\_mapper.table\_prefix, a\_mapper.conn, 
+a\_mapper.driver, and a\_mapper.logging)
+
+**orbit.model.recycle(*conn\_builder*, *timeout*)** - creates a connection using *conn\_builder*, a function
+that takes no arguments, and wraps it so a new connection is automatically reopened every *timeout* seconds
 
 **a\_mapper:new(*name*, [*tab*])** - creates a new model object; *name* is used together with a\_mapper.table\_prefix to
 form the DB table's name; fields and types are instrospected from the table. *tab* is an optional table that
@@ -140,23 +146,27 @@ is used as the basis for the model object if present
 the `id` column of the table (must be numeric)
 
 **a\_model:find\_first(*condition*, *args*)** - finds and returns the first instance of the model that
-matches *condition*; *args* can determine the order (args.order) or inject fields from other tables
+matches *condition*; *args* can determine the order (args.order), specify which fields should be returned
+(args.fields, default is all of them), and inject fields from other tables
 (args.inject)
 
 Example: `books:find_first("author = ? and year_pub > ?", { "John Doe", 1995, order = "year_pub asc" })`
 
 **a\_model:find\_all(*condition*, *args*)** - finds and returns all instances of the model that
-matches *condition*; *args* can determine the order (args.order) or inject fields from other tables
-(args.inject)
+matches *condition*; *args* can determine the order (args.order), specify which fields should be returned
+(args.fields, default is all of them), limit the number of returned rows (args.count), return only
+distinct rows (args.distinct), and inject fields from other tables (args.inject)
+
+Example: `books:find_first("author = ? and year_pub > ?", { "John Doe", 1995, order = "year_pub asc", count = 5, fields = { "id", "title" } })`
 
 **a\_model:new([*tab*])** - creates a fresh instance of the model, optionally using *tab* as initial
 values
 
 **a\_model:find\_by\_xxx(*args*)** - finds and returns the first instance of the model building the
-condition from the method name, a la Rails' ActiveRecord
+condition from the method name, a la Rails' ActiveRecord; *args* works the same way as in **find\_first**, above
 
 **a\_model:find\_all\_by\_xxx(*args*)** - finds and returns all instances of the model building the
-condition from the method name, a la Rails' ActiveRecord
+condition from the method name, a la Rails' ActiveRecord; *args* works the same way as in **find\_all**, above
 
 Example: `books:find_all_by_author_or_author{ "John Doe", "Jane Doe", order = "year_pub asc" }`
 
