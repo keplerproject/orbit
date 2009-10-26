@@ -333,7 +333,7 @@ function add_comment(web, post_id)
 			  "/section/" .. post.section_id .. "/xml",
 			  "/post/" .. post.id, "/post/" .. post.id .. "/xml",
 			  "/archive/" .. 
-				string.format("%Y/%m", post.published_at))
+				os.date("%Y/%m", post.published_at))
 	 else comment.approved = false end
 	 comment:save()
 	 return web:redirect(web:link("/post/" .. post_id))

@@ -62,7 +62,11 @@ if opts.l or opts.log then
   end
 end
 
-local path, name = app:match("^(.+[/\\])([%w%._%- ]+)$")
+local path, name = app:match("^(.+[/\\])?([%w%._%- ]+)$")
+
+if not path then
+  path, name = "", app
+end
 
 if app:sub(1, 1) ~= "/" and app:sub(1, 1) ~= "\\" and not app:match("^%a:\\") then
   path = lfs.currentdir() .. "/" .. path
