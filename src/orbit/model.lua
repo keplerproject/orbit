@@ -6,6 +6,10 @@ dao_methods = {}
 
 local type_names = {}
 
+local function log_query(sql)
+  io.stderr:write("[orbit.model] " .. sql .. "\n")
+end
+
 function type_names.sqlite3(t)
   return string.lower(string.match(t, "(%a+)"))
 end
@@ -187,10 +191,16 @@ local function parse_condition(dao, condition, args)
   return pairs
 end
 
-local function build_inject(inject, dao)
+local function build_inject(project, inject, dao)
   local fields = {}
-  for i, field in ipairs(dao.meta) do
-    fields[i] = dao.table_name .. "." .. field.name .. " as " .. field.name
+  if project then
+     for i, field in ipairs(project) do
+	fields[i] = dao.table_name .. "." .. field .. " as " .. field
+     end
+  else
+     for i, field in ipairs(dao.meta) do
+	fields[i] = dao.table_name .. "." .. field.name .. " as " .. field.name
+     end
   end
   local inject_fields = {}
   local model = inject.model
@@ -208,18 +218,24 @@ end
 local function build_query_by(dao, condition, args)
   local pairs = parse_condition(dao, condition, args)
   local order = ""
-  local field_list
-  local table_list
+  local field_list, table_list, select, limit
+  if args.distinct then select = "select distinct " else select = "select " end
+  if tonumber(args.count) then limit = " limit " .. tonumber(args.count) else limit = "" end
   if args.order then order = " order by " .. args.order end
   if args.inject then
-    field_list, table_list, pairs[#pairs + 1] = build_inject(args.inject,
+    field_list, table_list, pairs[#pairs + 1] = build_inject(args.fields, args.inject,
       dao)
   else
-    field_list = "*"
+    if args.fields then
+       field_list = table.concat(args.fields, ", ")
+    else
+       field_list = "*"
+    end
     table_list = dao.table_name
   end
-  local sql = "select " .. field_list .. " from " .. table_list ..
-    " where " .. table.concat(pairs, " and ") .. order
+  local sql = select .. field_list .. " from " .. table_list ..
+    " where " .. table.concat(pairs, " and ") .. order .. limit
+  if dao.model.logging then log_query(sql) end
   return sql
 end
 
@@ -254,6 +270,7 @@ function model_methods:new(name, dao)
     self.table_prefix .. name, {}, self.driver
   setmetatable(dao, { __index = dao_index })
   local sql = "select * from " .. dao.table_name .. " limit 0"
+  if self.logging then log_query(sql) end
   local cursor, err = self.conn:execute(sql)
   if not cursor then error(err) end
   local names, types = cursor:getcolnames(), cursor:getcoltypes()
@@ -285,9 +302,9 @@ function recycle(fresh_conn, timeout)
 			 })
 end
 
-function new(table_prefix, conn, driver)
+function new(table_prefix, conn, driver, logging)
   driver = driver or "sqlite3"
-  local app_model = { table_prefix = table_prefix or "", conn = conn, driver = driver or "sqlite3", models = {} }
+  local app_model = { table_prefix = table_prefix or "", conn = conn, driver = driver or "sqlite3", logging = logging, models = {} }
   setmetatable(app_model, { __index = model_methods })
   return app_model
 end
@@ -331,11 +348,12 @@ local function build_query(dao, condition, args)
   end
   local order = ""
   if args.order then order = " order by " .. args.order end
-  local field_list
-  local table_list
+  local field_list, table_list, select, limit
+  if args.distinct then select = "select distinct " else select = "select " end
+  if tonumber(args.count) then limit = " limit " .. tonumber(args.count) else limit = "" end
   if args.inject then
     local inject_condition
-    field_list, table_list, inject_condition = build_inject(args.inject,
+    field_list, table_list, inject_condition = build_inject(args.fields, args.inject,
       dao)
     if condition == "" then
       condition = " where " .. inject_condition
@@ -343,11 +361,16 @@ local function build_query(dao, condition, args)
       condition = condition .. " and " .. inject_condition
     end
   else
-    field_list = "*"
+    if args.fields then
+       field_list = table.concat(args.fields, ", ")
+    else
+       field_list = "*"
+    end
     table_list = dao.table_name
   end
-  local sql = "select " .. field_list .. " from " .. table_list .. 
-    condition .. order
+  local sql = select .. field_list .. " from " .. table_list .. 
+    condition .. order .. limit
+  if dao.model.logging then log_query(sql) end
   return sql
 end
 
@@ -379,6 +402,7 @@ local function update(row)
   end
   local sql = "update " .. row.table_name .. " set " ..
     table.concat(updates, ", ") .. " where id = " .. row.id
+  if row.model.logging then log_query(sql) end
   local ok, err = row.model.conn:execute(sql)
   if not ok then error(err) end
 end
@@ -402,6 +426,7 @@ local function insert(row)
   local sql = "insert into " .. row.table_name ..
     " (" .. table.concat(columns, ", ") .. ") values (" ..
     table.concat(values, ", ") .. ")"
+  if row.model.logging then log_query(sql) end
   local ok, err = row.model.conn:execute(sql)
   if ok then 
     row.id = row.id or row.model.conn:getlastautoid()
@@ -421,6 +446,7 @@ end
 function dao_methods.delete(row)
   if row.id then
     local sql = "delete from " .. row.table_name .. " where id = " .. row.id
+    if row.model.logging then log_query(sql) end
     local ok, err = row.model.conn:execute(sql)    
     if ok then row.id = nil else error(err) end
   end

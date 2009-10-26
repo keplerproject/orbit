@@ -218,7 +218,7 @@ function new(app_module)
 		       return run(app_module, wsapi_env)
 		    end
    local table_prefix = (app_module._NAME and app_module._NAME .. "_") or ""
-   app_module.real_path = wsapi.app_path
+   app_module.real_path = wsapi.app_path or "."
    app_module.mapper = orbit.model.new(table_prefix)
    app_module.not_found = function (web)
 			     web.status = "404 Not Found"

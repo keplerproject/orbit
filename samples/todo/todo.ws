@@ -7,12 +7,13 @@ require "luasql.sqlite3"
 
 local todo = orbit.new()
 
+todo.mapper.logging = true
 todo.mapper.conn = luasql.sqlite3():connect(todo.real_path .. "/todo.db")
 
-local todo_list = todo:model("todo_list")
+todo.list = todo:model("todo_list")
 
 local function item_list()
-  return todo_list:find_all{ order = "created_at desc" }
+  return todo.list:find_all{ order = "created_at desc" }
 end
 
 local function index(web)
@@ -23,7 +24,7 @@ end
 todo:dispatch_get(index, "/")
 
 local function add(web)
-  local item = todo_list:new()
+  local item = todo.list:new()
   item.title = web.input.item or ""
   item:save()
   return web:page_inline(todo.items, { items = item_list() })
@@ -32,7 +33,7 @@ end
 todo:dispatch_post(add, "/add")
 
 local function remove(web, id)
-  local item = todo_list:find(tonumber(id))
+  local item = todo.list:find(tonumber(id))
   item:delete()
   return web:page_inline(todo.items, { items = item_list() })
 end
@@ -40,7 +41,7 @@ end
 todo:dispatch_post(remove, "/remove/(%d+)")
 
 local function toggle(web, id)
-  local item = todo_list:find(tonumber(id))
+  local item = todo.list:find(tonumber(id))
   item.done = not item.done
   item:save()
   return "toggle"
