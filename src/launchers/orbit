@@ -78,6 +78,8 @@ wsapi.app_path = path
 
 local app = dofile(path .. name)
 
+if not app then app = _G[name:match("(.+)%.")] end
+
 if type(app) == "table" then app = app.run end
 
 xavante.httpd.handle_request = xavante.vhostshandler {
