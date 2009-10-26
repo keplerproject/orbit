@@ -313,6 +313,7 @@ function dao_methods.find(dao, id, inject)
   if not type(id) == "number" then
     error("find error: id must be a number")
   end
+  if dao.logging then log_query(sql) end
   local sql = "select * from " .. dao.table_name ..
     " where id=" .. id
   return fetch_row(dao, sql)
