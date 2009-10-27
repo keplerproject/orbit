@@ -12,10 +12,16 @@ if not fastcgi then
   os.exit(1)
 end
 
-local function op_loader(wsapi_env)
-  common.normalize_paths(wsapi_env, nil, "op.fcgi")
-  local app = wsapi.common.load_isolated_launcher(wsapi_env.PATH_TRANSLATED, "orbit.pages")
-  return app(wsapi_env)
-end 
+local ONE_HOUR = 60 * 60
+local ONE_DAY = 24 * ONE_HOUR
+
+local op_loader = common.make_isolated_launcher{
+  filename = nil,          -- if you want to force the launch of a single script
+  launcher = "op.fcgi",    -- the name of this launcher
+  modname = "orbit.pages", -- WSAPI application that processes the script
+  reload = false,          -- if you want to reload the application on every request
+  period = ONE_HOUR,       -- frequency of Lua state staleness checks
+  ttl = ONE_DAY            -- time-to-live for Lua states
+}
 
 fastcgi.run(op_loader)

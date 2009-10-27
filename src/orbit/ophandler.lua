@@ -10,15 +10,11 @@ require "wsapi.common"
 
 module ("orbit.ophandler", package.seeall)
 
-local function op_loader(wsapi_env)
-  wsapi.common.normalize_paths(wsapi_env)
-  local app = wsapi.common.load_isolated_launcher(wsapi_env.PATH_TRANSLATED, "orbit.pages")
-  return app(wsapi_env)
-end 
-
 -------------------------------------------------------------------------------
--- Returns the CGILua handler
+-- Returns the Orbit Pages handler
 -------------------------------------------------------------------------------
-function makeHandler (diskpath)
+function makeHandler (diskpath, params)
+   params = setmetatable({ modname = params.modname or "orbit.pages" }, { __index = params or {} })
+   local op_loader = wsapi.common.make_isolated_launcher(params)
    return wsapi.xavante.makeHandler(op_loader, nil, diskpath)
 end
