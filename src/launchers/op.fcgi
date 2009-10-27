@@ -5,9 +5,9 @@
 pcall(require, "luarocks.require")
 
 local common = require "wsapi.common"
-local fastcgi, err = pcall(require, "wsapi.fastcgi")
+local ok, err = pcall(require, "wsapi.fastcgi")
 
-if not fastcgi then
+if not ok then
   io.stderr:write("WSAPI FastCGI not loaded:\n" .. err .. "\n\nPlease install wsapi-fcgi with LuaRocks\n")
   os.exit(1)
 end
@@ -24,4 +24,4 @@ local op_loader = common.make_isolated_launcher{
   ttl = ONE_DAY            -- time-to-live for Lua states
 }
 
-fastcgi.run(op_loader)
+wsapi.fastcgi.run(op_loader)
