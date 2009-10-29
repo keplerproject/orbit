@@ -19,14 +19,14 @@ description = {
 dependencies = { 'luafilesystem >= 1.5.0' }
 
 build = {
-   type = "module",
+   type = "builtin",
    modules = {
      orbit = "src/orbit.lua",
-     ["orbit.model"] = "src/model.lua",
-     ["orbit.pages"] = "src/pages.lua",
-     ["orbit.cache"] = "src/cache.lua",
-     ["orbit.ophandler"] = "src/ophandler.lua",
+     ["orbit.model"] = "src/orbit/model.lua",
+     ["orbit.pages"] = "src/orbit/pages.lua",
+     ["orbit.cache"] = "src/orbit/cache.lua",
+     ["orbit.ophandler"] = "src/orbit/ophandler.lua",
    },
-   install = { bin = { "src/orbit" } },
+   install = { bin = { "src/launchers/orbit", "src/launchers/op.cgi", "src/launchers/op.fcgi" } },
    copy_directories = { "doc", "samples", "test" }
 }
