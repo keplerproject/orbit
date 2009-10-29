@@ -3,7 +3,7 @@ package = "Orbit"
 version = "2.1.0-1"
 
 source = {
-  url = "http://luaforge.net/frs/download.php/3975/orbit-2.1.0.tar.gz",
+  url = "http://cloud.github.com/downloads/keplerproject/orbit/orbit-2.1.0.tar.gz",
 }
 
 description = {
