@@ -34,6 +34,12 @@ the patterns *patt*. *func* receives a `web` object and the captures
 **app:dispatch\_post(*func*, *patt*[, *patt*...])** - installs *func* as a POST handler for
 the patterns *patt*. *func* receives a `web` object and the captures
 
+**app:dispatch\_put(*func*, *patt*[, *patt*...])** - installs *func* as a PUT handler for
+the patterns *patt*. *func* receives a `web` object and the captures
+
+**app:dispatch\_delete(*func*, *patt*[, *patt*...])** - installs *func* as a DELETE handler for
+the patterns *patt*. *func* receives a `web` object and the captures
+
 **app:dispatch\_wsapi(*func*, *patt*[, *patt*...])** - installs *func* as a WSAPI handler for
 the patterns *patt*. *func* receives the unmodified WSAPI environment
 

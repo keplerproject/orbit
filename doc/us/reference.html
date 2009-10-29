@@ -28,26 +28,31 @@
 <div id="navigation">
 <h1>Orbit</h1>
 	<ul>
+
 		<li><a href="index.html">Home</a>
 			<ul> 
                             
 			</ul>
 		</li>
+
 		<li><a href="pages.html">Pages</a>
 			<ul> 
                             
 			</ul>
 		</li>
+
 		<li><strong>Reference</strong>
 			<ul> 
                             
 			</ul>
 		</li>
+
 		<li><a href="example.html">Tutorial</a>
 			<ul> 
                             
 			</ul>
 		</li>
+
 		<li><a href="license.html">License</a>
 			<ul> 
                             
@@ -94,6 +99,12 @@ client, can be overriden. The handler receives a <code>web</code> object</p>
 the patterns <em>patt</em>. <em>func</em> receives a <code>web</code> object and the captures</p>
 
 <p><strong>app:dispatch_post(<em>func</em>, <em>patt</em>[, <em>patt</em>...])</strong> - installs <em>func</em> as a POST handler for
+the patterns <em>patt</em>. <em>func</em> receives a <code>web</code> object and the captures</p>
+
+<p><strong>app:dispatch_put(<em>func</em>, <em>patt</em>[, <em>patt</em>...])</strong> - installs <em>func</em> as a PUT handler for
+the patterns <em>patt</em>. <em>func</em> receives a <code>web</code> object and the captures</p>
+
+<p><strong>app:dispatch_delete(<em>func</em>, <em>patt</em>[, <em>patt</em>...])</strong> - installs <em>func</em> as a DELETE handler for
 the patterns <em>patt</em>. <em>func</em> receives a <code>web</code> object and the captures</p>
 
 <p><strong>app:dispatch_wsapi(<em>func</em>, <em>patt</em>[, <em>patt</em>...])</strong> - installs <em>func</em> as a WSAPI handler for
@@ -155,6 +166,8 @@ as a query string</p>
 
 <p><strong>web:empty(<em>s</em>)</strong> - returns true if <em>s</em> is nil or an empty string (zero or more spaces)</p>
 
+<p><strong>web:content_type(<em>s</em>)</strong> - sets the content type of the reponse to <em>s</em></p>
+
 <p><strong>web:empty_param(<em>name</em>)</strong> - returns true if input parameter <em>name</em> is empty (as web:empty)</p>
 
 <p><strong>web:page(<em>name</em>, [<em>env</em>])</strong> - loads and render Orbit page called <em>name</em>. If <em>name</em> starts with / it's relative to
@@ -180,11 +193,15 @@ path <em>base_path</em> (<strong>not</strong> relative to the app's path!), retu
 
 <h2>Module <code>orbit.model</code></h2>
 
-<p><strong>orbit.model.new([<em>table_prefix</em>], [<em>conn</em>], [<em>driver</em>])</strong> - creates a new ORM mapper. <em>table_prefix</em> (default "")
+<p><strong>orbit.model.new([<em>table_prefix</em>], [<em>conn</em>], [<em>driver</em>], [<em>logging</em>])</strong> - creates a new ORM mapper. <em>table_prefix</em> (default "")
 is a string added to the start of model names to get table names; <em>conn</em> is the database connection (can be set
-later); <em>driver</em> is the kind of database (currently "sqlite3", the default, and "mysql"). Returns a mapper instance,
-and all the parameters can be set after this instance is created (via a_mapper.table_prefix, a_mapper.conn 
-and a_mapper.driver)</p>
+later); <em>driver</em> is the kind of database (currently "sqlite3", the default, and "mysql");  <em>logging</em> 
+sets whether you want logging of all queries to <code>io.stderr</code>. Returns a mapper instance,
+and all the parameters can be set after this instance is created (via a_mapper.table_prefix, a_mapper.conn, 
+a_mapper.driver, and a_mapper.logging)</p>
+
+<p><strong>orbit.model.recycle(<em>conn_builder</em>, <em>timeout</em>)</strong> - creates a connection using <em>conn_builder</em>, a function
+that takes no arguments, and wraps it so a new connection is automatically reopened every <em>timeout</em> seconds</p>
 
 <p><strong>a_mapper:new(<em>name</em>, [<em>tab</em>])</strong> - creates a new model object; <em>name</em> is used together with a_mapper.table_prefix to
 form the DB table's name; fields and types are instrospected from the table. <em>tab</em> is an optional table that
@@ -202,23 +219,27 @@ is used as the basis for the model object if present</p>
 the <code>id</code> column of the table (must be numeric)</p>
 
 <p><strong>a_model:find_first(<em>condition</em>, <em>args</em>)</strong> - finds and returns the first instance of the model that
-matches <em>condition</em>; <em>args</em> can determine the order (args.order) or inject fields from other tables
+matches <em>condition</em>; <em>args</em> can determine the order (args.order), specify which fields should be returned
+(args.fields, default is all of them), and inject fields from other tables
 (args.inject)</p>
 
 <p>Example: <code>books:find_first("author = ? and year_pub &gt; ?", { "John Doe", 1995, order = "year_pub asc" })</code></p>
 
 <p><strong>a_model:find_all(<em>condition</em>, <em>args</em>)</strong> - finds and returns all instances of the model that
-matches <em>condition</em>; <em>args</em> can determine the order (args.order) or inject fields from other tables
-(args.inject)</p>
+matches <em>condition</em>; <em>args</em> can determine the order (args.order), specify which fields should be returned
+(args.fields, default is all of them), limit the number of returned rows (args.count), return only
+distinct rows (args.distinct), and inject fields from other tables (args.inject)</p>
+
+<p>Example: <code>books:find_first("author = ? and year_pub &gt; ?", { "John Doe", 1995, order = "year_pub asc", count = 5, fields = { "id", "title" } })</code></p>
 
 <p><strong>a_model:new([<em>tab</em>])</strong> - creates a fresh instance of the model, optionally using <em>tab</em> as initial
 values</p>
 
 <p><strong>a_model:find_by_xxx(<em>args</em>)</strong> - finds and returns the first instance of the model building the
-condition from the method name, a la Rails' ActiveRecord</p>
+condition from the method name, a la Rails' ActiveRecord; <em>args</em> works the same way as in <strong>find_first</strong>, above</p>
 
 <p><strong>a_model:find_all_by_xxx(<em>args</em>)</strong> - finds and returns all instances of the model building the
-condition from the method name, a la Rails' ActiveRecord</p>
+condition from the method name, a la Rails' ActiveRecord; <em>args</em> works the same way as in <strong>find_all</strong>, above</p>
 
 <p>Example: <code>books:find_all_by_author_or_author{ "John Doe", "Jane Doe", order = "year_pub asc" }</code></p>
 

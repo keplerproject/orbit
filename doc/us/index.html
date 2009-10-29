@@ -71,16 +71,27 @@
 frameworks such as <a href="http://code.whytheluckystiff.net/camping/">Camping</a>. It completely
 abandons the CGILua model of "scripts" in favor of applications, where each Orbit
 application can fit in a single file, but you can split it into multiple files if you want.
-All Orbit applications follow the <a href="http://wsapi.luaforge.net">WSAPI</a> protocol, so they currently
+All Orbit applications follow the <a href="http://keplerproject.github.com/wsapi">WSAPI</a> protocol, so they currently
 work with Xavante, CGI and Fastcgi. It includes a launcher that makes it easy to launch
 a Xavante instance for development.</p>
 
 <h2>History</h2>
 
 <ul>
-    <li><p>Version 2.1.0 (22/Sep/2009)</p>
+    <li><p>Version 2.1.0 (29/Oct/2009)</p>
     <ul>
-        <li>depends on new Cosmo version, added a "higher-order" to Orbit Pages</li>
+        <li>better decoupling of orbit and orbit.model</li>
+        <li>support for anything with a match method as patterns</li>
+        <li>new options for orbit.model finders: distinct, fields</li>
+        <li>count option for orbit.model now limits number of rows in the SQL</li>
+        <li>logging of queries in orbit.model</li>
+        <li>overhaul of the "orbit" script: better options, --help, sets application paht</li>
+        <li>content_type method in the web object to set content type</li>
+        <li>support for PUT and DELETE (methods <code>dispatch_put</code> and <code>dispatch_delete</code>)</li>
+        <li>orbit.model.recycle(*conn_builder<em>, *timeout</em>) function, to make a connection that
+        automatically reopens after a certain time</li>
+        <li>more samples in the samples folder</li>
+        <li>added a "higher-order" $if to Orbit Pages</li>
     </ul></li>
     <li><p>Version 2.0.2 (10/Mar/2009)</p>
     <ul>
@@ -185,7 +196,7 @@ One of Orbit's sample applications uses the <a href="http://cosmo.luaforge.net">
 <h2>OR Mapping</h2>
 
 <p>Orbit also includes a basic OR mapper that currently only works with 
-<a href="http://luaforge.net/projects/luasql">LuaSQL's</a> SQLite3 and MySQL drivers. The mapper provides
+<a href="http://github.com/keplerproject/luasql">LuaSQL's</a> SQLite3 and MySQL drivers. The mapper provides
 dynamic find methods, a la Rails' ActiveRecord (find_by_field1_and_field2{val1, val2}),
 as well as templates for conditions (find_by("field1 = ? or field1 = ?", { val1, val2 })). 
 The sample applications use this mapper.</p>
@@ -215,20 +226,6 @@ can install Orbit with a simple <code>luarocks install orbit</code>. Go to the p
 put Orbit to see the sample apps and this documentation. LuaRocks will automatically fetch
 and install any dependencies you don't already have.</p>
 
-<p>You can also get Orbit from <a href="http://luaforge.net/projects/orbit">LuaForge</a>. 
-Installing in Unix-like systems is "configure &amp;&amp; make &amp;&amp; make install", but you have to install
-any dependencies (such as WSAPI and Cosmo) and Xavante yourself.</p>
-
-<h2>Dependencies</h2>
-
-<p>Orbit depends on these modules:</p>
-
-<ul>
-    <li><a href="http://wsapi.luaforge.net">WSAPI</a> 1.1</li>
-    <li><a href="http://www.keplerproject.org/luafilesystem/">LuaFileSystem</a> 1.4.2</li>
-    <li><a href="http://cosmo.luaforge.net/cosmo-9.09.22.tar.gz">Cosmo</a> 9.09.22</li>
-</ul>
-
 <h2>Credits</h2>
 
 <p>Orbit was designed and developed by Fabio Mascarenhas and André Carregal,
@@ -241,8 +238,6 @@ Comments are welcome!</p>
 
 <p>You can also reach us and other developers and users on the Kepler Project 
 <a href="http://luaforge.net/mail/?group_id=104">mailing list</a>. </p>
-
-
 
 
 

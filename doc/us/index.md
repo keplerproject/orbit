@@ -10,7 +10,9 @@ a Xavante instance for development.
 
 ## History
 
-* Version 2.2.0 ()
+* Version 2.1.0 (29/Oct/2009)
+    * better decoupling of orbit and orbit.model
+    * support for anything with a match method as patterns
     * new options for orbit.model finders: distinct, fields
     * count option for orbit.model now limits number of rows in the SQL
     * logging of queries in orbit.model
@@ -20,9 +22,7 @@ a Xavante instance for development.
     * orbit.model.recycle(*conn_builder*, *timeout*) function, to make a connection that
       automatically reopens after a certain time
     * more samples in the samples folder
-
-* Version 2.1.0 (22/Sep/2009)
-    * depends on new Cosmo version, added a "higher-order" to Orbit Pages
+    * added a "higher-order" $if to Orbit Pages
 
 * Version 2.0.2 (10/Mar/2009)
     * url-decodes path captures (suggested by Ignacio Burgueño on a Jul 24 email to the Kepler list)
