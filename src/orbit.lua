@@ -1,15 +1,19 @@
+
 require "wsapi.request"
 require "wsapi.response"
 require "wsapi.util"
-require "orbit.model"
 
-module("orbit", package.seeall)
+local _G, setfenv = _G, setfenv
+module("orbit")
+local _M = _M
+setfenv(1, _G)
 
-_VERSION = "2.0.2"
-_COPYRIGHT = "Copyright (C) 2007 Kepler Project"
-_DESCRIPTION = "MVC Web Development for the Kepler platform"
+_M._NAME = "orbit"
+_M._VERSION = "2.1.0"
+_M._COPYRIGHT = "Copyright (C) 2007-2009 Kepler Project"
+_M._DESCRIPTION = "MVC Web Development for the Kepler platform"
 
-mime_types = {
+_M.mime_types = {
   ez = "application/andrew-inset",
   atom = "application/atom+xml",
   hqx = "application/mac-binhex40",
@@ -168,9 +172,11 @@ mime_types = {
   atom = "application/atom+xml"
 }
 
-app_module_methods = {}
+_M.app_module_methods = {}
+local app_module_methods = _M.app_module_methods
 
-web_methods = {}
+_M.web_methods = {}
+local web_methods = _M.web_methods
 
 local function flatten(t)
    local res = {}
@@ -184,7 +190,7 @@ local function flatten(t)
    return table.concat(res)
 end
 
-function make_tag(name, data, class)
+local function make_tag(name, data, class)
   if class then class = ' class="' .. class .. '"' else class = "" end
   if not data then
     return "<" .. name .. class .. "/>"
@@ -205,7 +211,7 @@ function make_tag(name, data, class)
   end      
 end
 
-function new(app_module)
+function _M.new(app_module)
    if type(app_module) == "string" then
       app_module = { _NAME = app_module }
    else
@@ -215,11 +221,9 @@ function new(app_module)
       app_module[k] = v
    end
    app_module.run = function (wsapi_env) 
-		       return run(app_module, wsapi_env)
+		       return _M.run(app_module, wsapi_env)
 		    end
-   local table_prefix = (app_module._NAME and app_module._NAME .. "_") or ""
    app_module.real_path = wsapi.app_path or "."
-   app_module.mapper = orbit.model.new(table_prefix)
    app_module.not_found = function (web)
 			     web.status = "404 Not Found"
 			     return [[<html>
@@ -286,7 +290,7 @@ end
 function app_module_methods.serve_static(app_module, web, filename)
    local ext = string.match(filename, "%.([^%.]+)$")
    if app_module.use_xsendfile then
-      web.headers["Content-Type"] = mime_types[ext] or 
+      web.headers["Content-Type"] = _M.mime_types[ext] or 
 	 "application/octet-stream"
       web.headers["X-Sendfile"] = filename
       return "xsendfile"
@@ -295,7 +299,7 @@ function app_module_methods.serve_static(app_module, web, filename)
       if not file then
 	 return app_module.not_found(web)
       else
-	 web.headers["Content-Type"] = mime_types[ext] or 
+	 web.headers["Content-Type"] = _M.mime_types[ext] or 
 	    "application/octet-stream"
 	 local contents = file:read("*a")
 	 file:close()
@@ -344,7 +348,7 @@ local function htmlify_func(func)
   setfenv(func, env)
 end
 
-function htmlify(app_module, ...)
+function _M.htmlify(app_module, ...)
    if type(app_module) == "function" then
       htmlify_func(app_module)
       for _, func in ipairs{...} do
@@ -367,9 +371,16 @@ function htmlify(app_module, ...)
    end
 end
 
-app_module_methods.htmlify = htmlify
+app_module_methods.htmlify = _M.htmlify
 
 function app_module_methods.model(app_module, ...)
+   if not app_module.mapper then
+      local table_prefix = (app_module._NAME and app_module._NAME .. "_") or ""
+      if not orbit.model then
+	 require "orbit.model"
+      end
+      app_module.mapper = orbit.model.new(table_prefix)
+   end
    return app_module.mapper:new(...)
 end
 
@@ -451,7 +462,12 @@ local function dispatcher(app_module, method, path)
       return app_module["handle_" .. method], {}
    else
       for _, item in ipairs(app_module.dispatch_table[method]) do
-	 local captures = { string.match(path, "^" .. item.pattern .. "$") }
+	 local captures
+	 if type(item.pattern) == "string" then
+	    captures = { string.match(path, "^" .. item.pattern .. "$") }
+	 else
+	    captures = { item.pattern:match(path) }
+	 end
 	 if #captures > 0 then
 	    for i = 1, #captures do
 	      captures[i] = wsapi.util.url_decode(captures[i])
@@ -494,7 +510,7 @@ local function make_web_object(app_module, wsapi_env)
   return web, res
 end
 
-function run(app_module, wsapi_env)
+function _M.run(app_module, wsapi_env)
   local handler, captures, wsapi_handler = dispatcher(app_module,
 						      string.lower(wsapi_env.REQUEST_METHOD),
 						      wsapi_env.PATH_INFO)
@@ -523,3 +539,5 @@ function run(app_module, wsapi_env)
   end
   return res:finish()
 end
+
+return _M

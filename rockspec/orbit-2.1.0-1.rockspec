@@ -16,7 +16,7 @@ description = {
   homepage = "http://www.keplerproject.org/orbit"
 }
 
-dependencies = { 'wsapi >= 1.1', 'luafilesystem >= 1.4.2', 'cosmo >= 9.09.22' }
+dependencies = { 'luafilesystem >= 1.5.0' }
 
 build = {
    type = "module",

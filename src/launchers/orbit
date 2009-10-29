@@ -9,12 +9,18 @@
 -------------------------------------------------------------------------------
 
 pcall(require, "luarocks.require")
+
+local ok, err = pcall(require, "wsapi.xavante") 
+if not ok then
+  io.stderr:write("WSAPI Xavante support not loaded:\n" .. err .. "\n\nPlease install wsapi-xavante with LuaRocks\n")
+  os.exit(1)
+end
+
 require "lfs"
 require "xavante"
 require "xavante.httpd"
 require "xavante.vhostshandler"
 require "xavante.urlhandler"
-require "wsapi.xavante"
 require "wsapi.util"
 
 local usage = [[

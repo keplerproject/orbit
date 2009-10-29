@@ -7,6 +7,14 @@ pcall(require, "luarocks.require")
 
 local common = require "wsapi.common"
 local cgi = require "wsapi.cgi"
+
+local ok, err = pcall(require, "cosmo")
+
+if not ok then
+  io.stderr:write("Cosmo not loaded:\n" .. err .. "\n\nPlease install cosmo with LuaRocks\n")
+  os.exit(1)
+end
+
 local op = require "orbit.pages"
 
 local arg_filename = (...)

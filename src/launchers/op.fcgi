@@ -5,10 +5,18 @@
 pcall(require, "luarocks.require")
 
 local common = require "wsapi.common"
+
 local ok, err = pcall(require, "wsapi.fastcgi")
 
 if not ok then
   io.stderr:write("WSAPI FastCGI not loaded:\n" .. err .. "\n\nPlease install wsapi-fcgi with LuaRocks\n")
+  os.exit(1)
+end
+
+local ok, err = pcall(require, "cosmo")
+
+if not ok then
+  io.stderr:write("Cosmo not loaded:\n" .. err .. "\n\nPlease install cosmo with LuaRocks\n")
   os.exit(1)
 end
 
