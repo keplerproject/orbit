@@ -28,25 +28,25 @@ $lua{[[
 <html>
 <head>
 <title>To-do List</title>
-<script type="text/javascript" src="jquery-1.2.3.min.js"></script>
+<script type="text/javascript" src="$static_link{'/jquery-1.2.3.min.js'}"></script>
 <script>
 function set_callbacks() {
-  $(".remove").click(function () {
-    $("#items>[item_id=" + $(this).attr("item_id") +"]").slideUp("slow");
-    $("#items").load("todo.op", { id: $(this).attr("item_id"), remove: true },
+  $$(".remove").click(function () {
+    $$("#items>[item_id=" + $$(this).attr("item_id") +"]").slideUp("slow");
+    $$("#items").load("$link{ '/' }", { id: $$(this).attr("item_id"), remove: true },
       function () { set_callbacks(); });
   });
-  $(".item").click(function () {
-    $.post("todo.op", { id: $(this).attr("item_id"), toggle: true });
+  $$(".item").click(function () {
+    $$.post("$link{ '/' }", { id: $$(this).attr("item_id"), toggle: true });
   });
 }
 
-$(document).ready(function () {
-  $("#add").submit(function () {
-    $("#button").attr("disabled", true);
-    $("#items").load("todo.op", { item: $("#title").val()  }, 
-      function () { $("#title").val(""); set_callbacks(); 
-      $("#button").attr("disabled",false); });
+$$(document).ready(function () {
+  $$("#add").submit(function () {
+    $$("#button").attr("disabled", true);
+    $$("#items").load("$link{ '/' }", { item: $$("#title").val()  }, 
+      function () { $$("#title").val(""); set_callbacks(); 
+      $$("#button").attr("disabled",false); });
     return false;
   });
   set_callbacks();
@@ -63,7 +63,7 @@ li { list-style-type: none;}
 <ul id="items">
 $include{ "items.op" }
 </ul>
-<form id = "add" method = "POST" action = "todo.op">
+<form id = "add" method = "POST" action = "$link{'/'}">
 <input id = "title" type = "text" name = "item" size = 30 />
 <input id = "button" type = "submit" value = "Add" />
 </form>

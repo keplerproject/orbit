@@ -49,30 +49,32 @@ end
 
 todo:dispatch_post(toggle, "/toggle/(%d+)")
 
+todo:dispatch_static(".+%.js")
+
 todo.index = [===[
 
   <html>
   <head>
   <title>To-do List</title>
-  <script type="text/javascript" src="jquery-1.2.3.min.js"></script>
+  <script type="text/javascript" src="$static_link{ '/jquery-1.2.3.min.js' }"></script>
   <script>
   function set_callbacks() {
-    $(".remove").click(function () {
-      $("#items>[item_id=" + $(this).attr("item_id") +"]").slideUp("slow");
-    $("#items").load("todo.ws/remove/" + $(this).attr("item_id"), {},
+    $$(".remove").click(function () {
+      $$("#items>[item_id=" + $$(this).attr("item_id") +"]").slideUp("slow");
+    $$("#items").load("$link{ '/remove/'}" + $$(this).attr("item_id"), {},
       function () { set_callbacks(); });
     });
-    $(".item").click(function () {
-      $.post("todo.ws/toggle/" + $(this).attr("item_id"), {});
+    $$(".item").click(function () {
+      $$.post("$link{ '/toggle/' }" + $$(this).attr("item_id"), {});
     });
   }
 
-  $(document).ready(function () {
-    $("#add").submit(function () {
-      $("#button").attr("disabled", true);
-      $("#items").load("todo.ws/add", { item: $("#title").val()  }, 
-        function () { $("#title").val(""); set_callbacks(); 
-        $("#button").attr("disabled",false); });
+  $$(document).ready(function () {
+    $$("#add").submit(function () {
+      $$("#button").attr("disabled", true);
+      $$("#items").load("$link{ '/add' }", { item: $$("#title").val()  }, 
+        function () { $$("#title").val(""); set_callbacks(); 
+        $$("#button").attr("disabled",false); });
       return false;
     });
     set_callbacks();
@@ -89,7 +91,7 @@ todo.index = [===[
   <ul id="items">
   $items
   </ul>
-  <form id = "add" method = "POST" action = "todo.ws">
+  <form id = "add" method = "POST" action = "$link{ '/add' }">
   <input id = "title" type = "text" name = "item" size = 30 />
   <input id = "button" type = "submit" value = "Add" />
   </form>
