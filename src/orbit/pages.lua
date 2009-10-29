@@ -1,5 +1,6 @@
 
 local orbit = require "orbit"
+local model = require "orbit.model"
 local cosmo = require "cosmo"
 
 local io, string = io, string
@@ -99,6 +100,14 @@ local function make_env(web, initial)
   function env.fill(arg)
     cosmo.yield(arg[1])
   end
+  function env.link(arg)
+    local url = arg[1]
+    arg[1] = nil
+    return web:link(url, arg)
+  end
+  function env.static_link(arg)
+    return web:static_link(arg[1])
+  end
   function env.include(name, subt_env)
     local filename
     if type(name) == "table" then 
@@ -123,14 +132,14 @@ local function make_env(web, initial)
   function env.forward(...)
     abort(env.include(...))
   end
-  env.mapper = orbit.model.new()
+  env.mapper = model.new()
   function env.model(name, dao)
     if type(name) == "table" then
       name, dao = name[1], name[2]
     end
     return env.mapper:new(name, dao)
   end
-  env.recycle = orbit.model.recycle
+  env.recycle = model.recycle
   return env
 end
 

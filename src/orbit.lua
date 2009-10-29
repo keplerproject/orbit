@@ -224,6 +224,7 @@ function _M.new(app_module)
 		       return _M.run(app_module, wsapi_env)
 		    end
    app_module.real_path = wsapi.app_path or "."
+   app_module.mapper = { default = true }
    app_module.not_found = function (web)
 			     web.status = "404 Not Found"
 			     return [[<html>
@@ -374,12 +375,12 @@ end
 app_module_methods.htmlify = _M.htmlify
 
 function app_module_methods.model(app_module, ...)
-   if not app_module.mapper then
+   if app_module.mapper.default then
       local table_prefix = (app_module._NAME and app_module._NAME .. "_") or ""
       if not orbit.model then
 	 require "orbit.model"
       end
-      app_module.mapper = orbit.model.new(table_prefix)
+      app_module.mapper = orbit.model.new(table_prefix, app_module.mapper.conn)
    end
    return app_module.mapper:new(...)
 end
@@ -409,7 +410,7 @@ function web_methods:static_link(url)
   local prefix = self.prefix or ""
   local is_script = prefix:match("(%.%w+)$")
   if not is_script then return self:link(url) end
-  local vpath = prefix:match("(.*)/")
+  local vpath = self.path_translated:sub(#self.doc_root+1):match("(.*)/")
   return vpath .. url
 end
 
