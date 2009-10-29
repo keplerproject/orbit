@@ -1,0 +1,9 @@
+This folder contains several sample Orbit applications, from trivial to quite sophisticated:
+
+hello       The traditional "Hello World"
+songs       A simple song list formatted with Cosmo
+todo        An AJAX todo list, using both straight Orbit (todo.ws) and Orbit Pages (todo.op)
+pages       Simple Orbit Pages examples
+blog        A simple blog with comments
+toycms      A simple CMS with posts, categories, moderated comments, and an admin interface
+
