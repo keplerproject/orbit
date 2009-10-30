@@ -1,6 +1,16 @@
 
 require "lpeg"
 require "re"
+require "wsapi.util"
+
+-- monkeypatching
+wsapi.util.url_decode = function (str)
+  if not str then return str end
+  str = string.gsub (str, "+", " ")
+  str = string.gsub (str, "%%(%x%x)", function(h) return string.char(tonumber(h,16)) end)
+  str = string.gsub (str, "\r\n", "\n")
+  return str
+end
 
 module("orbit.routes", package.seeall)
 
@@ -17,7 +27,7 @@ param = re.compile[[ [/%.] ':' {[%w_]+} &('/' / {'.'} / !.) ]] /
 				close = lpeg.P"/" + lpeg.P(dot or -1) + lpeg.P(-1) }
 		return { cap = lpeg.Carg(1) * re.compile([[ [/%.] {%inner+} &(%close) ]], extra) / 
 		                   function (params, item, delim)
-			             params[name] = item
+				      params[name] = wsapi.util.url_decode(item)
 				   end,
 				clean = re.compile([[ [/%.] %inner &(%close) ]], extra) }
 	     end
@@ -28,7 +38,7 @@ opt_param = re.compile[[ [/%.] '?:' {[%w_]+} '?' &('/' / {'.'} / !.) ]] /
 				close = lpeg.P"/" + lpeg.P(dot or -1) + lpeg.P(-1) }
 		return { cap = (lpeg.Carg(1) * re.compile([[ [/%.] {%inner+} &(%close) ]], extra) / 
 		                   function (params, item, delim)
-			             params[name] = item
+				      params[name] = wsapi.util.url_decode(item)
 				   end)^-1,
 				clean = re.compile([[ [/%.] %inner &(%close) ]], extra)^-1 }
 	     end
@@ -42,7 +52,7 @@ fold_caps = function (cap, acc)
 		  return { cap = (lpeg.Carg(1) * lpeg.C((lpeg.P(1) - acc.clean)^1) / 
                                       function (params, splat)
 					 if not params.splat then params.splat = {} end
-					 params.splat[#params.splat+1] = splat
+					 params.splat[#params.splat+1] = wsapi.util.url_decode(splat)
 				      end) * acc.cap,
 			   clean = (lpeg.P(1) - acc.clean)^1 * acc.clean }
 	       elseif type(cap) == "string" then

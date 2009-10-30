@@ -119,3 +119,10 @@ do
    assert(not t.foo)
    assert(not t.bar)
 end
+
+do
+   local r = R('/:foo/*')
+   local t = r:match('/hello%20world/how%20are%20you')
+   assert(t.foo == "hello world")
+   assert(t.splat[1] == "how are you")
+end 
