@@ -5,12 +5,12 @@ require "wsapi.util"
 
 -- monkeypatching
 wsapi.util.url_decode = function (str)
-  if not str then return str end
-  str = string.gsub (str, "+", " ")
-  str = string.gsub (str, "%%(%x%x)", function(h) return string.char(tonumber(h,16)) end)
-  str = string.gsub (str, "\r\n", "\n")
-  return str
-end
+			   if type(str) ~= "string" then return str end
+			   str = string.gsub (str, "+", " ")
+			   str = string.gsub (str, "%%(%x%x)", function(h) return string.char(tonumber(h,16)) end)
+			   str = string.gsub (str, "\r\n", "\n")
+			   return str
+			end
 
 module("orbit.routes", package.seeall)
 
