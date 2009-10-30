@@ -471,7 +471,9 @@ local function dispatcher(app_module, method, path)
 	 end
 	 if #captures > 0 then
 	    for i = 1, #captures do
-	      captures[i] = wsapi.util.url_decode(captures[i])
+	       if type(captures[i]) == "string" then
+		  captures[i] = wsapi.util.url_decode(captures[i])
+	       end
 	    end
 	    return item.handler, captures, item.wsapi
 	 end

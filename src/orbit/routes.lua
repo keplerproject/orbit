@@ -3,15 +3,6 @@ require "lpeg"
 require "re"
 require "wsapi.util"
 
--- monkeypatching
-wsapi.util.url_decode = function (str)
-			   if type(str) ~= "string" then return str end
-			   str = string.gsub (str, "+", " ")
-			   str = string.gsub (str, "%%(%x%x)", function(h) return string.char(tonumber(h,16)) end)
-			   str = string.gsub (str, "\r\n", "\n")
-			   return str
-			end
-
 module("orbit.routes", package.seeall)
 
 local function foldr(t, f, acc)
