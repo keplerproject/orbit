@@ -26,6 +26,7 @@ build = {
      ["orbit.pages"] = "src/orbit/pages.lua",
      ["orbit.cache"] = "src/orbit/cache.lua",
      ["orbit.ophandler"] = "src/orbit/ophandler.lua",
+     ["orbit.routes"] = "src/orbit/routes.lua",
    },
    install = { bin = { "src/launchers/orbit", "src/launchers/op.cgi", "src/launchers/op.fcgi" } },
    copy_directories = { "doc", "samples", "test" }
