@@ -20,7 +20,7 @@ local op = require "orbit.pages"
 local arg_filename = (...)
 
 local function op_loader(wsapi_env)
-  common.normalize_paths(wsapi_env, arg_filename, "op.cgi")
+  common.normalize_paths(wsapi_env, arg_filename, "op.cgi", { "SCRIPT_FILENAME", "PATH_TRANSLATED" })
   return op.run(wsapi_env)
 end 
 
