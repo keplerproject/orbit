@@ -1,3 +1,7 @@
+
+require "lpeg"
+require "re"
+
 module("orbit.model", package.seeall)
 
 model_methods = {}
@@ -319,6 +323,15 @@ function dao_methods.find(dao, id, inject)
   return fetch_row(dao, sql)
 end
 
+local sql_condition = re.compile([[
+                                     top <- {~ <condition>* ~}
+                                     condition <- %s* '(' %s* <condition> %s* ')' %s* / <simple> (<conective> <condition>)*
+                                     simple <- %s* (%func <field> <op> '?'?) -> apply %s*
+                                     field <- {[%w_]+}
+                                     op <- { %s* [!<>=~]+ %s* / %s+ (!<conective> %w+ %s+)+ }
+                                     conective <- [aA][nN][dD] / [oO][rR]
+                                 ]], { func = lpeg.Carg(1) , apply = function (f, field, op) return f(field, op) end })
+
 local function build_query(dao, condition, args)
   local i = 0
   args = args or {}
@@ -329,7 +342,7 @@ local function build_query(dao, condition, args)
   end
   if condition ~= "" then
     condition = " where " ..
-      string.gsub(condition, "([%w_]+)%s*([%a<>=]+)%s*%?",
+      sql_condition:match(condition, 1,
 		  function (field, op)
 		    i = i + 1
 		    if not args[i] then

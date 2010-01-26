@@ -12,7 +12,7 @@ description = {
   homepage = "http://www.keplerproject.org/orbit"
 }
 
-dependencies = { 'luafilesystem cvs' }
+dependencies = { 'luafilesystem >= 1.5.0', 'lpeg >= 0.9' }
 
 source = {
   url = "git://github.com/keplerproject/orbit.git"
