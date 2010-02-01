@@ -4,6 +4,7 @@ local routes = require "orbit.routes"
 local util = require "modules.util"
 local blocks = require "modules.blocks"
 local themes = require "modules.themes"
+local lfs = require "lfs"
 
 local core = {}
 
@@ -74,6 +75,15 @@ function methods:view_node_type(web, params)
   return self.reparse
 end
 
+function core.load_plugins(app)
+  for file in lfs.dir(app.real_path .. "/plugins") do
+    if file:match("%.lua$") then
+      local plugin = dofile(app.real_path .. "/plugins/" .. file)
+      app.plugins[plugin.name] = plugin.new(app)
+    end
+  end
+end
+
 function core.new(app)
   app = orbit.new(app)
   for k, v in pairs(methods) do
@@ -89,6 +99,7 @@ function core.new(app)
     error("theme " .. app.config.theme .. " not found")
   end
   app.nodes = {}
+  app.plugins = {}
   app.routes = { 
     { pattern = R'/', handler = app.home, method = "get" },
     { pattern = R'/node/:id', handler = app.view_node_id, method = "get" },
@@ -101,6 +112,7 @@ function core.new(app)
   for _, route in ipairs(app.routes) do
     app["dispatch_" .. route.method](app, function (...) return route.handler(app, ...) end, route.pattern)
   end
+  core.load_plugins(app)
 end
 
 return core
