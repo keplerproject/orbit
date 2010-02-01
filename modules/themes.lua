@@ -35,14 +35,13 @@ end
 
 function methods:load(filename)
   local cached = self.cache[filename]
-  local timestamp = lfs.attributes(self.path .. "/" .. filename, "modification")
-  if cached and cached.when == timestamp then
-    return cached.template
+  if cached then
+    return cached
   end
   local tmpl, err = template.load(self.path ..  "/" .. filename)
   if tmpl then
     local template = setmetatable({ theme = self, tmpl = tmpl }, template_methods)
-    self.cache[filename] = { template = template, when = modif }
+    self.cache[filename] = template
     return template
   else
     return tmpl, err

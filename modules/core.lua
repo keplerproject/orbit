@@ -96,7 +96,7 @@ function core.new(app)
     { pattern = R'/*', handler = app.view_nice, method = "get" },
   }
   for name, proto in pairs(app.config.blocks) do
-    app.blocks.instances[name] = app.blocks.protos[proto[1]](app, proto.args, function () return app.theme:block_template(name) end)
+    app.blocks.instances[name] = app.blocks.protos[proto[1]](app, proto.args, app.theme:block_template(name))
   end
   for _, route in ipairs(app.routes) do
     app["dispatch_" .. route.method](app, function (...) return route.handler(app, ...) end, route.pattern)
