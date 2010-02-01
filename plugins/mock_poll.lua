@@ -71,7 +71,7 @@ local function post_vote(app, web, params)
   local poll = app.nodes.poll:find(id)
   if poll then
     poll:vote(tonumber(web.input.option))
-    return web:redirect(web:link("/poll/" .. id, { raw = 1 }))
+    return web:redirect(web:link("/poll/" .. id .. "/raw"))
   else
     return app.not_found(web)
   end

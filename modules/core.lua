@@ -30,7 +30,7 @@ function methods:home(web)
   end
 end
 
-function methods:view_node(web, node)
+function methods:view_node(web, node, raw)
   local type = node.type
   local template
   if node.nice_id then
@@ -38,7 +38,7 @@ function methods:view_node(web, node)
   end
   template = template or self.theme:load("pages/" .. type .. ".html")
   if template then
-    if web.input.raw then
+    if raw then
       return template:render(web, { node = node })
     else
       return self:layout(web, template:render(web, { node = node }))
@@ -53,6 +53,16 @@ function methods:view_node_id(web, params)
   local node = self.nodes:find(id)
   if node then
     return self:view_node(web, node)
+  else
+    return self.not_found(web)
+  end
+end
+
+function methods:view_node_id_raw(web, params)
+  local id = tonumber(params.id)
+  local node = self.nodes:find(id)
+  if node then
+    return self:view_node(web, node, true)
   else
     return self.not_found(web)
   end
@@ -74,6 +84,17 @@ function methods:view_node_type(web, params)
     local node = self.nodes[type]:find(id)
     if node then
       return self:view_node(web, node)
+    end
+  end
+  return self.reparse
+end
+
+function methods:view_node_type_raw(web, params)
+  local type, id = params.type, tonumber(params.id)
+  if self.nodes.types[type] and id then
+    local node = self.nodes[type]:find(id)
+    if node then
+      return self:view_node(web, node, true)
     end
   end
   return self.reparse
@@ -107,7 +128,9 @@ function core.new(app)
   app.routes = { 
     { pattern = R'/', handler = app.home, method = "get" },
     { pattern = R'/node/:id', handler = app.view_node_id, method = "get" },
+    { pattern = R'/node/:id/raw', handler = app.view_node_id_raw, method = "get" },
     { pattern = R'/:type/:id', handler = app.view_node_type, method = "get" },
+    { pattern = R'/:type/:id/raw', handler = app.view_node_type_raw, method = "get" },
     { pattern = R'/*', handler = app.view_nice, method = "get" },
   }
   core.load_plugins(app)
