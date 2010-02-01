@@ -3,7 +3,7 @@
 		  $body
 			<ul class="module-list">
    $options[[
-      <li class="module-list-item">$name: $votes ($((votes/total) * 100)%)</li>
-    ]]
+      <li>$name: $votes ($format{ "%.1f", (votes/total) * 100}%)</li>
+   ]]
 			</ul>
 		</div>

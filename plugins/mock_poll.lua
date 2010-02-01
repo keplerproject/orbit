@@ -54,7 +54,9 @@ local poll_total_tmpl = [=[
   <h2>$title</h2>
   $body
   <ul>
-      $options[[<li>$name: $votes ($((votes/total) * 100)%)</li>]]
+      $options[[
+      <li>$name: $votes ($format{ "%.1f", (votes/total) * 100}%)</li>
+      ]]
   </ul>
 ]=]
 
