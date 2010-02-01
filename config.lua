@@ -16,7 +16,7 @@ blocks = {
 		      }
 		    }
   },
-  show_latest = { "show_latest", args = { count = 7 } },
+  show_latest = { "show_latest_body", args = { count = 7 } },
   recent_links = { "show_latest", args = { title = "Recent Posts", count = 7 } },
   powered_by = { "generic", args = { title = "Powered by", text = "Orbit and Kepler toolkit." } },
   post = { "node_info" }

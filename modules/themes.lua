@@ -15,9 +15,8 @@ function template_methods:render(web, env)
   local areas = setmetatable({}, { __index = function (t, name)
 					       local area = function (args, has_block)
 							      local out = {}
-							      args = args or {}
 							      for _, block in ipairs(self.theme.areas[name]) do
-								out[#out+1] = blocks[block](web, args[block], env)
+								out[#out+1] = blocks[block](web, env, block)
 							      end
 							      return table.concat(out)
 							    end
