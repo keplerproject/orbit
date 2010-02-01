@@ -1,0 +1,14 @@
+	<div class="module-archives module" id = "$div_id">
+		<h2 class="module-header">$title</h2>
+		<div class="module-content">
+		  $body
+		  <form>
+			<ul class="module-list">
+   $options[[
+      <li class="module-list-item"><input type = "radio" name = "option" value = "$id" />$name</li>
+    ]]
+      <button onClick="$$.post('$(web:link('/poll/' .. id .. '/vote'))', function(data) { $$('#$div_id').html(data); }); return false;">Vote</button>
+			</ul>
+    </form>
+		</div>
+	</div>

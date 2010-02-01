@@ -38,7 +38,11 @@ function methods:view_node(web, node)
   end
   template = template or self.theme:load("pages/" .. type .. ".html")
   if template then
-    return self:layout(web, template:render(web, { node = node }))
+    if web.input.raw then
+      return template:render(web, { node = node })
+    else
+      return self:layout(web, template:render(web, { node = node }))
+    end
   else
     return self.not_found(web)
   end
@@ -98,7 +102,7 @@ function core.new(app)
   if not app.theme then
     error("theme " .. app.config.theme .. " not found")
   end
-  app.nodes = {}
+  app.nodes = { types = {} }
   app.plugins = {}
   app.routes = { 
     { pattern = R'/', handler = app.home, method = "get" },
@@ -106,13 +110,13 @@ function core.new(app)
     { pattern = R'/:type/:id', handler = app.view_node_type, method = "get" },
     { pattern = R'/*', handler = app.view_nice, method = "get" },
   }
+  core.load_plugins(app)
   for name, proto in pairs(app.config.blocks) do
     app.blocks.instances[name] = app.blocks.protos[proto[1]](app, proto.args, app.theme:block_template(name))
   end
   for _, route in ipairs(app.routes) do
     app["dispatch_" .. route.method](app, function (...) return route.handler(app, ...) end, route.pattern)
   end
-  core.load_plugins(app)
 end
 
 return core

@@ -3,7 +3,7 @@ theme = "wordpress"
 
 blocks = {
   title = { "title", args = { "Test Website" } },
-  javascript = { "javascript" },
+  javascript = { "javascript", args = { "http://ajax.googleapis.com/ajax/libs/jquery/1.4.1/jquery.min.js" } },
   css = { "css", args = { "/styles/default.css" } },
   banner = { "banner", args = { title = "Test Website", tagline = "It is simple!" } },
   copyright = { "copyright", args = { "2010" } },
@@ -19,5 +19,7 @@ blocks = {
   show_latest = { "show_latest_body", args = { count = 7 } },
   recent_links = { "show_latest", args = { title = "Recent Posts", count = 7 } },
   powered_by = { "generic", args = { title = "Powered by", text = "Orbit and Kepler toolkit." } },
-  post = { "node_info" }
+  post = { "node_info" },
+  poll = { "latest_poll" },
+  poll_result = { "poll_total" }
 }
