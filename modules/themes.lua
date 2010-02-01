@@ -3,6 +3,7 @@ local themes = {}
 
 local template = require "modules.template"
 local util = require "modules.util"
+local lfs = require "lfs"
 
 local methods = {}
 methods.__index = methods
@@ -33,9 +34,16 @@ function methods:block_template(block)
 end
 
 function methods:load(filename)
+  local cached = self.cache[filename]
+  local timestamp = lfs.attributes(self.path .. "/" .. filename, "modification")
+  if cached and cached.when == timestamp then
+    return cached.template
+  end
   local tmpl, err = template.load(self.path ..  "/" .. filename)
   if tmpl then
-    return setmetatable({ theme = self, tmpl = tmpl }, template_methods)
+    local template = setmetatable({ theme = self, tmpl = tmpl }, template_methods)
+    self.cache[filename] = { template = template, when = modif }
+    return template
   else
     return tmpl, err
   end
@@ -48,6 +56,7 @@ function themes.new(app, name, path)
     theme.app = app
     theme.name = name
     theme.path = theme_path
+    theme.cache = setmetatable({}, { __mode = "v" })
     return setmetatable(theme, methods)
   else
     return nil, err

@@ -1,5 +1,5 @@
 
-theme = "wordpress"
+theme = "default"
 
 blocks = {
   title = { "title", args = { "Test Website" } },

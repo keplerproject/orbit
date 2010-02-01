@@ -6,9 +6,12 @@ local template = require "modules.template"
 local title_tmpl = [[<title>$title</title>]]
 
 function blocks.title(app, args, tmpl)
-  tmpl = tmpl or template.compile(title_tmpl)
+  if not tmpl() then
+    local t = template.compile(title_tmpl)
+    tmpl = function () return t end
+  end
   return function (web)
-	   return tmpl:render(web, { title = args[1] })
+	   return tmpl():render(web, { title = args[1] })
 	 end
 end
 
@@ -19,9 +22,12 @@ $js[[
 ]=]
 
 function blocks.javascript(app, args, tmpl)
-  tmpl = tmpl or template.compile(js_tmpl)
+  if not tmpl() then
+    local t = template.compile(js_tmpl)
+    tmpl = function () return t end
+  end
   return function (web)
-	   return tmpl:render(web, { js = args or {} })
+	   return tmpl():render(web, { js = args or {} })
 	 end
 end
 
@@ -32,9 +38,12 @@ $css[[
 ]=]
 
 function blocks.css(app, args, tmpl)
-  tmpl = tmpl or template.compile(css_tmpl)
+  if not tmpl() then
+    local t = template.compile(css_tmpl)
+    tmpl = function () return t end
+  end
   return function (web)
-	   return tmpl:render(web, { css = args or {} })
+	   return tmpl():render(web, { css = args or {} })
 	 end
 end
 
@@ -47,10 +56,13 @@ local banner_tmpl = [[
 
 function blocks.banner(app, args, tmpl)
   args = args or {}
-  tmpl = tmpl or template.compile(banner_tmpl)
+  if not tmpl() then
+    local t = template.compile(banner_tmpl)
+    tmpl = function () return t end
+  end
   return function (web, env, name)
 	   args.id = args.id or name
-	   return tmpl:render(web, args)
+	   return tmpl():render(web, args)
 	 end
 end
 
@@ -62,9 +74,12 @@ local copyright_tmpl = [[
 
 function blocks.copyright(app, args, tmpl)
   args = args or {}
-  tmpl = tmpl or template.compile(copyright_tmpl)
+  if not tmpl() then
+    local t = template.compile(copyright_tmpl)
+    tmpl = function () return t end
+  end
   return function (web, env, name)
-	   return tmpl:render(web, { year = args[1], id = args.id or name })
+	   return tmpl():render(web, { year = args[1], id = args.id or name })
 	 end
 end
 
@@ -77,10 +92,13 @@ local generic_tmpl = [[
 
 function blocks.generic(app, args, tmpl)
   args = args or {}
-  tmpl = tmpl or template.compile(generic_tmpl)
+  if not tmpl() then
+    local t = template.compile(generic_tmpl)
+    tmpl = function () return t end
+  end
   return function (web, env, name)
 	   args.id = args.id or name
-	   return tmpl:render(web, args)
+	   return tmpl():render(web, args)
 	 end
 end
 
@@ -95,10 +113,13 @@ local links_tmpl = [=[
 
 function blocks.links(app, args, tmpl)
   args = args or {}
-  tmpl = tmpl or template.compile(links_tmpl)
+  if not tmpl() then
+    local t = template.compile(links_tmpl)
+    tmpl = function () return t end
+  end
   return function (web, env, name)
 	   args.id = args.id or name
-	   return tmpl:render(web, args)
+	   return tmpl():render(web, args)
 	 end
 end
 
@@ -125,23 +146,29 @@ local show_latest_body_tmpl = [=[
 
 function blocks.show_latest(app, args, tmpl)
   args = args or {}
-  tmpl = tmpl or template.compile(show_latest_tmpl)
+  if not tmpl() then
+    local t = template.compile(show_latest_tmpl)
+    tmpl = function () return t end
+  end
   return function (web, env, name)
 	   local fields = { "id", "nice_id", "title", unpack(args.includes or {}) }
 	   local nodes = app.nodes[args.node or "post"]:find_latest{ count = args.count,
 								     fields = fields }
-	   return tmpl:render(web, { title = args.title, nodes = nodes, id = args.id or name })
+	   return tmpl():render(web, { title = args.title, nodes = nodes, id = args.id or name })
 	 end
 end
 
 function blocks.show_latest_body(app, args, tmpl)
   args = args or {}
-  tmpl = tmpl or template.compile(show_latest_body_tmpl)
+  if not tmpl() then
+    local t = template.compile(show_latest_body_tmpl)
+    tmpl = function () return t end
+  end
   return function (web, env, name)
 	   local fields = { "id", "nice_id", "title", "body", unpack(args.includes or {}) }
 	   local nodes = app.nodes[args.node or "post"]:find_latest{ count = args.count,
 								     fields = fields }
-	   return tmpl:render(web, { title = args.title, nodes = nodes, id = args.id or name })
+	   return tmpl():render(web, { title = args.title, nodes = nodes, id = args.id or name })
 	 end
 end
 
@@ -154,9 +181,12 @@ local node_info_tmpl = [=[
 
 function blocks.node_info(app, args, tmpl)
   args = args or {}
-  tmpl = tmpl or template.compile(node_info_tmpl)
+  if not tmpl() then
+    local t = template.compile(node_info_tmpl)
+    tmpl = function () return t end
+  end
   return function (web, env, name)
-	   return tmpl:render(web, { node = env.node, id = args.id or name })
+	   return tmpl():render(web, { node = env.node, id = args.id or name })
 	 end
 end
 
