@@ -15,7 +15,9 @@ areas = {
   },
   sidebar = {
     "about",
-    "links"
+    "recent_links",
+    "links",
+    "powered_by",
   },
   body_post = {
     "post_body"
