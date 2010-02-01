@@ -20,6 +20,6 @@ areas = {
     "powered_by",
   },
   body_post = {
-    "post_body"
+    "post"
   },
 }
