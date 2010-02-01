@@ -13,6 +13,8 @@ _M._VERSION = "2.1.0"
 _M._COPYRIGHT = "Copyright (C) 2007-2009 Kepler Project"
 _M._DESCRIPTION = "MVC Web Development for the Kepler platform"
 
+local REPARSE = {}
+
 _M.mime_types = {
   ez = "application/andrew-inset",
   atom = "application/atom+xml",
@@ -236,7 +238,8 @@ function _M.new(app_module)
 				return [[<html>
 				      <head><title>Server Error</title></head>
 					 <body><pre>]] .. msg .. [[</pre></body></html>]]
-			     end
+				 end
+   app_module.reparse = REPARSE
    app_module.dispatch_table = { get = {}, post = {}, put = {}, delete = {} }
    return app_module
 end
@@ -458,27 +461,29 @@ for name, func in pairs(wsapi.util) do
 		      end
 end
 
-local function dispatcher(app_module, method, path)
-   if #app_module.dispatch_table[method] == 0 then
-      return app_module["handle_" .. method], {}
-   else
-      for _, item in ipairs(app_module.dispatch_table[method]) do
-	 local captures
-	 if type(item.pattern) == "string" then
-	    captures = { string.match(path, "^" .. item.pattern .. "$") }
-	 else
-	    captures = { item.pattern:match(path) }
-	 end
-	 if #captures > 0 then
-	    for i = 1, #captures do
-	       if type(captures[i]) == "string" then
-		  captures[i] = wsapi.util.url_decode(captures[i])
-	       end
-	    end
-	    return item.handler, captures, item.wsapi
-	 end
+local function dispatcher(app_module, method, path, index)
+  index = index or 0
+  if #app_module.dispatch_table[method] == 0 then
+    return app_module["handle_" .. method], {}
+  else
+    for index = index+1, #app_module.dispatch_table[method] do
+      local item = app_module.dispatch_table[method][index]
+      local captures
+      if type(item.pattern) == "string" then
+	captures = { string.match(path, "^" .. item.pattern .. "$") }
+      else
+	captures = { item.pattern:match(path) }
       end
-   end
+      if #captures > 0 then
+	for i = 1, #captures do
+	  if type(captures[i]) == "string" then
+	    captures[i] = wsapi.util.url_decode(captures[i])
+	  end
+	end
+	return item.handler, captures, item.wsapi, index
+      end
+    end
+  end
 end
 
 local function make_web_object(app_module, wsapi_env)
@@ -514,9 +519,9 @@ local function make_web_object(app_module, wsapi_env)
 end
 
 function _M.run(app_module, wsapi_env)
-  local handler, captures, wsapi_handler = dispatcher(app_module,
-						      string.lower(wsapi_env.REQUEST_METHOD),
-						      wsapi_env.PATH_INFO)
+  local handler, captures, wsapi_handler, index = dispatcher(app_module,
+							     string.lower(wsapi_env.REQUEST_METHOD),
+							     wsapi_env.PATH_INFO)
   handler = handler or app_module.not_found
   captures = captures or {}
   if wsapi_handler then
@@ -530,16 +535,31 @@ function _M.run(app_module, wsapi_env)
     end
   end
   local web, res = make_web_object(app_module, wsapi_env)
-  local ok, response = xpcall(function () 
-				return handler(web, unpack(captures)) 
-			      end, debug.traceback)
-  if not ok then
-    res.status = "500 Internal Server Error"
-    res:write(app_module.server_error(web, response))
-  else
-    res.status = web.status
-    res:write(response)
-  end
+  local reparse = false
+  repeat
+    local ok, response = xpcall(function () 
+				  return handler(web, unpack(captures)) 
+				end, debug.traceback)
+    if not ok then
+      res.status = "500 Internal Server Error"
+      res:write(app_module.server_error(web, response))
+    else
+      if response == REPARSE then
+	reparse = true
+	handler, captures, wsapi_handler, index = dispatcher(app_module,
+							     string.lower(wsapi_env.REQUEST_METHOD),
+							     wsapi_env.PATH_INFO, index)
+	handler, captures = handler or app_module.not_found, captures or {}
+	if wsapi_handler then
+	  error("cannot reparse to WSAPI handler")
+	end
+      else
+	reparse = false
+	res.status = web.status
+	res:write(response)
+      end
+    end
+  until not reparse
   return res:finish()
 end
 
