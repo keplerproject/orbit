@@ -13,7 +13,8 @@ function methods:render(web, env)
 		       node_url = function (args)
 				    local node = args[1]
 				    return web:link(node.nice_id or string.format("/%s/%i", node.type, node.id))
-				  end
+				  end,
+		       web = web
 		     }, { __index = env})
   return self.template(env)
 end
