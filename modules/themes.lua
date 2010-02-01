@@ -17,7 +17,7 @@ function template_methods:render(web, env)
 							      local out = {}
 							      args = args or {}
 							      for _, block in ipairs(self.theme.areas[name]) do
-								out[#out+1] = blocks[block](web, args[block])
+								out[#out+1] = blocks[block](web, args[block], env)
 							      end
 							      return table.concat(out)
 							    end

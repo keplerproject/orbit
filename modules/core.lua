@@ -29,6 +29,51 @@ function methods:home(web)
   end
 end
 
+function methods:view_node(web, node)
+  local type = node.type
+  local template
+  if node.nice_id then
+    template = self.theme:load("pages/" .. node.nice_id:gsub("/", "-") .. ".html")
+  end
+  template = template or self.theme:load("pages/" .. type .. ".html")
+  if template then
+    return self:layout(web, template:render(web, { node = node }))
+  else
+    return self.not_found(web)
+  end
+end
+
+function methods:view_node_id(web, params)
+  local id = tonumber(params.id)
+  local node = self.nodes:find(id)
+  if node then
+    return self:view_node(web, node)
+  else
+    return self.not_found(web)
+  end
+end
+
+function methods:view_nice(web, params)
+  local nice_handle = "/" .. params.splat[1]
+  local node = self.nodes:find_by_nice_id(nice_handle)
+  if node then
+    return self:view_node(web, node)
+  else
+    return self.reparse
+  end
+end
+
+function methods:view_node_type(web, params)
+  local type, id = params.type, tonumber(params.id)
+  if self.nodes.types[type] and id then
+    local node = self.nodes[type]:find(id)
+    if node then
+      return self:view_node(web, node)
+    end
+  end
+  return self.reparse
+end
+
 function core.new(app)
   app = orbit.new(app)
   for k, v in pairs(methods) do
@@ -43,18 +88,13 @@ function core.new(app)
   if not app.theme then
     error("theme " .. app.config.theme .. " not found")
   end
-  app.nodes = {
-    post = {
-      find_latest = function ()
-		      return {
-			{ id = 1, nice_id = "/post/foo", title = "Foo" },
-			{ id = 2, type = "post", title = "Bar" },
-			{ id = 3, nice_id = "/post/bar-blaz", title = "Bar Blaz" }
-		      }
-		    end
-    }
+  app.nodes = {}
+  app.routes = { 
+    { pattern = R'/', handler = app.home, method = "get" },
+    { pattern = R'/node/:id', handler = app.view_node_id, method = "get" },
+    { pattern = R'/:type/:id', handler = app.view_node_type, method = "get" },
+    { pattern = R'/*', handler = app.view_nice, method = "get" },
   }
-  app.routes = { { pattern = R'/', handler = app.home, method = "get" } }
   for name, proto in pairs(app.config.blocks) do
     app.blocks.instances[name] = app.blocks.protos[proto[1]](app, proto.args, app.theme:block_template(name))
   end

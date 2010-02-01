@@ -59,13 +59,13 @@ function blocks.copyright(app, args, tmpl)
 	 end
 end
 
-local about_tmpl = [[
+local generic_tmpl = [[
   <h3>$title</h3>
   <p>$text</p>
 ]]
 
-function blocks.about(app, args, tmpl)
-  tmpl = tmpl or template.compile(about_tmpl)
+function blocks.generic(app, args, tmpl)
+  tmpl = tmpl or template.compile(generic_tmpl)
   return function (web)
 	   return tmpl:render(web, args)
 	 end
@@ -98,8 +98,21 @@ function blocks.show_latest(app, args, tmpl)
   tmpl = tmpl or template.compile(show_latest_tmpl)
   return function (web)
 	   local nodes = app.nodes[args.node or "post"]:find_latest{ count = args.count,
-							   fields = { "id", "nice_id", "title" } }
+								     fields = { "id", "nice_id", "title" } }
 	   return tmpl:render(web, { title = args.title, nodes = nodes })
+	 end
+end
+
+local node_info_tmpl = [=[
+    <h2>$title</h2>
+    $body
+]=]
+
+function blocks.node_info(app, args, tmpl)
+  tmpl = tmpl or template.compile(node_info_tmpl)
+  return function (web, args, env)
+	   local node = env.node
+	   return tmpl:render(web, node)
 	 end
 end
 

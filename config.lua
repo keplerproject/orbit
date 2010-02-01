@@ -7,7 +7,7 @@ blocks = {
   css = { "css", args = { "/styles/default.css" } },
   banner = { "banner", args = { title = "Test Website", tagline = "It is simple!" } },
   copyright = { "copyright", args = { "2010" } },
-  about = { "about", args = { title = "About Website", text = "Lorem ipsum." } },
+  about = { "generic", args = { title = "About Website", text = "Lorem ipsum." } },
   links = { 
     "links", args = { title = "Useful Links", 
 		      links = {
@@ -18,5 +18,6 @@ blocks = {
   },
   show_latest = { "show_latest", args = { count = 7 } },
   recent_links = { "show_latest", args = { title = "Recent Posts", count = 7 } },
-  powered_by = { "about", args = { title = "Powered by", text = "Orbit and Kepler toolkit." } }
+  powered_by = { "generic", args = { title = "Powered by", text = "Orbit and Kepler toolkit." } },
+  post = { "node_info" }
 }
