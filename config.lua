@@ -16,5 +16,5 @@ blocks = {
 		      }
 		    }
   },
-  latest_posts = { "latest_posts", args = { count = 7 } }
+  show_latest = { "show_latest", args = { count = 7 } }
 }

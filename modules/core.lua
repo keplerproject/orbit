@@ -1,12 +1,18 @@
 
+local orbit = require "orbit"
 local routes = require "orbit.routes"
+local util = require "modules.util"
+local blocks = require "modules.blocks"
+local themes = require "modules.themes"
 
 local core = {}
 
 local R = orbit.routes.R
 
-function core.layout(web, inner_html)
-  local layout_template = publique.theme:load("layout.html")
+local methods = {}
+
+function methods:layout(web, inner_html)
+  local layout_template = self.theme:load("layout.html")
   if layout_template then
     return layout_template:render(web, { inner = inner_html })
   else
@@ -14,15 +20,47 @@ function core.layout(web, inner_html)
   end
 end
 
-function core.home(web)
-  local home_template = publique.theme:load("home.html")
+function methods:home(web)
+  local home_template = self.theme:load("pages/home.html")
   if home_template then
-    return core.layout(web, home_template:render(web))
+    return self:layout(web, home_template:render(web))
   else
-    return publique.not_found(web)
+    return self.not_found(web)
   end
 end
 
-publique:dispatch_get(core.home, R'/', R'/home')
+function core.new(app)
+  app = orbit.new(app)
+  for k, v in pairs(methods) do
+    app[k] = v
+  end
+  app.blocks = { protos = blocks, instances = {} }
+  app.config = util.loadin(app.real_path .. "/config.lua")
+  if not app.config then
+    error("cannot find config.lua in " .. app.real_path)
+  end
+  app.theme = themes.new(app, app.config.theme, app.real_path .. "/themes")
+  if not app.theme then
+    error("theme " .. app.config.theme .. " not found")
+  end
+  app.nodes = {
+    post = {
+      find_latest = function ()
+		      return {
+			{ id = 1, nice_id = "/post/foo", title = "Foo" },
+			{ id = 2, type = "post", title = "Bar" },
+			{ id = 3, nice_id = "/post/bar-blaz", title = "Bar Blaz" }
+		      }
+		    end
+    }
+  }
+  app.routes = { { pattern = R'/', handler = app.home, method = "get" } }
+  for name, proto in pairs(app.config.blocks) do
+    app.blocks.instances[name] = app.blocks.protos[proto[1]](app, proto.args, app.theme:block_template(name))
+  end
+  for _, route in ipairs(app.routes) do
+    app["dispatch_" .. route.method](app, function (...) return route.handler(app, ...) end, route.pattern)
+  end
+end
 
 return core

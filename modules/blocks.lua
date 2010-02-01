@@ -5,8 +5,8 @@ local template = require "modules.template"
 
 local title_tmpl = [[<title>$title</title>]]
 
-function blocks.title(args, tmpl)
-  tmpl = template.compile(tmpl or title_tmpl)
+function blocks.title(app, args, tmpl)
+  tmpl = tmpl or template.compile(title_tmpl)
   return function (web)
 	   return tmpl:render(web, { title = args[1] })
 	 end
@@ -18,8 +18,8 @@ $js[[
 ]]
 ]=]
 
-function blocks.javascript(args, tmpl)
-  tmpl = template.compile(tmpl or js_tmpl)
+function blocks.javascript(app, args, tmpl)
+  tmpl = tmpl or template.compile(js_tmpl)
   return function (web)
 	   return tmpl:render(web, { js = args or {} })
 	 end
@@ -31,8 +31,8 @@ $css[[
 ]]
 ]=]
 
-function blocks.css(args, tmpl)
-  tmpl = template.compile(tmpl or css_tmpl)
+function blocks.css(app, args, tmpl)
+  tmpl = tmpl or template.compile(css_tmpl)
   return function (web)
 	   return tmpl:render(web, { css = args or {} })
 	 end
@@ -43,8 +43,8 @@ local banner_tmpl = [[
   <h3>$tagline</h3>
 ]]
 
-function blocks.banner(args, tmpl)
-  tmpl = template.compile(tmpl or banner_tmpl)
+function blocks.banner(app, args, tmpl)
+  tmpl = tmpl or template.compile(banner_tmpl)
   return function (web)
 	   return tmpl:render(web, args)
 	 end
@@ -52,8 +52,8 @@ end
 
 local copyright_tmpl = [[Copyright $year]]
 
-function blocks.copyright(args, tmpl)
-  tmpl = template.compile(tmpl or copyright_tmpl)
+function blocks.copyright(app, args, tmpl)
+  tmpl = tmpl or template.compile(copyright_tmpl)
   return function (web)
 	   return tmpl:render(web, { year = args[1] })
 	 end
@@ -64,8 +64,8 @@ local about_tmpl = [[
   <p>$text</p>
 ]]
 
-function blocks.about(args, tmpl)
-  tmpl = template.compile(tmpl or about_tmpl)
+function blocks.about(app, args, tmpl)
+  tmpl = tmpl or template.compile(about_tmpl)
   return function (web)
 	   return tmpl:render(web, args)
 	 end
@@ -78,28 +78,28 @@ local links_tmpl = [=[
   </ul>
 ]=]
 
-function blocks.links(args, tmpl)
-  tmpl = template.compile(tmpl or links_tmpl)
+function blocks.links(app, args, tmpl)
+  tmpl = tmpl or template.compile(links_tmpl)
   return function (web)
 	   return tmpl:render(web, args)
 	 end
 end
 
-local latest_posts_tmpl = [=[
+local show_latest_tmpl = [=[
   <h2>$title</h2>
   <ul>
-  $posts[[
+  $nodes[[
     <li><a href = "$node_url{ raw }">$title</a></li>
   ]]
   </ul>
 ]=]
 
-function blocks.latest_posts(args, tmpl)
-  tmpl = template.compile(tmpl or latest_posts_tmpl)
+function blocks.show_latest(app, args, tmpl)
+  tmpl = tmpl or template.compile(show_latest_tmpl)
   return function (web)
-	   local posts = publique.post:find_latest{ count = args.count,
-						    fields = { "id", "nice_id", "title" } }
-	   return tmpl:render(web, { title = args.title, posts = posts })
+	   local nodes = app.nodes[args.node or "post"]:find_latest{ count = args.count,
+							   fields = { "id", "nice_id", "title" } }
+	   return tmpl:render(web, { title = args.title, nodes = nodes })
 	 end
 end
 
