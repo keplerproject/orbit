@@ -326,7 +326,7 @@ end
 local sql_condition = re.compile([[
                                      top <- {~ <condition>* ~}
                                      condition <- %s* '(' %s* <condition> %s* ')' %s* / <simple> (<conective> <condition>)*
-                                     simple <- %s* (%func <field> <op> '?'?) -> apply %s*
+                                     simple <- %s* (%func <field> <op> '?') -> apply %s* / %s* <field> <op> %s*
                                      field <- {[%w_]+}
                                      op <- { %s* [!<>=~]+ %s* / %s+ (!<conective> %w+ %s+)+ }
                                      conective <- [aA][nN][dD] / [oO][rR]
