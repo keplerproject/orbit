@@ -535,8 +535,8 @@ function _M.run(app_module, wsapi_env)
     end
   end
   local web, res = make_web_object(app_module, wsapi_env)
-  local reparse = false
   repeat
+    local reparse = false
     local ok, response = xpcall(function () 
 				  return handler(web, unpack(captures)) 
 				end, debug.traceback)
@@ -554,7 +554,6 @@ function _M.run(app_module, wsapi_env)
 	  error("cannot reparse to WSAPI handler")
 	end
       else
-	reparse = false
 	res.status = web.status
 	res:write(response)
       end
