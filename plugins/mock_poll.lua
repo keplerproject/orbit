@@ -1,6 +1,8 @@
 
 local template = require "modules.template"
+local forms = require "modules.form"
 local route = require "orbit.routes"
+local json = require "json"
 
 local R = route.R
 local plugin = { name = "mock_poll" }
@@ -27,25 +29,41 @@ local mock_polls = {
 		{ id = 4, name = "None", votes = 5 } }, vote = vote, total = 265 },
 }
 
+local poll_form = [=[
+  $form{ id = form_id, url = url, obj = {} }[[
+    $radio{ field = "option", wrap_ul = wrap_ul, ul_class = ul_class, li_class = li_class, list = options }
+    $button{ id = "vote", label = "Vote", action = "post_redirect_inline", to = result,
+              container = div_id }
+  ]]
+]=]
+
 local poll_tmpl = [=[
   <div id = "$div_id">
     <h2>$title</h2>
     $body
-    <form>
-    $options[[
-      <input type = "radio" name = "option" value = "$id" />$name<br/>
-    ]]
-      <button onClick="$$.post('$(web:link('/poll/' .. id .. '/vote'))', function(data) { $$('#$div_id').html(data); }); return false;">Vote</button>
-    </form>
+    $form
   </div>
 ]=]
 
 local function block_poll(app, args, tmpl)
   args = args or {}
   tmpl = tmpl or template.compile(poll_tmpl)
+  local form_tmpl = cosmo.compile(poll_form)
   return function (web, env, name)
+       local div_id = args.id or name
 	   local poll = app.nodes.poll:find_latest()
-	   local env = setmetatable({ div_id = args.id or name }, { __index = poll })
+	   local options = {}
+	   for _, option in ipairs(poll.options) do
+		 options[#options+1] = { value = option.id, text = option.name }
+	   end
+	   local form = function (args)
+	     args = args or {}
+		 return form_tmpl{ form = forms.form, form_id = "form_" .. div_id, div_id = div_id,
+			       wrap_ul = args.wrap_ul, result = web:link("/poll/" .. poll.id .. "/raw"),
+			       url = web:link("/poll/" .. poll.id .. "/vote"), options = options,
+			 	   ul_class = args.ul_class, li_class = args.li_class }
+	   end	
+	   local env = setmetatable({ div_id = args.id or name, form = form }, { __index = poll })
 	   return tmpl:render(web, env)
 	 end
 end
@@ -69,13 +87,19 @@ local function block_poll_total(app, args, tmpl)
 end
 
 local function post_vote(app, web, params)
+  web:content_type("application/json")
   local id = tonumber(params.id)
   local poll = app.nodes.poll:find(id)
   if poll then
-    poll:vote(tonumber(web.input.option))
-    return web:redirect(web:link("/poll/" .. id .. "/raw"))
+	local obj = json.decode(web.input.json)
+    local ok, err = poll:vote(obj.option)
+	if ok then
+      return json.encode{}
+    else
+	  return json.encode{ message = err }
+	end
   else
-    return app.not_found(web)
+    return json.encode{ message = "Poll not found" }
   end
 end
 

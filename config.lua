@@ -1,9 +1,13 @@
 
-theme = "wordpress"
+theme = "default"
 
 blocks = {
   title = { "title", args = { "Test Website" } },
-  javascript = { "javascript", args = { "http://ajax.googleapis.com/ajax/libs/jquery/1.4.1/jquery.min.js" } },
+  javascript = { "javascript", args = { 
+	 "http://ajax.googleapis.com/ajax/libs/jquery/1.4.1/jquery.min.js",
+	 "http://jquery-json.googlecode.com/files/jquery.json-2.2.min.js",
+	 "/js/form_support.js",
+	} },
   css = { "css", args = { "/styles/default.css" } },
   banner = { "banner", args = { title = "Test Website", tagline = "It is simple!" } },
   copyright = { "copyright", args = { "2010" } },
