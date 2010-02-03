@@ -326,8 +326,9 @@ end
 local sql_condition = re.compile([[
                                      top <- {~ <condition>* ~}
                                      condition <- %s* '(' %s* <condition> %s* ')' %s* / <simple> (<conective> <condition>)*
-                                     simple <- %s* (%func <field> <op> '?') -> apply %s* / %s* <field> <op> %s*
-                                     field <- {[%w_]+}
+                                     simple <- %s* (%func <field> <op> '?') -> apply %s* / %s* <field> <op> <field> %s* /
+                                          %s* <field> <op> %s*
+                                     field <- {[%w_]+('.'[%w_]+)*}
                                      op <- { %s* [!<>=~]+ %s* / %s+ (!<conective> %w+ %s+)+ }
                                      conective <- [aA][nN][dD] / [oO][rR]
                                  ]], { func = lpeg.Carg(1) , apply = function (f, field, op) return f(field, op) end })
@@ -347,17 +348,19 @@ local function build_query(dao, condition, args)
 		    i = i + 1
 		    if not args[i] then
 		      return "id=id"
+		    elseif type(args[i]) == "table" and args[i].type == "query" then
+			  return field .. " " .. op .. " (" .. args[i][1] .. ")"
 		    elseif type(args[i]) == "table" then
 		      local values = {}
 		      for j, value in ipairs(args[i]) do
-			values[#values + 1] = field .. " " .. op .. " " ..
+				values[#values + 1] = field .. " " .. op .. " " ..
 		          escape[dao.meta[field].type](value, dao.driver, dao.model.conn)
-                      end
+              end
 		      return "(" .. table.concat(values, " or ") .. ")"
-                    else
+            else
 		      return field .. " " .. op .. " " ..
 		        escape[dao.meta[field].type](args[i], dao.driver, dao.model.conn)
-                    end
+            end
 		  end)
   end
   local order = ""
@@ -380,7 +383,7 @@ local function build_query(dao, condition, args)
     else
        field_list = "*"
     end
-    table_list = dao.table_name
+    table_list = table.concat({ dao.table_name, unpack(args.from or {}) }, ", ")
   end
   local sql = select .. field_list .. " from " .. table_list .. 
     condition .. order .. limit
