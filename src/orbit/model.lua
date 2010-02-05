@@ -329,7 +329,7 @@ local sql_condition = re.compile([[
                                      simple <- %s* (%func <field> <op> '?') -> apply %s* / %s* <field> <op> <field> %s* /
                                           %s* <field> <op> %s*
                                      field <- {[%w_]+('.'[%w_]+)*}
-                                     op <- { %s* [!<>=~]+ %s* / %s+ (!<conective> %w+ %s+)+ }
+                                     op <- { %s* [!<>=~]+ %s* / (%s+ !<conective> %w+)+ %s*}
                                      conective <- [aA][nN][dD] / [oO][rR]
                                  ]], { func = lpeg.Carg(1) , apply = function (f, field, op) return f(field, op) end })
 
