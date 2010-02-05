@@ -379,12 +379,13 @@ app_module_methods.htmlify = _M.htmlify
 
 function app_module_methods.model(app_module, ...)
    if app_module.mapper.default then
-      local table_prefix = (app_module._NAME and app_module._NAME .. "_") or ""
       if not orbit.model then
-	    require "orbit.model"
+	require "orbit.model"
       end
-      app_module.mapper = orbit.model.new(app_module.mapper.table_prefix or table_prefix, 
-			app_module.mapper.conn, app_module.mapper.driver, app_module.mapper.logging)
+      local mapper = orbit.model.new()
+      mapper.conn, mapper.driver, mapper.logging, mapper.schema = 
+        app_module.mapper.conn, app_module.mapper.driver, app_module.mapper.logging, app_module.mapper.schema
+      app_module.mapper = mapper
    end
    return app_module.mapper:new(...)
 end

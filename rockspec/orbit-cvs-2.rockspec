@@ -23,6 +23,7 @@ build = {
    modules = {
      orbit = "src/orbit.lua",
      ["orbit.model"] = "src/orbit/model.lua",
+     ["orbit.schema"] = "src/orbit/schema.lua",
      ["orbit.pages"] = "src/orbit/pages.lua",
      ["orbit.cache"] = "src/orbit/cache.lua",
      ["orbit.ophandler"] = "src/orbit/ophandler.lua",
