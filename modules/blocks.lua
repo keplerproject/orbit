@@ -128,7 +128,7 @@ function blocks.show_latest(app, args, tmpl)
   tmpl = tmpl or template.compile(show_latest_tmpl)
   return function (web, env, name)
 	   local fields = { "id", "nice_id", "title", unpack(args.includes or {}) }
-	   local nodes = app.nodes[args.node or "post"]:find_latest{ count = args.count,
+	   local nodes = app.nodes[args.node or "all"]:find_latest{ count = args.count,
 								     fields = fields }
 	   return tmpl:render(web, { title = args.title, nodes = nodes, id = args.id or name })
 	 end
@@ -139,7 +139,7 @@ function blocks.show_latest_body(app, args, tmpl)
   tmpl = tmpl or template.compile(show_latest_body_tmpl)
   return function (web, env, name)
 	   local fields = { "id", "nice_id", "title", "body", unpack(args.includes or {}) }
-	   local nodes = app.nodes[args.node or "post"]:find_latest{ count = args.count,
+	   local nodes = app.nodes[args.node or "all"]:find_latest{ count = args.count,
 								     fields = fields }
 	   return tmpl:render(web, { title = args.title, nodes = nodes, id = args.id or name })
 	 end

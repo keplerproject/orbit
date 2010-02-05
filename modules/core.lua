@@ -1,5 +1,6 @@
 
 local orbit = require "orbit"
+local model = require "orbit.model"
 local routes = require "orbit.routes"
 local util = require "modules.util"
 local blocks = require "modules.blocks"
@@ -101,12 +102,15 @@ function methods:view_node_type_raw(web, params)
 end
 
 function core.load_plugins(app)
-  for file in lfs.dir(app.real_path .. "/plugins") do
-    if file:match("%.lua$") then
-      local plugin = dofile(app.real_path .. "/plugins/" .. file)
-      app.plugins[plugin.name] = plugin.new(app)
-    end
+  for _, file in ipairs(app.config.plugins or {}) do
+    local plugin = dofile(app.real_path .. "/plugins/" .. file)
+    app.plugins[plugin.name] = plugin.new(app)
   end
+end
+
+function methods:block_template(block)
+  local tmpl, err = self.theme:load("blocks/" .. block .. ".html")
+  return tmpl
 end
 
 function core.new(app)
@@ -133,9 +137,15 @@ function core.new(app)
     { pattern = R'/:type/:id/raw', handler = app.view_node_type_raw, method = "get" },
     { pattern = R'/*', handler = app.view_nice, method = "get" },
   }
+  local luasql = require("luasql." .. app.config.database.driver)
+  local env = luasql[app.config.database.driver]()
+  app.mapper.logging = true
+  app.mapper.conn = env:connect(unpack(app.config.database.connection))
+  app.mapper.driver = model.drivers[app.config.database.driver]
+  app.mapper.schema = { entities = {} }
   core.load_plugins(app)
   for name, proto in pairs(app.config.blocks) do
-    app.blocks.instances[name] = app.blocks.protos[proto[1]](app, proto.args, app.theme:block_template(name))
+    app.blocks.instances[name] = app.blocks.protos[proto[1]](app, proto.args, app:block_template(name))
   end
   for _, route in ipairs(app.routes) do
     app["dispatch_" .. route.method](app, function (...) return route.handler(app, ...) end, route.pattern)

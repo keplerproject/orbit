@@ -3,8 +3,9 @@
 <div class="entry">
     <div class="entry-content">
         <div class="entry-body">
-	  $(node.body)
+	  $(node.full_body)
         </div>
     </div>
+  $if{ node.byline }[[<h3 class="entry-footer">Posted by $(node.byline)</h3>]]
 </div>
 

@@ -1,5 +1,5 @@
 
-theme = "default"
+theme = "wordpress"
 
 blocks = {
   title = { "title", args = { "Test Website" } },
@@ -27,3 +27,14 @@ blocks = {
   poll = { "latest_poll" },
   poll_result = { "poll_total" }
 }
+
+database = {
+  driver = "mysql",
+  connection = { "publique-devel", "root", "rfc8000" }
+}
+
+plugins = {
+  "mock_nodes.lua",
+  "mock_poll.lua"
+}
+

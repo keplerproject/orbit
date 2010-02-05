@@ -432,7 +432,7 @@ a:hover {
 
 #banner { 
     border-color: #470101;  
-    background: #ad0404 url(http://aboutanything.nfshost.com/cgi-bin/mt/mt-static/themes/minimalist-red/header.gif) repeat-x bottom right; 
+    background: #ad0404 repeat-x bottom right; 
     padding: 30px 0 40px 20px;
     padding-left: 0;
     padding-right: 0;

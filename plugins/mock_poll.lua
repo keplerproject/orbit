@@ -3,31 +3,10 @@ local template = require "modules.template"
 local forms = require "modules.form"
 local route = require "orbit.routes"
 local json = require "json"
+local schema = require "orbit.schema"
 
 local R = route.R
 local plugin = { name = "mock_poll" }
-
-local function vote(self, option_id)
-  for _, option in ipairs(self.options) do
-    if option.id == option_id then
-      self.total = self.total + 1
-      option.votes = option.votes + 1
-      break
-    end
-  end
-end
-
-local mock_polls = {
-  { id = 10, type = "poll", title = "Poll 1", body = "<p>Are you going to buy an iPad?</p>", 
-    options = { { id = 1, name = "Yes", votes = 100 },
-		{ id = 2, name = "No", votes = 300 },
-		{ id = 3, name = "I don't know", votes = 400 } }, vote = vote, total = 800 },
-  { id = 11, type = "poll", title = "Poll 2", body = "<p>What is the best mobile OS?</p>",
-    options = { { id = 1, name = "Android", votes = 50 }, 
-		{ id = 2, name = "Touch OS", votes = 200 }, 
-		{ id = 3, name = "Symbian", votes = 10 }, 
-		{ id = 4, name = "None", votes = 5 } }, vote = vote, total = 265 },
-}
 
 local poll_form = [=[
   $form{ id = form_id, url = url, obj = {} }[[
@@ -91,27 +70,63 @@ local function post_vote(app, web, params)
   local id = tonumber(params.id)
   local poll = app.nodes.poll:find(id)
   if poll then
-	local obj = json.decode(web.input.json)
-    local ok, err = poll:vote(obj.option)
-	if ok then
-      return json.encode{}
-    else
-	  return json.encode{ message = err }
-	end
+    local obj = json.decode(web.input.json)
+    local options = app.nodes.poll.option:find_all_by_poll{ poll.id }
+    local ok, err = poll:vote(obj.option, options)
+      if ok then
+        return json.encode{}
+      else
+        return json.encode{ message = err }
+      end
   else
     return json.encode{ message = "Poll not found" }
   end
 end
 
 function plugin.new(app)
-  app.nodes.poll = {
-    find_latest = function (self)
-		    return mock_polls[#mock_polls]
-		  end,
-    find = function (self, id)
-	     return mock_polls[id - 9]
-	   end
-  }
+  schema.loadstring([[
+    poll = entity {
+      parent = "node",
+      fields = {
+        total = integer(),
+	closed = boolean()
+      }
+    }
+    poll_option = entity {
+      fields = {
+	id = key(),
+	name = text(),
+	weight = integer(),
+	votes = integer(),
+	poll = belongs_to{ "poll" }
+      }
+    }
+  ]], "@poll.lua", app.mapper.schema)
+
+  app.nodes.poll = app:model("poll")
+  app.nodes.poll.option = app:model("poll_option")
+
+  function app.nodes.poll:find_latest()
+    local poll = self:find_first("closed is null or closed != ?", 
+	{ true, order = "created_at desc", count = 1 })
+    if poll then
+      poll.options = self.option:find_all_by_poll{ poll.id, order = "weight desc" }
+      return poll
+    end
+  end
+
+  function app.nodes.poll:vote(option_id, options)
+    for _, option in ipairs(options) do
+      if option.id == option_id then
+        self.total = self.total + 1
+        self:save()
+        option.votes = option.votes + 1
+        option:save()
+        break
+      end
+    end
+  end
+
   app.blocks.protos.latest_poll = block_poll
   app.blocks.protos.poll_total = block_poll_total
   table.insert(app.routes, { pattern = R'/poll/:id/vote', handler = post_vote, method = "post" })
