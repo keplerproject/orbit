@@ -13,33 +13,77 @@ drivers = {}
 
 drivers.base = {
   convert = {
-    key = function (v) return tonumber(v) end,
-    integer = function (v) return tonumber(v) end,
-    number = function (v) return tonumber(v) end,
-    text = function (v) return tostring(v) end,
-    long_text = function (v) return tostring(v) end,
-    boolean = function (v) return tonumber(v) == 1 end,
-    timestamp = function (v)
+    key = function (dao, field, v) return tonumber(v) end,
+    integer = function (dao, field, v) return tonumber(v) end,
+    number = function (dao, field, v) return tonumber(v) end,
+    text = function (dao, field, v) return tostring(v) end,
+    long_text = function (dao, field, v) return tostring(v) end,
+    boolean = function (dao, field, v) return tonumber(v) == 1 end,
+    timestamp = function (dao, field, v)
                   local year, month, day, hour, min, sec = 
                     string.match(v, "(%d+)%-(%d+)%-(%d+) (%d+):(%d+):(%d+)")
                   return os.time({ year = tonumber(year), month = tonumber(month),
 		            day = tonumber(day), hour = tonumber(hour),
 		            min = tonumber(min), sec = tonumber(sec) })
                 end,
-    date = function (v)
+    date = function (dao, field, v)
              local year, month, day, hour, min, sec = 
                string.match(v, "(%d+)%-(%d+)%-(%d+) (%d+):(%d+):(%d+)")
              return os.time({ year = tonumber(year), month = tonumber(month),
                day = tonumber(day), hour = tonumber(hour),
                min = tonumber(min), sec = tonumber(sec) })
            end,
-    belongs_to = function (v) return tonumber(v) end,
-    has_one = function (v) return tonumber(v) end
+    belongs_to = function (dao, field, id)
+                   return setmetatable({ id = tonumber(id) },
+                                       { __index = function (v, name)
+                                                     local obj = dao.__models[field.entity]:find(v.id)
+                                                     for key, val in pairs(obj) do v[key] = val end
+                                                     setmetatable(v, getmetatable(obj))
+                                                     return obj[name]
+                                                   end })
+                 end,
+    has_one = function (dao, field, id)
+                return setmetatable({ id = tonumber(id) },
+                                    { __index = function (v, name)
+                                                  local obj = dao.__models[field.entity]:find(v.id)
+                                                  for key, val in pairs(obj) do v[key] = val end
+                                                  setmetatable(v, getmetatable(obj))
+                                                  return obj[name]
+                                                end })
+              end,
+    has_many = function (dao, field, id)
+                 return setmetatable({},
+                                     { __index = function (list, idx)
+                                                   local rel = dao.__models[field.entity]
+                                                   local objs = 
+                                                     rel:find_all(field.foreign .. " = ?", 
+                                                                  { id, order = field.order_by })
+                                                   for key, val in ipairs(objs) do list[key] = val end
+                                                   setmetatable(list, nil)
+                                                   return objs[idx]
+                                                 end })
+               end,
+    has_and_belongs = function (dao, field, id)
+                        return setmetatable({},
+                                            { __index = function (list, idx)
+                                                          local rel = dao.__models[field.entity]
+                                                          local query = {
+                                                            entity = field.join_table,
+                                                            fields = { field.entity },
+                                                            condition = field.foreign .. " = ?",
+                                                            id, order = field.order_by
+                                                          }
+                                                          local objs = rel:find_all("id in ?", { query })
+                                                          for key, val in ipairs(objs) do list[key] = val end
+                                                          setmetatable(list, nil)
+                                                          return objs[idx]
+                                                        end })
+                      end,
   },
   escape  = {
-    key = function (conn, v) if v then return tostring(v) else return "NULL" end end,
-    integer = function (conn, v) if v then return tostring(v) else return "NULL" end end,
-    number = function (conn, v) if v then return tostring(v) else return "NULL" end end,
+    key = function (conn, v) if tonumber(v) then return tostring(v) else return "NULL" end end,
+    integer = function (conn, v) if tonumber(v) then return tostring(v) else return "NULL" end end,
+    number = function (conn, v) if tonumber(v) then return tostring(v) else return "NULL" end end,
     text = function (conn, v) if v then return "'" .. conn:escape(v) .. "'" else return "NULL" end end,
     long_text = function (conn, v) if v then return "'" .. conn:escape(v) .. "'" else return "NULL" end end,
     boolean = function (conn, v) if v then return "1" else return "0" end end,
@@ -52,7 +96,7 @@ drivers.base = {
     belongs_to = function (conn, v)
                    if type(v) == "table" then
                      return tostring(v.id)
-	           elseif v then
+	           elseif tonumber(v) then
                      return tostring(v) 
                    else
 	             return "NULL"
@@ -61,7 +105,7 @@ drivers.base = {
     has_one = function (conn, v) 
                 if type(v) == "table" then
 	          return tostring(v.id)
-	        elseif v then
+	        elseif tonumber(v) then
                   return tostring(v) 
                 else
 	          return "NULL"
@@ -71,7 +115,7 @@ drivers.base = {
 }
 
 drivers.sqlite3 = {
-  convert = setmetatable({ boolean = function (v) return v == "t" end }, 
+  convert = setmetatable({ boolean = function (dao, field, v) return v == "t" end }, 
                          { __index = drivers.base.convert }),
   escape = setmetatable({ boolean = function (conn, v) if v then return "t" else return "f" end end },
                         { __index = drivers.base.escape })
@@ -118,9 +162,9 @@ local function mkfield(t)
 end
 
 local sql_condition = re.compile([[
-                                     top <- {~ <condition>* ~}
+                                     top <- {~ <condition> ~}
 				     s <- %s+ -> ' ' / ''
-                                     condition <- <s> '(' <s> <condition> <s> ')' <s> / <simple> (<conective> <condition>)*
+                                     condition <- (<s> '(' <s> <condition> <s> ')' <s> / <simple>) (<conective> <condition>)*
                                      simple <- <s> (%func (<field> <op> {'?'} / <field> <op> <field> /
 							 <field> <op>)) -> apply <s>
 				     field <- !<conective> ({:table:[%w_]+:}('.'{:field:[%w_]+:})?) -> {} -> mkfield
@@ -153,7 +197,6 @@ local function build_query(main_entity, dao, condition, args)
 			    left.table = left.table or main_entity
 			    local left_field = schema[left.table].table_name .. "." ..
 			      schema[left.table].fields[left.field].column_name
-			    print(right, right and right.table, right and right.field)
 			    if not right then
 			      return left_field .. op
 			    elseif right ~= "?" then
@@ -246,13 +289,15 @@ function dao_methods:from_row(row)
   end
   local obj = {}
   for name, field in pairs(schema.fields) do
-    if row[field.column_name] then
-      local conv = driver.convert[field.type]
-      if conv then
-	obj[name] = conv(row[field.column_name])
+    local conv = driver.convert[field.type]
+    if conv then
+      if field.column_name then
+        obj[name] = conv(self, field, row[field.column_name])
       else
-	error("no conversion for field " .. name .. " of type " .. field.type)
+	obj[name] = conv(self, field, row[schema.fields["id"].column_name])
       end
+    else
+      error("no conversion for field " .. name .. " of type " .. field.type)
     end
   end
   return setmetatable(obj, { __index = self })
@@ -345,10 +390,18 @@ function dao_methods:find(id)
 end
 
 function dao_methods:find_first(condition, args)
+  if self.__schema[self.__name].parent then
+    condition = "(" .. condition .. ") and type = ?"
+    args[#args+1] = self.__name
+  end
   return self:fetch_one(build_query(self.__name, self, condition, args))
 end
 
 function dao_methods:find_all(condition, args)
+  if self.__schema[self.__name].parent then
+    condition = "(" .. condition .. ") and type = ?"
+    args[#args+1] = self.__name
+  end
   return self:fetch_all(build_query(self.__name, self, condition, args))
 end
 

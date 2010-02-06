@@ -99,6 +99,9 @@ local function fill_entity(schema, alias, entity)
 					        (entity.column_prefix or "") .. 
 					        f_alias .. (primitive_types[field.type].suffix or "")) 
     end
+    if primitive_types[field.type] and primitive_types[field.type].virtual and not field.foreign then
+      field.foreign = entity.name
+    end
     if field.type == "has_and_belongs" and not field.join_table then
       local names = { alias, f_alias }
       table.sort(names)
