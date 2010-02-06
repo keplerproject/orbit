@@ -103,7 +103,7 @@ local function fill_entity(schema, alias, entity)
       field.foreign = entity.name
     end
     if field.type == "has_and_belongs" and not field.join_table then
-      local names = { alias, f_alias }
+      local names = { alias, field.entity }
       table.sort(names)
       field.join_table = (schema.table_prefix or "") .. table.concat(names, "_")
     end
