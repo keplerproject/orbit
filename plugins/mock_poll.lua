@@ -32,6 +32,7 @@ local function block_poll(app, args, tmpl)
        local div_id = args.id or name
 	   local poll = app.nodes.poll:find_latest()
 	   local options = {}
+	   local _ = poll.options[1]
 	   for _, option in ipairs(poll.options) do
 		 options[#options+1] = { value = option.id, text = option.name }
 	   end
@@ -71,8 +72,7 @@ local function post_vote(app, web, params)
   local poll = app.nodes.poll:find(id)
   if poll then
     local obj = json.decode(web.input.json)
-    local options = app.nodes.poll.option:find_all_by_poll{ poll.id }
-    local ok, err = poll:vote(obj.option, options)
+    local ok, err = poll:vote(obj.option)
       if ok then
         return json.encode{}
       else
@@ -89,7 +89,8 @@ function plugin.new(app)
       parent = "node",
       fields = {
         total = integer(),
-	closed = boolean()
+	closed = boolean(),
+	options = has_many{ "poll_option", order_by = "weight desc" }
       }
     }
     poll_option = entity {
@@ -107,16 +108,13 @@ function plugin.new(app)
   app.nodes.poll.option = app:model("poll_option")
 
   function app.nodes.poll:find_latest()
-    local poll = self:find_first("closed is null or closed != ?", 
-	{ true, order = "created_at desc", count = 1 })
-    if poll then
-      poll.options = self.option:find_all_by_poll{ poll.id, order = "weight desc" }
-      return poll
-    end
+    return self:find_first("closed is null or closed != ?", 
+	                   { true, order = "created_at desc", count = 1 })
   end
 
-  function app.nodes.poll:vote(option_id, options)
-    for _, option in ipairs(options) do
+  function app.nodes.poll:vote(option_id)
+    local _ = self.options[1]
+    for _, option in ipairs(self.options) do
       if option.id == option_id then
         self.total = self.total + 1
         self:save()

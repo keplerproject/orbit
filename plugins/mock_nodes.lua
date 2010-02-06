@@ -27,7 +27,8 @@ function plugin.new(app)
       fields = {
 	id = key(),
 	name = text(),
-	display_name = text()
+	display_name = text(),
+	terms = has_many{ "term" }
       }
     }
     term = entity {
@@ -78,6 +79,10 @@ function plugin.new(app)
     count = args.count or 10
     return self:find_all("type = ?", { "post", order = "created_at desc", count = count })
   end
+
+  app.nodes.term = app:model("term")
+  app.nodes.vocabulary = app:model("vocabulary")
+  app.nodes.node_term = app:model("node_term")
 
   app.nodes.types.post = app.nodes.post
 end
