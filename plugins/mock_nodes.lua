@@ -13,7 +13,7 @@ function plugin.new(app)
         title = text(),
         body = long_text(),
         created_at = timestamp(),
-	term = has_and_belongs{ "term" }
+	terms = has_and_belongs{ "term" }
       }
     }
     post = entity {
@@ -38,7 +38,7 @@ function plugin.new(app)
 	parent = has_one{ "term" },
 	name = text(),
 	display_name = text(),
-	node = has_and_belongs{ "node" }
+	nodes = has_and_belongs{ "node" }
       }
     }
     node_term = entity{
