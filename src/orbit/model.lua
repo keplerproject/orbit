@@ -16,8 +16,8 @@ drivers.base = {
     key = function (dao, field, v) return tonumber(v) end,
     integer = function (dao, field, v) return tonumber(v) end,
     number = function (dao, field, v) return tonumber(v) end,
-    text = function (dao, field, v) return tostring(v) end,
-    long_text = function (dao, field, v) return tostring(v) end,
+    text = function (dao, field, v) if v then return tostring(v) end end,
+    long_text = function (dao, field, v) if v then return tostring(v) end end,
     boolean = function (dao, field, v) return tonumber(v) == 1 end,
     timestamp = function (dao, field, v)
                   local year, month, day, hour, min, sec = 
@@ -71,9 +71,10 @@ drivers.base = {
                                                             entity = field.join_table,
                                                             fields = { field.entity },
                                                             condition = field.foreign .. " = ?",
-                                                            id, order = field.order_by
+                                                            id
                                                           }
-                                                          local objs = rel:find_all("id in ?", { query })
+                                                          local objs = rel:find_all("id in ?", { query,
+                                                             order = field.order_by })
                                                           for key, val in ipairs(objs) do list[key] = val end
                                                           setmetatable(list, nil)
                                                           return objs[idx]
