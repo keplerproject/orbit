@@ -307,6 +307,7 @@ local post_widgets = function (self, web)
     node_widgets[4]
   }
 end
+
 local page_widgets = node_widgets
 
 function plugin.new(app)

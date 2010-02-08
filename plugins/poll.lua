@@ -84,6 +84,15 @@ local function post_vote(app, web, params)
   end
 end
 
+local poll_widgets = function (self, web) 
+  local node_widgets = self:node(web)
+  return {
+    node_widgets[1],
+    node_widgets[2],
+    { type = "check", args = { label = "Closed", field = "closed" } },
+  }
+end
+
 function plugin.new(app)
   schema.loadstring([[
     poll = entity {
@@ -130,7 +139,7 @@ function plugin.new(app)
   app.blocks.protos.poll_total = block_poll_total
   table.insert(app.routes, { pattern = R'/poll/:id/vote', handler = post_vote, method = "post" })
   app.models.types.poll = app.models.poll
-  app.forms.poll = app.forms.node
+  app.forms.poll = poll_widgets
 end
 
 return plugin
