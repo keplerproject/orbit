@@ -9,6 +9,9 @@ blocks = {
 	 "http://ajax.googleapis.com/ajax/libs/jquery/1.4.1/jquery.min.js",
 	 "http://jquery-json.googlecode.com/files/jquery.json-2.2.min.js",
 	 "/js/form_support.js",
+         "/js/jquery-ui-1.7.2.custom.min.js",
+         "/js/jquery.wysiwyg.js",
+         "/js/jquery.autocomplete.min.js"
 	} },
   css = { "css", args = { "/styles/default.css" } },
   banner = { "banner", args = { title = "Test Website", tagline = "It is simple!" } },
@@ -22,12 +25,14 @@ blocks = {
 		      }
 		    }
   },
-  show_latest = { "show_latest_body", args = { count = 7 } },
-  recent_links = { "show_latest", args = { title = "Recent Posts", count = 7 } },
+  show_latest = { "show_latest_body", args = { node = "post", count = 7 } },
+  recent_links = { "show_latest", args = { node = "post", title = "Recent Posts", count = 7 } },
   powered_by = { "generic", args = { title = "Powered by", text = "Orbit and Kepler toolkit." } },
   post = { "node_info" },
   poll = { "latest_poll" },
-  poll_result = { "poll_total" }
+  poll_result = { "poll_total" },
+  new_node = { "form_new_node" },
+  edit_node = { "form_edit_node" }
 }
 
 database = {

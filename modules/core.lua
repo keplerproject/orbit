@@ -22,6 +22,15 @@ function methods:layout(web, inner_html)
   end
 end
 
+function methods:admin_layout(web, inner_html)
+  local layout_template = self.admin_theme:load("layout.html")
+  if layout_template then
+    return layout_template:render(web, { inner = inner_html })
+  else
+    return inner_html
+  end
+end
+
 function core.load_plugins(app)
   for _, file in ipairs(app.config.plugins or {}) do
     local plugin = dofile(app.real_path .. "/plugins/" .. file)
@@ -48,9 +57,18 @@ function core.new(app)
   if not app.theme then
     error("theme " .. app.config.theme .. " not found")
   end
+  if app.config.admin_theme then
+    app.admin_theme = themes.new(app.blocks.instances, app.config.admin_theme, app.real_path .. "/themes")
+    if not app.admin_theme then
+      error("theme " .. app.config.admin_theme .. " not found")
+    end
+  else
+    app.admin_theme = app.theme
+  end
   app.models = { types = {} }
   app.plugins = {}
   app.routes = {}
+  app.forms = {}
   local luasql = require("luasql." .. app.config.database.driver)
   local env = luasql[app.config.database.driver]()
   app.mapper.logging = true

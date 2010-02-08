@@ -29,7 +29,7 @@ local function block_poll(app, args, tmpl)
   tmpl = tmpl or template.compile(poll_tmpl)
   local form_tmpl = cosmo.compile(poll_form)
   return function (web, env, name)
-       local div_id = args.id or name
+           local div_id = args.id or name
 	   local poll = app.models.poll:find_latest()
 	   local options = {}
 	   local _ = poll.options[1]
@@ -38,10 +38,10 @@ local function block_poll(app, args, tmpl)
 	   end
 	   local form = function (args)
 	     args = args or {}
-		 return form_tmpl{ form = forms.form, form_id = "form_" .. div_id, div_id = div_id,
+             return form_tmpl{ form = forms.form, form_id = "form_" .. div_id, div_id = div_id,
 			       wrap_ul = args.wrap_ul, result = web:link("/poll/" .. poll.id .. "/raw"),
 			       url = web:link("/poll/" .. poll.id .. "/vote"), options = options,
-			 	   ul_class = args.ul_class, li_class = args.li_class }
+			       ul_class = args.ul_class, li_class = args.li_class }
 	   end	
 	   local env = setmetatable({ div_id = args.id or name, form = form }, { __index = poll })
 	   return tmpl:render(web, env)
@@ -130,6 +130,7 @@ function plugin.new(app)
   app.blocks.protos.poll_total = block_poll_total
   table.insert(app.routes, { pattern = R'/poll/:id/vote', handler = post_vote, method = "post" })
   app.models.types.poll = app.models.poll
+  app.forms.poll = app.forms.node
 end
 
 return plugin

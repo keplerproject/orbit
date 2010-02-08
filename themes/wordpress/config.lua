@@ -26,4 +26,10 @@ areas = {
   body_poll = {
     "poll_result"
   },
+  body_new_node = {
+    "new_node"	
+  },
+  body_edit_node = {
+    "edit_node"	
+  }
 }
