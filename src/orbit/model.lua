@@ -20,18 +20,24 @@ drivers.base = {
     long_text = function (dao, field, v) if v then return tostring(v) end end,
     boolean = function (dao, field, v) return tonumber(v) == 1 end,
     timestamp = function (dao, field, v)
-                  local year, month, day, hour, min, sec = 
-                    string.match(v, "(%d+)%-(%d+)%-(%d+) (%d+):(%d+):(%d+)")
-                  return os.time({ year = tonumber(year), month = tonumber(month),
-		            day = tonumber(day), hour = tonumber(hour),
-		            min = tonumber(min), sec = tonumber(sec) })
+                  if v then
+                    local year, month, day, hour, min, sec = 
+                      string.match(v, "(%d+)%-(%d+)%-(%d+) (%d+):(%d+):(%d+)")
+                    return os.date("%Y-%m-%d %H:%M:%S", 
+                              os.time({ year = tonumber(year), month = tonumber(month),
+		                day = tonumber(day), hour = tonumber(hour),
+		                min = tonumber(min), sec = tonumber(sec) }))
+		  end
                 end,
     date = function (dao, field, v)
-             local year, month, day, hour, min, sec = 
-               string.match(v, "(%d+)%-(%d+)%-(%d+) (%d+):(%d+):(%d+)")
-             return os.time({ year = tonumber(year), month = tonumber(month),
-               day = tonumber(day), hour = tonumber(hour),
-               min = tonumber(min), sec = tonumber(sec) })
+             if v then
+               local year, month, day = 
+                 string.match(v, "(%d+)%-(%d+)%-(%d+)")
+               return os.date("%Y-%m-%d %H:%M:%S",
+                               os.time({ year = tonumber(year), month = tonumber(month),
+                                         day = tonumber(day), hour = 12,
+                                         min = 0, sec = 0 }))
+             end
            end,
     belongs_to = function (dao, field, id)
                    return setmetatable({ id = tonumber(id) },
@@ -88,11 +94,30 @@ drivers.base = {
     text = function (conn, v) if v then return "'" .. conn:escape(v) .. "'" else return "NULL" end end,
     long_text = function (conn, v) if v then return "'" .. conn:escape(v) .. "'" else return "NULL" end end,
     boolean = function (conn, v) if v then return "1" else return "0" end end,
-    timestamp = function (conn, v) 
-                  if v then return "'" .. os.date("%Y-%m-%d %H:%M:%S", v) .. "'" else return "NULL" end
+    timestamp = function (conn, v)
+                  if type(v) == "string" then
+	            local year, month, day, hour, min, sec = v:match("(%d+)%-(%d+)%-(%d+).(%d+):(%d+):(%d+)")
+	            v = os.time({ year = tonumber(year), month = tonumber(month),
+		            day = tonumber(day), hour = tonumber(hour),
+		            min = tonumber(min), sec = tonumber(sec) })
+                    return "'" .. os.date("%Y-%m-%d %H:%M:%S", v) .. "'"
+	          elseif type(v) == "number" then 
+                    return "'" .. os.date("%Y-%m-%d %H:%M:%S", v) .. "'"
+                  else 
+	            return "NULL" 
+	          end
                 end,
     date = function (conn, v) 
-             if v then return "'" .. os.date("%Y-%m-%d 12:00:00", v) .. "'" else return "NULL" end
+             if type(v) == "string" then
+	       local year, month, day = v:match("(%d+)%-(%d+)%-(%d+)")
+	       v = os.time({ year = tonumber(year), month = tonumber(month),
+	          day = tonumber(day), hour = 12, min = 0, sec = 0 })
+               return "'" .. os.date("%Y-%m-%d %H:%M:%S", v) .. "'"
+	     elseif type(v) == "number" then 
+               return "'" .. os.date("%Y-%m-%d %H:%M:%S", v) .. "'"
+             else 
+	       return "NULL" 
+	     end
            end,
     belongs_to = function (conn, v)
                    if type(v) == "table" then
@@ -256,8 +281,13 @@ local function build_query(main_entity, dao, condition, args)
     tables[#tables+1] = schema[entity].table_name
   end
   table_list = table.concat(tables, ", ")
-  local sql = select .. field_list .. " from " .. table_list .. 
-    condition .. order .. limit
+  local sql
+  if not args.delete then
+    sql = select .. field_list .. " from " .. table_list .. 
+      condition .. order .. limit
+  else
+    sql = "delete from " .. table_list .. condition
+  end
   return sql
 end
 
@@ -324,12 +354,16 @@ function dao_methods:fetch_one(sql)
   if self.__logging then log_query(sql) end
   local cursor, err = self.__conn:execute(sql)
   if not cursor then error(err) end
-  local row = cursor:fetch({}, "a")
-  cursor:close()
-  if row then
-    return self:from_row(row)
+  if type(cursor) == "number" then
+    return cursor
+  else
+    local row = cursor:fetch({}, "a")
+    cursor:close()
+    if row then
+      return self:from_row(row)
+    end
+    return row
   end
-  return row
 end
 
 function dao_methods:fetch_all(sql)
@@ -337,13 +371,21 @@ function dao_methods:fetch_all(sql)
   if self.__logging then log_query(sql) end
   local cursor, err = self.__conn:execute(sql)
   if not cursor then error(err) end
-  local row = cursor:fetch({}, "a")
-  while row do
-    rows[#rows + 1] = self:from_row(row)
-    row = cursor:fetch({}, "a")
+  if type(cursor) == "number" then
+    return cursor
+  else
+    local row = cursor:fetch({}, "a")
+    while row do
+      rows[#rows + 1] = self:from_row(row)
+      row = cursor:fetch({}, "a")
+    end
+    cursor:close()
+    return rows
   end
-  cursor:close()
-  return rows
+end
+
+function dao_methods:execute(sql)
+  local ok, err = self.__conn:execute(sql)
 end
 
 local function parse_by_condition(condition, args)
@@ -406,11 +448,20 @@ function dao_methods:find_all(condition, args)
   return self:fetch_all(build_query(self.__name, self, condition, args))
 end
 
+function dao_methods:delete_all(condition, args)
+  args.delete = true
+  if self.__schema[self.__name].parent then
+    condition = "(" .. condition .. ") and type = ?"
+    args[#args+1] = self.__name
+  end
+  return self:fetch_one(build_query(self.__name, self, condition, args))
+end
+
 function dao_methods:new(row)
   row = row or {}
   local schema = self.__schema[self.__name]
   for name, field in pairs(schema.fields) do
-    row[name] = field.default
+    row[name] = row[name] or field.default
   end
   if schema.parent then row.type = self.__name end
   setmetatable(row, { __index = self })
