@@ -6,7 +6,7 @@ local json = require "json"
 local schema = require "orbit.schema"
 
 local R = route.R
-local plugin = { name = "mock_poll" }
+local plugin = { name = "poll" }
 
 local poll_form = [=[
   $form{ id = form_id, url = url, obj = {} }[[
@@ -30,7 +30,7 @@ local function block_poll(app, args, tmpl)
   local form_tmpl = cosmo.compile(poll_form)
   return function (web, env, name)
        local div_id = args.id or name
-	   local poll = app.nodes.poll:find_latest()
+	   local poll = app.models.poll:find_latest()
 	   local options = {}
 	   local _ = poll.options[1]
 	   for _, option in ipairs(poll.options) do
@@ -62,6 +62,7 @@ local function block_poll_total(app, args, tmpl)
   tmpl = tmpl or template.compile(poll_total_tmpl)
   return function (web, env, name)
 	   local poll = env.node
+	   local _ = poll.options[1]
 	   return tmpl:render(web, poll)
 	 end
 end
@@ -69,7 +70,7 @@ end
 local function post_vote(app, web, params)
   web:content_type("application/json")
   local id = tonumber(params.id)
-  local poll = app.nodes.poll:find(id)
+  local poll = app.models.poll:find(id)
   if poll then
     local obj = json.decode(web.input.json)
     local ok, err = poll:vote(obj.option)
@@ -104,15 +105,15 @@ function plugin.new(app)
     }
   ]], "@poll.lua", app.mapper.schema)
 
-  app.nodes.poll = app:model("poll")
-  app.nodes.poll.option = app:model("poll_option")
+  app.models.poll = app:model("poll")
+  app.models.poll_option = app:model("poll_option")
 
-  function app.nodes.poll:find_latest()
+  function app.models.poll:find_latest()
     return self:find_first("closed is null or closed != ?", 
 	                   { true, order = "created_at desc", count = 1 })
   end
 
-  function app.nodes.poll:vote(option_id)
+  function app.models.poll:vote(option_id)
     local _ = self.options[1]
     for _, option in ipairs(self.options) do
       if option.id == option_id then
@@ -128,7 +129,7 @@ function plugin.new(app)
   app.blocks.protos.latest_poll = block_poll
   app.blocks.protos.poll_total = block_poll_total
   table.insert(app.routes, { pattern = R'/poll/:id/vote', handler = post_vote, method = "post" })
-  app.nodes.types.poll = {}
+  app.models.types.poll = app.models.poll
 end
 
 return plugin

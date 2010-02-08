@@ -1,6 +1,8 @@
 
 theme = "wordpress"
 
+home_page = "/home"
+
 blocks = {
   title = { "title", args = { "Test Website" } },
   javascript = { "javascript", args = { 
@@ -34,7 +36,7 @@ database = {
 }
 
 plugins = {
-  "mock_nodes.lua",
-  "mock_poll.lua"
+  "nodes.lua",
+  "poll.lua"
 }
 
