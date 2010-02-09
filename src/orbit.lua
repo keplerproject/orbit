@@ -384,7 +384,8 @@ function app_module_methods.model(app_module, ...)
       end
       local mapper = orbit.model.new()
       mapper.conn, mapper.driver, mapper.logging, mapper.schema = 
-        app_module.mapper.conn, app_module.mapper.driver, app_module.mapper.logging, app_module.mapper.schema
+        app_module.mapper.conn, app_module.mapper.driver or orbit.model.drivers.sqlite3, 
+        app_module.mapper.logging, app_module.mapper.schema
       app_module.mapper = mapper
    end
    return app_module.mapper:new(...)
