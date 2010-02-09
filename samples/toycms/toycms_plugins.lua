@@ -82,6 +82,7 @@ end
 local function get_posts(web, condition, args, count, template)
   local posts =
     models.post:find_all(condition, args)
+  print(#posts)
   local cur_date
   local out
   if template then out = {} end
@@ -134,7 +135,7 @@ function plugins.index_view(web)
         section_ids[#section_ids + 1] = web.input.section_id
       end
       if #section_ids == 0 then return "" end
-      local date_start, date_end
+      local date_start, date_end, date_part = nil, nil, ''
       if arg and arg.archive and web.input.month and web.input.year then
         date_start = os.time({ year = web.input.year, 
 			    month = web.input.month, day = 1 })
@@ -142,11 +143,11 @@ function plugins.index_view(web)
 			    math.floor(web.input.month / 12),
                             month = (web.input.month % 12) + 1,
                             day = 1 })
+        date_part = "and published_at >= ? and published_at <= ?"
       end
       local template
       if not has_block then template = load_template(template_file) end
-      return get_posts(web, "published = ? and section_id = ? and " ..
-		       "published_at >= ? and published_at <= ?",
+      return get_posts(web, "published = ? and section_id in ?" .. date_part,
 		     { order = "published_at desc", true, 
 		       section_ids, date_start,
 		       date_end },

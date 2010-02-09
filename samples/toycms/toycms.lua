@@ -3,6 +3,7 @@
 require "orbit"
 require "markdown"
 require "orbit.cache"
+require "orbit.model"
 require "cosmo"
 
 module("toycms", package.seeall, orbit.new)
@@ -16,7 +17,9 @@ require "toycms_admin"
 require("luasql." .. database.driver)
 local env = luasql[database.driver]()
 mapper.conn = env:connect(unpack(database.conn_data))
-mapper.driver = database.driver
+mapper.driver = orbit.model.drivers[database.driver]
+mapper.schema = toycms_schema
+mapper.logging = logging
 
 models = {
    post = toycms:model "post",
