@@ -23,20 +23,18 @@ drivers.base = {
                   if v then
                     local year, month, day, hour, min, sec = 
                       string.match(v, "(%d+)%-(%d+)%-(%d+) (%d+):(%d+):(%d+)")
-                    return os.date("%Y-%m-%d %H:%M:%S", 
-                              os.time({ year = tonumber(year), month = tonumber(month),
+                    return os.time({ year = tonumber(year), month = tonumber(month),
 		                day = tonumber(day), hour = tonumber(hour),
-		                min = tonumber(min), sec = tonumber(sec) }))
+		                min = tonumber(min), sec = tonumber(sec) })
 		  end
                 end,
     date = function (dao, field, v)
              if v then
                local year, month, day = 
                  string.match(v, "(%d+)%-(%d+)%-(%d+)")
-               return os.date("%Y-%m-%d %H:%M:%S",
-                               os.time({ year = tonumber(year), month = tonumber(month),
+               return os.time({ year = tonumber(year), month = tonumber(month),
                                          day = tonumber(day), hour = 12,
-                                         min = 0, sec = 0 }))
+                                         min = 0, sec = 0 })
              end
            end,
     belongs_to = function (dao, field, id)
@@ -143,7 +141,7 @@ drivers.base = {
 drivers.sqlite3 = {
   convert = setmetatable({ boolean = function (dao, field, v) return v == "t" end }, 
                          { __index = drivers.base.convert }),
-  escape = setmetatable({ boolean = function (conn, v) if v then return "t" else return "f" end end },
+  escape = setmetatable({ boolean = function (conn, v) if v then return "'t'" else return "'f'" end end },
                         { __index = drivers.base.escape })
 }
 
@@ -245,7 +243,7 @@ local function build_query(main_entity, dao, condition, args)
 			      end
 			    end
 			  end)
-  end
+  else condition = "" end
   local order = ""
   if args.order then 
     order = " order by " .. sql_order:match(args.order, 1,
@@ -433,22 +431,31 @@ function dao_methods:find(id)
 end
 
 function dao_methods:find_first(condition, args)
+  if type(condition) ~= "string" then
+    args, condition = condition, nil
+  end
   if self.__schema[self.__name].parent then
-    condition = "(" .. condition .. ") and type = ?"
+    condition = condition and "(" .. condition .. ") and type = ?" or "type = ?"
     args[#args+1] = self.__name
   end
   return self:fetch_one(build_query(self.__name, self, condition, args))
 end
 
 function dao_methods:find_all(condition, args)
+  if type(condition) ~= "string" then
+    args, condition = condition, nil
+  end
   if self.__schema[self.__name].parent then
-    condition = "(" .. condition .. ") and type = ?"
+    condition = condition and "(" .. condition .. ") and type = ?" or "type = ?"
     args[#args+1] = self.__name
   end
   return self:fetch_all(build_query(self.__name, self, condition, args))
 end
 
 function dao_methods:delete_all(condition, args)
+  if type(condition) ~= "string" then
+    args, condition = condition, nil
+  end
   args.delete = true
   if self.__schema[self.__name].parent then
     condition = "(" .. condition .. ") and type = ?"
