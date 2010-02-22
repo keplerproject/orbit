@@ -6,7 +6,7 @@ home_page = "/home"
 blocks = {
   title = { "title", args = { "Test Website" } },
   javascript = { "javascript", args = { 
-	 "http://ajax.googleapis.com/ajax/libs/jquery/1.4.1/jquery.min.js",
+	 "/js/jquery-1.4.2.min.js",
 	 "http://jquery-json.googlecode.com/files/jquery.json-2.2.min.js",
 	 "/js/form_support.js",
          "/js/jquery-ui-1.7.2.custom.min.js",
