@@ -33,14 +33,11 @@ local function block_poll(app, args, tmpl)
 	   local poll = app.models.poll:find_latest()
 	   local options = {}
 	   local _ = poll.options[1]
-	   for _, option in ipairs(poll.options) do
-		 options[#options+1] = { value = option.id, text = option.name }
-	   end
 	   local form = function (args)
 	     args = args or {}
              return form_tmpl{ form = forms.form, form_id = "form_" .. div_id, div_id = div_id,
 			       wrap_ul = args.wrap_ul, result = web:link("/poll/" .. poll.id .. "/raw"),
-			       url = web:link("/poll/" .. poll.id .. "/vote"), options = options,
+			       url = web:link("/poll/" .. poll.id .. "/vote"), options = poll.options,
 			       ul_class = args.ul_class, li_class = args.li_class }
 	   end	
 	   local env = setmetatable({ div_id = args.id or name, form = form }, { __index = poll })

@@ -143,7 +143,7 @@ function methods:view_terms_json(web, params)
   local terms = self.models.term:find_by_vocabulary(vocabulary)
   local list = {}
   for _, term in ipairs(terms) do
-    list[#list+1] = { value = term.id, text = term.display_name }
+    list[#list+1] = { id = term.id, name = term.display_name }
   end
   return json.encode{ list = list }  
 end
