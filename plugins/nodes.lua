@@ -225,6 +225,7 @@ function blocks.node_info(app, args, tmpl)
 end
 
 local node_form = [=[
+    $subforms[[$it]]
     $form{ id = form_id, url = url, obj = node.raw }[[
       $flash{ class = "form_flash" }
       $(node.widgets)[[
@@ -251,11 +252,16 @@ function blocks.form_new_node(app, args, tmpl)
            local node = setmetatable({}, { __index = env.node })
            node.raw = node:to_table()
            node.widgets = app.forms[node.type](app.forms, web)
+           local subforms = {}
+           for i, subform in ipairs(node.widgets.subforms or {}) do
+	     subforms[#subforms+1] = cosmo.fill(subform, { form = forms.form, 
+	                                                   form_id = "subform_" .. div_id .. "_" .. i })
+	   end
 	   local form = function (args)
 	     args = args or {}
-             return form_tmpl{ form = forms.form, form_id = args.id or "form_" .. div_id, 
+             return form_tmpl{ form = forms.form, subforms = subforms, form_id = args.id or "form_" .. div_id, 
 			       url = args.url or web:link("/" .. node.type .. "/new"), node = node }
-	   end	
+	   end
 	   return tmpl:render(web, { node = node, id = div_id, form = form })
 	 end
 end
@@ -276,9 +282,14 @@ function blocks.form_edit_node(app, args, tmpl)
            local node = setmetatable({}, { __index = env.node })
            node.raw = node:to_table()
            node.widgets = app.forms[node.type](app.forms, web)
+           local subforms = {}
+           for i, subform in ipairs(node.widgets.subforms or {}) do
+	     subforms[#subforms+1] = cosmo.fill(subform, { form = forms.form, 
+	                                                   form_id = "subform_" .. div_id .. "_" .. i })
+	   end
 	   local form = function (args)
 	     args = args or {}
-             return form_tmpl{ form = forms.form, form_id = args.id or "form_" .. div_id, 
+             return form_tmpl{ form = forms.form, subforms = subforms, form_id = args.id or "form_" .. div_id, 
 			       url = args.url or web:link("/" .. node.type .. "/" .. node.id), node = node }
 	   end	
 	   return tmpl:render(web, { node = node, id = div_id, form = form })
@@ -418,11 +429,30 @@ function plugin.new(app)
     node_save(self)
     for name, field in pairs(self.__schema[self.__name].fields) do
       if field.join_table then
-	app.models[field.join_table]:delete_all("node = ?", { self.id })
+	local rel_name
+	if self.__schema[field.join_table].fields.node then
+	  rel_name = "node"
+        else
+	  rel_name = self.__name
+	end
+	app.models[field.join_table]:delete_all(rel_name .. " = ?", { self.id })
 	for _, item in ipairs(self[name] or {}) do
 	  local new = app.models[field.join_table]:new()
-	  new.node = self.id
+	  new[rel_name] = self.id
 	  new[field.entity] = item.id
+	  new:save()
+	end
+      elseif field.entity then
+	local rel_name
+	if self.__schema[field.entity].fields.node then
+	  rel_name = "node"
+        else
+	  rel_name = self.__name
+	end
+	app.models[field.entity]:delete_all(rel_name .. " = ?", { self.id })
+	for _, item in ipairs(self[name] or {}) do
+	  local new = app.models[field.entity]:new(item)
+	  new[rel_name] = self.id
 	  new:save()
 	end
       end

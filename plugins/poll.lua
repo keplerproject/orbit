@@ -87,6 +87,18 @@ local poll_widgets = function (self, web)
     node_widgets[1],
     node_widgets[2],
     { type = "check", args = { label = "Closed", field = "closed" } },
+    { type = "detail", args = { label = "Options", field = "options", form = "#poll_options" } },
+    subforms = {
+     [=[
+       <div id = "$form_id" style = "display: none">
+         $form{ id = "poll_options", url = "#poll_options", hidden = true }[[
+           $text{ label = "Question", field = "name" }
+           $text{ label = "Weight", field = "weight", size = 10 }
+           $button{ id = "delete", label = "Remove", action = "delete_self" }
+         ]]
+       </div>
+     ]=]	
+    }
   }
 end
 
@@ -117,6 +129,27 @@ function plugin.new(app)
   function app.models.poll:find_latest()
     return self:find_first("closed is null or closed != ?", 
 	                   { true, order = "created_at desc", count = 1 })
+  end
+
+  function app.models.poll:to_table()
+    local tab = app.models.node.to_table(self)
+    local _ = tab.options[1]
+    return tab
+  end
+
+  function app.models.poll:from_table(tab)
+    app.models.post.from_table(self, tab)
+    local total = 0
+    for i, option in ipairs(tab.options) do
+      for name, value in pairs(option) do
+        self.options[i][name] = value
+      end
+      if not self.options[i].votes then
+        self.options[i].votes = 0
+      end
+      total = total + self.options[i].votes
+    end
+    self.total = total
   end
 
   function app.models.poll:vote(option_id)
