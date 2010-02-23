@@ -470,6 +470,7 @@ function dao_methods:new(row)
   for name, field in pairs(schema.fields) do
     row[name] = row[name] or field.default
   end
+  row.id = nil
   if schema.parent then row.type = self.__name end
   setmetatable(row, { __index = self })
   return row
