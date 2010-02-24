@@ -92,7 +92,7 @@ local poll_widgets = function (self, web)
      [=[
        <div id = "$form_id" style = "display: none">
          $form{ id = "poll_options", url = "#poll_options", hidden = true }[[
-           $text{ label = "Question", field = "name" }
+           $text{ label = "Option", field = "name" }
            $text{ label = "Weight", field = "weight", size = 10 }
            $button{ id = "delete", label = "Remove", action = "delete_self" }
          ]]
@@ -163,6 +163,14 @@ function plugin.new(app)
         break
       end
     end
+  end
+
+  local poll_new = app.models.poll.new
+  
+  function app.models.poll:new(tab)
+    local poll = poll_new(self, tab)
+    poll.options = {}
+    return poll
   end
 
   app.blocks.protos.latest_poll = block_poll
