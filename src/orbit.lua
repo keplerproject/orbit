@@ -310,7 +310,6 @@ function app_module_methods.serve_static(app_module, web, filename)
 	 return contents
       end
    end
-
 end
 
 local function newtag(name)
