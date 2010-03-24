@@ -30,9 +30,9 @@ function _M.methods:htmlify(...)
       util.htmlify(patt)
     else
       for name, func in pairs(self) do
-	if string.match(name, "^" .. patt .. "$") and type(func) == "function" then
-	  htmlify_func(func)
-	end
+        if string.match(name, "^" .. patt .. "$") and type(func) == "function" then
+          htmlify_func(func)
+        end
       end
     end
   end
