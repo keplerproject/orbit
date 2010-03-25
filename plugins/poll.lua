@@ -1,11 +1,9 @@
 
-local template = require "modules.template"
-local forms = require "modules.form"
-local route = require "orbit.routes"
+local template = require "mk.template"
+local forms = require "mk.forms"
 local json = require "json"
 local schema = require "orbit.schema"
 
-local R = route.R
 local plugin = { name = "poll" }
 
 local poll_form = [=[
@@ -28,7 +26,7 @@ local function block_poll(app, args, tmpl)
   args = args or {}
   tmpl = tmpl or template.compile(poll_tmpl)
   local form_tmpl = cosmo.compile(poll_form)
-  return function (web, env, name)
+  return function (req, res, env, name)
            local div_id = args.id or name
 	   local poll = app.models.poll:find_latest()
 	   local options = {}
@@ -36,12 +34,12 @@ local function block_poll(app, args, tmpl)
 	   local form = function (args)
 	     args = args or {}
              return form_tmpl{ form = forms.form, form_id = "form_" .. div_id, div_id = div_id,
-			       wrap_ul = args.wrap_ul, result = web:link("/poll/" .. poll.id .. "/raw"),
-			       url = web:link("/poll/" .. poll.id .. "/vote"), options = poll.options,
+			       wrap_ul = args.wrap_ul, result = req:link_view_node_type_raw(nil, { type = "poll", id = poll.id }),
+			       url = req:link_post_vote(nil, { id = poll.id }), options = poll.options,
 			       ul_class = args.ul_class, li_class = args.li_class }
 	   end	
 	   local env = setmetatable({ div_id = args.id or name, form = form }, { __index = poll })
-	   return tmpl:render(web, env)
+	   return tmpl:render(req, res, env)
 	 end
 end
 
@@ -57,36 +55,36 @@ local poll_total_tmpl = [=[
 
 local function block_poll_total(app, args, tmpl)
   tmpl = tmpl or template.compile(poll_total_tmpl)
-  return function (web, env, name)
+  return function (req, res, env, name)
 	   local poll = env.node
 	   local _ = poll.options[1]
-	   return tmpl:render(web, poll)
+	   return tmpl:render(req, res, poll)
 	 end
 end
 
-local function post_vote(app, web, params)
-  web:content_type("application/json")
+local function post_vote(app, req, res, params)
+  res:content_type("application/json")
   local id = tonumber(params.id)
   local poll = app.models.poll:find(id)
   if poll then
-    local obj = json.decode(web.input.json)
+    local obj = json.decode(req.POST.json)
     local ok, err = poll:vote(obj.option)
       if ok then
-        return json.encode{}
+        res:write(json.encode{})
       else
-        return json.encode{ message = err }
+        res:write(json.encode{ message = err })
       end
   else
-    return json.encode{ message = "Poll not found" }
+    res:write(json.encode{ message = "Poll not found" })
   end
 end
 
-local poll_widgets = function (self, web) 
-  local node_widgets = self:node(web)
+local poll_widgets = function (self, req, res) 
+  local node_widgets = self:node(req, res)
   return {
     node_widgets[1],
     node_widgets[2],
-    { type = "check", args = { label = "Closed", field = "closed" } },
+    { type = "checkbox", args = { label = "Closed", field = "closed" } },
     { type = "detail", args = { label = "Options", field = "options", form = "#poll_options" } },
     subforms = {
      [=[
@@ -175,7 +173,8 @@ function plugin.new(app)
 
   app.blocks.protos.latest_poll = block_poll
   app.blocks.protos.poll_total = block_poll_total
-  table.insert(app.routes, { pattern = R'/poll/:id/vote', handler = post_vote, method = "post" })
+  app.post_vote = post_vote
+  table.insert(app.routes, { pattern = '/poll/:id/vote', name = "post_vote", method = "post" })
   app.models.types.poll = app.models.poll
   app.forms.poll = poll_widgets
 end

@@ -1,6 +1,4 @@
 
-local core = require "modules.core"
+local orbit = require "orbit"
 
-module("publique", core.new)
-
-return _M.run
+return orbit.new("publique")

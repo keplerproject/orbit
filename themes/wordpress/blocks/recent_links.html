@@ -3,7 +3,7 @@
 <div class="module-content">
   <ul class="module-list">
     $nodes[[
-    <li class="module-list-item"><a href="$node_url{ raw }">$title</a></li>
+    <li class="module-list-item"><a href="$(req:link_view_node_id(nil, { id = self.id }))">$title</a></li>
     ]]
   </ul>
 </div>

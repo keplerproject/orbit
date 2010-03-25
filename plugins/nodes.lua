@@ -1,167 +1,163 @@
 
-local routes = require "orbit.routes"
 local schema = require "orbit.schema"
-local forms = require "modules.form"
-local template = require "modules.template"
+local forms = require "mk.forms"
+local template = require "mk.template"
 local json = require "json"
 
 local plugin = { name = "nodes" }
 
-local R = orbit.routes.R
-
 local methods = {}
 
-function methods:view_home(web)
+function methods:view_home(req, res)
   local home_id = self.config.home_page or "/index"
   local node = self.models.node:find_by_nice_id{ home_id }
   if node then
-    return self:view_node(web, node)
+    return self:view_node(req, res, node)
   else
-    return self.not_found(web)
+    return self.not_found(req, res)
   end
 end
 
-function methods:view_node(web, node, raw)
+function methods:view_node(req, res, node, raw)
   local type = node.type
   local template
   if node.nice_id then
-    template = self.theme:load("pages/" .. node.nice_id:sub(2):gsub("/", "-") .. ".html")
+    template = self.theme:load("pages/" .. node.nice_id:sub(2):gsub("/", "-") .. ".html", self.engine)
   end
-  template = template or self.theme:load("pages/" .. type .. ".html")
+  template = template or self.theme:load("pages/" .. type .. ".html", self.engine)
   if template then
     if raw then
-      return template:render(web, { node = node })
+      res:write(template:render(req, res, { node = node }))
     else
-      return self:layout(web, template:render(web, { node = node }))
+      res:write(self:layout(req, res, template:render(req, res, { node = node })))
     end
   else
-    return self.not_found(web)
+    return self.not_found(req, res)
   end
 end
 
-function methods:view_node_id(web, params)
+function methods:view_node_id(req, res, params)
   local id = tonumber(params.id)
   local node = self.models.node:find(id)
   if node then
-    return self:view_node(web, node)
+    return self:view_node(req, res, node)
   else
-    return self.not_found(web)
+    return self.not_found(req, res)
   end
 end
 
-function methods:view_node_id_raw(web, params)
+function methods:view_node_id_raw(req, res, params)
   local id = tonumber(params.id)
   local node = self.models.node:find(id)
   if node then
-    return self:view_node(web, node, true)
+    return self:view_node(req, res, node, true)
   else
-    return self.not_found(web)
+    return self.not_found(req, res)
   end
 end
 
-function methods:view_nice(web, params)
+function methods:view_nice(req, res, params)
   local nice_handle = "/" .. params.splat[1]
   local node = self.models.node:find_by_nice_id{ nice_handle }
   if node then
-    return self:view_node(web, node)
+    return self:view_node(req, res, node)
   else
     return self.reparse
   end
 end
 
-function methods:view_node_type(web, params)
+function methods:view_node_type(req, res, params)
   local type, id = params.type, tonumber(params.id)
   if self.models.types[type] and id then
     local node = self.models.types[type]:find(id)
     if node then
-      return self:view_node(web, node)
+      return self:view_node(req, res, node)
     end
   end
   return self.reparse
 end
 
-function methods:view_node_type_raw(web, params)
+function methods:view_node_type_raw(req, res, params)
   local type, id = params.type, tonumber(params.id)
   if self.models.types[type] and id then
     local node = self.models.types[type]:find(id)
     if node then
-      return self:view_node(web, node, true)
+      return self:view_node(req, res, node, true)
     end
   end
   return self.reparse
 end
 
-function methods:form_node_new(web, params)
+function methods:form_node_new(req, res, params)
   local type = params.type
   local node = self.models.types[type]:new()
-  local template = self.admin_theme:load("pages/form-new-" .. type .. ".html") or
-                   self.admin_theme:load("pages/form-new-node.html")
+  local template = self.admin_theme:load("pages/form-new-" .. type .. ".html", self.engine) or
+                   self.admin_theme:load("pages/form-new-node.html", self.engine)
   if template then
-    return self:admin_layout(web, template:render(web, { node = node }))
+    res:write(self:admin_layout(req, res, template:render(req, res, { node = node })))
   else
-    return self.not_found(web)
+    return self.not_found(req, res)
   end
 end
 
-function methods:node_new(web, params)
-  web:content_type("application/json")
-  local raw_node = json.decode(web.input.json)
+function methods:node_new(req, res, params)
+  res:content_type("application/json")
+  local raw_node = json.decode(req.POST.json)
   local node = self.models.types[params.type]:new()
   node:from_table(raw_node)
-  local ok, errors = pcall(node.save, node)
-  if not ok then print(errors); error(errors) end
-  return string.format([[{ "to": "%s" }]], web:link(string.format("/%s/%s", node.type, node.id)))
+  node:save()
+  res:write(string.format([[{ "to": "%s" }]], req:link_view_node_type(nil, { type = node.type, id = node.id })))
 end
 
-function methods:form_node_edit(web, params)
+function methods:form_node_edit(req, res, params)
   local id = tonumber(params.id)
   local node = self.models.node:find(id)
   local type = params.type or node.type
-  local template = self.admin_theme:load("pages/form-edit-" .. type .. ".html") or
-                   self.admin_theme:load("pages/form-edit-node.html")
+  local template = self.admin_theme:load("pages/form-edit-" .. type .. ".html", self.engine) or
+                   self.admin_theme:load("pages/form-edit-node.html", self.engine)
   if template then
-    return self:admin_layout(web, template:render(web, { node = node }))
+    res:write(self:admin_layout(req, res, template:render(req, res, { node = node })))
   else
-    return self.not_found(web)
+    return self.not_found(req, res)
   end
 end
 
-function methods:node_edit(web, params)
-  web:content_type("application/json")
-  print(web.input.json)
-  local raw_node = json.decode(web.input.json)
+function methods:node_edit(req, res, params)
+  res:content_type("application/json")
+  local raw_node = json.decode(req.POST.json)
   local node = self.models.node:find(raw_node.id)
   node:from_table(raw_node)
-  local ok, errors = pcall(node.save, node)
-  if not ok then print(errors); error(errors) end
-  return string.format([[{ "to": "%s" }]], web:link(string.format("/%s/%s", node.type, node.id)))
+  node:save()
+  res:write(string.format([[{ "to": "%s" }]], req:link_view_node_type(nil, { type = node.type, id = node.id })))
 end
 
-function methods:view_terms_json(web, params)
-  web:content_type("application/json")
+function methods:view_terms_json(req, res, params)
+  res:content_type("application/json")
   local vocabulary = params.name
   local terms = self.models.term:find_by_vocabulary(vocabulary)
   local list = {}
   for _, term in ipairs(terms) do
     list[#list+1] = { id = term.id, name = term.display_name }
   end
-  return json.encode{ list = list }  
+  res:write(json.encode{ list = list })
 end
 
 local node_routes = {
-    { pattern = R'/', handler = methods.view_home, method = "get" },
-    { pattern = R'/node/:id', handler = methods.view_node_id, method = "get" },
-    { pattern = R'/node/:id/raw', handler = methods.view_node_id_raw, method = "get" },
-    { pattern = R'/node/:id', handler = methods.node_edit, method = "post" },
-    { pattern = R'/node/:id/edit', handler = methods.form_node_edit, method = "get" },
-    { pattern = R'/terms/:name/json', handler = methods.view_terms_json, method = "get" },
-    { pattern = R'/:type/:id', handler = methods.view_node_type, method = "get" },
-    { pattern = R'/:type/:id', handler = methods.node_edit, method = "post" },
-    { pattern = R'/:type/:id/edit', handler = methods.form_node_edit, method = "get" },
-    { pattern = R'/:type/:id/raw', handler = methods.view_node_type_raw, method = "get" },
-    { pattern = R'/:type/new', handler = methods.form_node_new, method = "get" },
-    { pattern = R'/:type/new', handler = methods.node_new, method = "post" },
-    { pattern = R'/*', handler = methods.view_nice, method = "get" },
+    { pattern = '/', name = "view_home", method = "get" },
+    { pattern = '/node/:id', name = "view_node_id", method = "get" },
+    { pattern = '/node/:id/raw', name = "view_node_id_raw", method = "get" },
+    { pattern = '/node/:id', name = "node_edit", method = "post" },
+    { pattern = '/node/:id/edit', name = "form_node_edit", method = "get" },
+    { pattern = '/terms/:name/json', name = "view_terms_json", method = "get" },
+    { pattern = '/:type/:id', name = "view_node_type", method = "get" },
+    { pattern = '/:type/:id', name = "node_edit_type", 
+      handler = methods.node_edit, method = "post" },
+    { pattern = '/:type/:id/edit', name = "form_node_edit_type", 
+      handler = methods.form_node_edit, method = "get" },
+    { pattern = '/:type/:id/raw', name = "view_node_type_raw", method = "get" },
+    { pattern = '/:type/new', name = "form_node_new", method = "get" },
+    { pattern = '/:type/new', name = "node_new", method = "post" },
+    { pattern = '/*', name = "view_nice", method = "get" },
 }
 
 local blocks = {}
@@ -171,7 +167,7 @@ local show_latest_tmpl = [=[
     <h2>$title</h2>
     <ul>
     $nodes[[
-      <li><a href = "$node_url{ raw }">$title</a></li>
+	<li><a href = "$(req:link_view_node_id(nil, { id = self.id }))">$title</a></li>
     ]]
     </ul>
   </div>
@@ -181,7 +177,7 @@ local show_latest_body_tmpl = [=[
   <div id = "$id">
     <h2>$title</h2>
     $nodes[[
-	<h3><a href = "$node_url{raw}">$title</a></h3>
+	<h3><a href = "$(req:link_view_node_id(nil, { id = self.id }))">$title</a></h3>
 	$body
     ]]
   </div>
@@ -190,22 +186,22 @@ local show_latest_body_tmpl = [=[
 function blocks.show_latest(app, args, tmpl)
   args = args or {}
   tmpl = tmpl or template.compile(show_latest_tmpl)
-  return function (web, env, name)
+  return function (req, res, env, name)
 	   local fields = { "id", "nice_id", "title", unpack(args.includes or {}) }
 	   local nodes = app.models[args.node or "node"]:find_latest{ count = args.count,
 								     fields = fields }
-	   return tmpl:render(web, { title = args.title, nodes = nodes, id = args.id or name })
+	   return tmpl:render(req, res, { title = args.title, nodes = nodes, id = args.id or name })
 	 end
 end
 
 function blocks.show_latest_body(app, args, tmpl)
   args = args or {}
   tmpl = tmpl or template.compile(show_latest_body_tmpl)
-  return function (web, env, name)
+  return function (req, res, env, name)
 	   local fields = { "id", "nice_id", "title", "body", unpack(args.includes or {}) }
 	   local nodes = app.models[args.node or "node"]:find_latest{ count = args.count,
 								     fields = fields }
-	   return tmpl:render(web, { title = args.title, nodes = nodes, id = args.id or name })
+	   return tmpl:render(req, res, { title = args.title, nodes = nodes, id = args.id or name })
 	 end
 end
 
@@ -219,8 +215,8 @@ local node_info_tmpl = [=[
 function blocks.node_info(app, args, tmpl)
   args = args or {}
   tmpl = tmpl or template.compile(node_info_tmpl)
-  return function (web, env, name)
-	   return tmpl:render(web, { node = env.node, id = args.id or name })
+  return function (req, res, env, name)
+	   return tmpl:render(req, res, { node = env.node, id = args.id or name })
 	 end
 end
 
@@ -247,11 +243,11 @@ function blocks.form_new_node(app, args, tmpl)
   args = args or {}
   tmpl = tmpl or template.compile(form_new_node_tmpl)
   local form_tmpl = cosmo.compile(node_form)
-  return function (web, env, name)
+  return function (req, res, env, name)
            local div_id = args.id or name
            local node = setmetatable({}, { __index = env.node })
            node.raw = node:to_table()
-           node.widgets = app.forms[node.type](app.forms, web)
+           node.widgets = app.forms[node.type](app.forms, req, res)
            local subforms = {}
            for i, subform in ipairs(node.widgets.subforms or {}) do
 	     subforms[#subforms+1] = cosmo.fill(subform, { form = forms.form, 
@@ -260,9 +256,9 @@ function blocks.form_new_node(app, args, tmpl)
 	   local form = function (args)
 	     args = args or {}
              return form_tmpl{ form = forms.form, subforms = subforms, form_id = args.id or "form_" .. div_id, 
-			       url = args.url or web:link("/" .. node.type .. "/new"), node = node }
+			       url = args.url or req:link_node_new(nil, { type = node.type }), node = node }
 	   end
-	   return tmpl:render(web, { node = node, id = div_id, form = form })
+	   return tmpl:render(req, res, { node = node, id = div_id, form = form })
 	 end
 end
 
@@ -277,11 +273,11 @@ function blocks.form_edit_node(app, args, tmpl)
   args = args or {}
   tmpl = tmpl or template.compile(form_edit_node_tmpl)
   local form_tmpl = cosmo.compile(node_form)
-  return function (web, env, name)
+  return function (req, res, env, name)
            local div_id = args.id or name
            local node = setmetatable({}, { __index = env.node })
            node.raw = node:to_table()
-           node.widgets = app.forms[node.type](app.forms, web)
+           node.widgets = app.forms[node.type](app.forms, req, res)
            local subforms = {}
            for i, subform in ipairs(node.widgets.subforms or {}) do
 	     subforms[#subforms+1] = cosmo.fill(subform, { form = forms.form, 
@@ -290,24 +286,24 @@ function blocks.form_edit_node(app, args, tmpl)
 	   local form = function (args)
 	     args = args or {}
              return form_tmpl{ form = forms.form, subforms = subforms, form_id = args.id or "form_" .. div_id, 
-			       url = args.url or web:link("/" .. node.type .. "/" .. node.id), node = node }
+			       url = args.url or req:link_node_edit_type(nil, { type = node.type, id = node.id }), node = node }
 	   end	
-	   return tmpl:render(web, { node = node, id = div_id, form = form })
+	   return tmpl:render(req, res, { node = node, id = div_id, form = form })
 	 end
 end
 
-local node_widgets = function (self, web)
+local node_widgets = function (self, req, res)
   return {
     { type = "text", args = { label = "Title", field = "title", flash = { class = "field_flash" } } },
     { type = "richtext", args = { label = "Body", field = "body" } },
     { type = "text", args = { label = "Nice URL", field = "nice_id" } },
     { type = "checkgroup", args = { label = "Visibility", field = "visibility", 
-                                    url = web:link("/terms/visibility/json") } }
+                                    url = req:link_view_terms_json(nil, { name = "visibility" }) } }
   }
 end
 
-local post_widgets = function (self, web) 
-  local node_widgets = self:node(web)
+local post_widgets = function (self, req, res) 
+  local node_widgets = self:node(req, res)
   return {
     node_widgets[1],
     { type = "richtext", args = { label = "Teaser", field = "body" } },
