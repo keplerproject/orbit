@@ -5,15 +5,8 @@ home_page = "/home"
 
 blocks = {
   title = { "title", args = { "Test Website" } },
-  javascript = { "javascript", args = { 
-	 "/js/jquery-1.4.2.min.js",
-	 "http://jquery-json.googlecode.com/files/jquery.json-2.2.min.js",
-	 "/js/form_support.js",
-         "/js/jquery-ui-1.7.2.custom.min.js",
-         "/js/jquery.wysiwyg.js",
-         "/js/jquery.autocomplete.min.js"
-	} },
-  css = { "css", args = { "/styles/default.css" } },
+  javascript = { "javascript" },
+  css = { "css" },
   banner = { "banner", args = { title = "Test Website", tagline = "It is simple!" } },
   copyright = { "copyright", args = { "2010" } },
   about = { "generic", args = { title = "About Website", text = "Lorem ipsum." } },

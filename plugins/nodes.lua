@@ -142,6 +142,25 @@ function methods:view_terms_json(req, res, params)
   res:write(json.encode{ list = list })
 end
 
+function methods:form_deps(widgets)
+  for _, dep in ipairs{ "js", "css" } do
+    for _, file in ipairs(forms.dependencies[dep]) do
+      if not self[dep][file] then
+	self[dep][file] = true
+	self[dep][#self[dep]+1] = "ext/forms/" .. file
+      end
+    end
+    for _, w in ipairs(widgets) do
+      for _, file in ipairs(forms.controls[w.type][dep] or {}) do
+	if not self[dep][file] then
+	  self[dep][file] = true
+	  self[dep][#self[dep]+1] = "ext/" .. w.type .. "/" .. file
+	end
+      end
+    end
+  end
+end
+
 local node_routes = {
     { pattern = '/', name = "view_home", method = "get" },
     { pattern = '/node/:id', name = "view_node_id", method = "get" },
@@ -248,6 +267,7 @@ function blocks.form_new_node(app, args, tmpl)
            local node = setmetatable({}, { __index = env.node })
            node.raw = node:to_table()
            node.widgets = app.forms[node.type](app.forms, req, res)
+	   app:form_deps(node.widgets)
            local subforms = {}
            for i, subform in ipairs(node.widgets.subforms or {}) do
 	     subforms[#subforms+1] = cosmo.fill(subform, { form = forms.form, 
@@ -278,6 +298,7 @@ function blocks.form_edit_node(app, args, tmpl)
            local node = setmetatable({}, { __index = env.node })
            node.raw = node:to_table()
            node.widgets = app.forms[node.type](app.forms, req, res)
+	   app:form_deps(node.widgets)
            local subforms = {}
            for i, subform in ipairs(node.widgets.subforms or {}) do
 	     subforms[#subforms+1] = cosmo.fill(subform, { form = forms.form, 

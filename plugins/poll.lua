@@ -26,6 +26,7 @@ local function block_poll(app, args, tmpl)
   args = args or {}
   tmpl = tmpl or template.compile(poll_tmpl)
   local form_tmpl = cosmo.compile(poll_form)
+  app:form_deps({ { type = "radio" } })
   return function (req, res, env, name)
            local div_id = args.id or name
 	   local poll = app.models.poll:find_latest()
