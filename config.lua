@@ -30,7 +30,7 @@ blocks = {
 
 database = {
   driver = "mysql",
-  connection = { "publique-devel", "root", "rfc8000" }
+  connection = { "toycms-devel", "root", "password" }
 }
 
 plugins = {

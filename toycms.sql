@@ -3,7 +3,7 @@
 # http://code.google.com/p/sequel-pro
 #
 # Host: 127.0.0.1 (MySQL 5.1.41)
-# Database: publique-devel
+# Database: toycms-devel
 # Generation Time: 2010-02-24 10:52:59 -0300
 # ************************************************************
 
