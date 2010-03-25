@@ -1,8 +1,8 @@
 
 local mk = require "mk"
 local util = require "mk.util"
-local request = require "wsapi.request"
-local response = require "wsapi.response"
+local blocks = require "mk.blocks"
+local themes = require "mk.themes"
 
 local _M = {}
 
@@ -15,12 +15,109 @@ _M.methods = {}
 _M.methods.__index = _M.methods
 
 function _M.new(app)
-  local mk_app = mk.new(app)
+  local app = mk.new(app)
   for k, v in pairs(_M.methods) do
-    mk_app[k] = v
+    app[k] = v
   end
-  mk_app.mapper = { default = true }
-  return mk_app
+  app.reparse = "MK_FORWARD"
+  app.blocks = { protos = util.merge(blocks, app.blocks), instances = {} }
+  app:load_config()
+  app:load_themes()
+  app:connect_mapper()
+  app.models = { types = {} }
+  app.plugins = {}
+  app.routes = {}
+  app.forms = {}
+  app:load_plugins()
+  app:connect_blocks()
+  app:connect_routes()
+  return app
+end
+
+function _M.methods:load_config()
+  self.config = self.config or util.loadin(self.app_path .. "/config.lua")
+  if not self.config then
+    error("cannot find config.lua in " .. self.app_path)
+  end
+end
+
+function _M.methods:load_themes()
+  if self.config.theme then
+    self.theme = themes.new{ name = self.config.theme, 
+                             path = self.app_path .. "/themes" }
+    if not self.theme then
+      error("theme " .. self.config.theme .. " not found")
+    end
+  end
+  if self.config.admin_theme then
+    self.admin_theme = themes.new{ name = self.config.admin_theme, 
+                                   path = self.app_path .. "/themes" }
+    if not self.admin_theme then
+      error("theme " .. self.config.admin_theme .. " not found")
+    end
+  end
+  self.admin_theme = self.admin_theme or self.theme
+  if self.theme then
+    self.theme.blocks = self.blocks.instances
+  end
+  if self.admin_theme then
+    self.admin_theme.blocks = self.blocks.instances
+  end
+end
+
+function _M.methods:connect_mapper()
+  self.mapper = self.mapper or { default = true, 
+                                 logging = true,
+                                 schema = { entities = {} } }
+  if self.config.database then
+    local luasql = require("luasql." .. self.config.database.driver)
+    local env = luasql[self.config.database.driver]()
+    self.mapper.conn = env:connect(unpack(self.config.database.connection))
+    self.mapper.driver = self.config.database.driver
+  end
+end
+
+function _M.methods:connect_blocks()
+  for name, proto in pairs(self.config.blocks) do
+    self.blocks.instances[name] = self.blocks.protos[proto[1]](self, proto.args, self:block_template(name, proto.engine))
+  end
+end
+
+function _M.methods:connect_routes()
+  for _, route in ipairs(self.routes) do
+    self["dispatch_" .. route.method](self, route.name, route.pattern, route.handler and 
+				      self:wrap(function (...) return route.handler(self, ...) end))
+  end
+end
+
+function _M.methods:layout(req, res, inner_html)
+  local layout_template = self.theme:load("layout.html", self.engine)
+  if layout_template then
+    return layout_template:render(req, res, { inner = inner_html })
+  else
+    return inner_html
+  end
+end
+
+function _M.methods:admin_layout(req, res, inner_html)
+  local layout_template = self.admin_theme:load("layout.html", self.engine)
+  if layout_template then
+    return layout_template:render(req, res, { inner = inner_html })
+  else
+    return inner_html
+  end
+end
+
+function _M.methods:load_plugins()
+  for _, file in ipairs(self.config.plugins or {}) do
+    local plugin = dofile(self.app_path .. "/plugins/" .. file)
+    self.plugins[plugin.name] = plugin.new(self)
+  end
+end
+
+function _M.methods:block_template(block, engine)
+  local tmpl, err = self.theme:load("blocks/" .. block .. ".html", engine or self.engine)
+  return tmpl
 end
 
 function _M.methods:htmlify(...)
@@ -40,12 +137,10 @@ end
 
 function _M.methods:model(...)
   if self.mapper.default then
-    if not orbit.model then
-      require "orbit.model"
-    end
-    local mapper = orbit.model.new()
+    local model = require "orbit.model"
+    local mapper = model.new()
     mapper.conn, mapper.driver, mapper.logging, mapper.schema = 
-      self.mapper.conn, self.mapper.driver or orbit.model.drivers.sqlite3, 
+      self.mapper.conn, model.drivers[self.mapper.driver or "sqlite3"], 
       self.mapper.logging, self.mapper.schema
     self.mapper = mapper
   end
