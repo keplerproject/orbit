@@ -28,6 +28,8 @@ function _M.new(app)
   app.plugins = {}
   app.routes = {}
   app.forms = {}
+  app.js = {}
+  app.css = {}
   app:load_plugins()
   app:connect_blocks()
   app:connect_routes()
