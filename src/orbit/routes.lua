@@ -1,9 +1,9 @@
 
-require "lpeg"
-require "re"
-require "wsapi.util"
+local lpeg = require "lpeg"
+local re = require "re"
+local util = require "wsapi.util"
 
-module("orbit.routes", package.seeall)
+local _M = {}
 
 local function foldr(t, f, acc)
    for i = #t, 1, -1 do
@@ -19,79 +19,86 @@ local function foldl(t, f, acc)
    return acc
 end
 
-param = re.compile[[ {[/%.]} ':' {[%w_]+} &('/' / {'.'} / !.) ]] / 
-             function (prefix, name, dot)
-		local extra = { inner = (lpeg.P(1) - lpeg.S("/" .. (dot or "")))^1,
-				close = lpeg.P"/" + lpeg.P(dot or -1) + lpeg.P(-1) }
-		return { cap = lpeg.Carg(1) * re.compile([[ [/%.] {%inner+} &(%close) ]], extra) / 
-		                   function (params, item, delim)
-				      params[name] = wsapi.util.url_decode(item)
-				   end,
-				clean = re.compile([[ [/%.] %inner &(%close) ]], extra),
-			      tag = "param", name = name, prefix = prefix }
-	     end
+local param = re.compile[[ {[/%.]} ':' {[%w_]+} &('/' / {'.'} / !.) ]] / 
+                 function (prefix, name, dot)
+		   local extra = { inner = (lpeg.P(1) - lpeg.S("/" .. (dot or "")))^1,
+				   close = lpeg.P"/" + lpeg.P(dot or -1) + lpeg.P(-1) }
+		   return { cap = lpeg.Carg(1) * re.compile([[ [/%.] {%inner+} &(%close) ]], extra) / 
+			function (params, item, delim)
+			  params[name] = wsapi.util.url_decode(item)
+			end,
+		      clean = re.compile([[ [/%.] %inner &(%close) ]], extra),
+		      tag = "param", name = name, prefix = prefix }
+		 end
 
-opt_param = re.compile[[ {[/%.]} '?:' {[%w_]+} '?' &('/' / {'.'} / !.) ]] / 
-             function (prefix, name, dot)
-		local extra = { inner = (lpeg.P(1) - lpeg.S("/" .. (dot or "")))^1,
-				close = lpeg.P"/" + lpeg.P(dot or -1) + lpeg.P(-1) }
-		return { cap = (lpeg.Carg(1) * re.compile([[ [/%.] {%inner+} &(%close) ]], extra) / 
-		                   function (params, item, delim)
-				      params[name] = wsapi.util.url_decode(item)
+local opt_param = re.compile[[ {[/%.]} '?:' {[%w_]+} '?' &('/' / {'.'} / !.) ]] / 
+                     function (prefix, name, dot)
+		       local extra = { inner = (lpeg.P(1) - lpeg.S("/" .. (dot or "")))^1,
+				       close = lpeg.P"/" + lpeg.P(dot or -1) + lpeg.P(-1) }
+		       return { cap = (lpeg.Carg(1) * re.compile([[ [/%.] {%inner+} &(%close) ]], extra) / 
+				   function (params, item, delim)
+				     params[name] = wsapi.util.url_decode(item)
 				   end)^-1,
-				clean = re.compile([[ [/%.] %inner &(%close) ]], extra)^-1,
+			      clean = re.compile([[ [/%.] %inner &(%close) ]], extra)^-1,
 			      tag = "opt", name = name, prefix = prefix }
-	     end
+		     end
+		   
+local splat = re.compile[[ {[/%.]} {'*'} &('/' / '.' / !.) ]] /
+                  function (prefix)
+		    return { cap = "*", tag = "splat", prefix = prefix }
+		  end
+		
+local rest = lpeg.C((lpeg.P(1) - param - opt_param - splat)^1)
 
-splat = re.compile[[ {[/%.]} {'*'} &('/' / '.' / !.) ]] /
-              function (prefix)
-		return prefix, { cap = "*", tag = "splat", prefix = prefix }
-	      end
+local function fold_caps(cap, acc)
+  if type(cap) == "string" then
+    return { cap = lpeg.P(cap) * acc.cap, clean = lpeg.P(cap) * acc.clean }
+  elseif cap.cap == "*" then
+    return { cap = (lpeg.Carg(1) * (lpeg.P(cap.prefix) * lpeg.C((lpeg.P(1) - acc.clean)^0))^-1 / 
+		function (params, splat)
+		  if not params.splat then params.splat = {} end
+		  if splat and splat ~= "" then
+		    params.splat[#params.splat+1] = wsapi.util.url_decode(splat)
+		  end
+		end) * acc.cap,
+	   clean = (lpeg.P(cap.prefix) * (lpeg.P(1) - acc.clean)^0)^-1 * acc.clean }
+  else
+    return { cap = cap.cap * acc.cap, clean = cap.clean * acc.clean }
+  end
+end
 
-rest = lpeg.C((lpeg.P(1) - param - opt_param - splat)^1)
+local function fold_parts(parts, cap)
+  if type(cap) == "string" then
+    parts[#parts+1] = { tag = "text", text = cap }
+  else
+    parts[#parts+1] = { tag = cap.tag, prefix = cap.prefix, name = cap.name }
+  end
+  return parts
+end
 
-fold_caps = function (cap, acc)
-	       if type(cap) == "string" then
-		  return { cap = lpeg.P(cap) * acc.cap, clean = lpeg.P(cap) * acc.clean }
-	       elseif cap.cap == "*" then
-		  return { cap = (lpeg.Carg(1) * lpeg.C((lpeg.P(1) - acc.clean)^1) / 
-                                      function (params, splat)
-					 if not params.splat then params.splat = {} end
-					 params.splat[#params.splat+1] = wsapi.util.url_decode(splat)
-				      end) * acc.cap,
-			   clean = (lpeg.P(1) - acc.clean)^1 * acc.clean }
-	       else
-		  return { cap = cap.cap * acc.cap, clean = cap.clean * acc.clean }
-	       end
-	    end
-
-fold_parts = function (parts, cap)
-	       if type(cap) == "string" then
-		 parts[#parts+1] = { tag = "text", text = cap }
-	       else
-		 parts[#parts+1] = { tag = cap.tag, prefix = cap.prefix, name = cap.name }
-	       end
-	       return parts
-	     end
-
-route = lpeg.Ct((param + opt_param + splat + rest)^1 * lpeg.P(-1)) / 
-           function (caps)
-	      return foldr(caps, fold_caps, { cap = lpeg.P("/")^-1 * lpeg.P(-1), clean = lpeg.P("/")^-1 * lpeg.P(-1) }),
-	             foldl(caps, fold_parts, {})
-	   end
+local route = lpeg.Ct((param + opt_param + splat + rest)^1 * lpeg.P(-1)) / 
+                function (caps)
+		  return foldr(caps, fold_caps, { cap = lpeg.P("/")^-1 * lpeg.P(-1), clean = lpeg.P("/")^-1 * lpeg.P(-1) }),
+		         foldl(caps, fold_parts, {})
+		end
 
 local function build(parts, params)
   local res = {}
   local i = 1
+  params = params or {}
+  params.splat = params.splat or {}
   for _, part in ipairs(parts) do
     if part.tag == "param" then
+      if not params[part.name] then
+	error("route parameter " .. part.name .. " does not exist")
+      end
       local s = string.gsub (params[part.name], "([^%.@]+)",
 			     function (s) return wsapi.util.url_encode(s) end)
       res[#res+1] = part.prefix .. s
     elseif part.tag == "splat" then
-      local s = string.gsub (params.splat[i], "([^/%.@]+)",
+      local s = string.gsub (params.splat[i] or "", "([^/%.@]+)",
 			     function (s) return wsapi.util.url_encode(s) end)
-      res[#res+1] = s
+      res[#res+1] = part.prefix .. s
       i = i + 1
     elseif part.tag == "opt" then
       if params and params[part.name] then
@@ -106,7 +113,7 @@ local function build(parts, params)
   if #res > 0 then return table.concat(res) else return "/" end
 end
 
-function R(path)
+function _M.R(path)
    local p, b = route:match(path)
    return setmetatable({ parser = p.cap, parts = b },
 		       { __index = { 
@@ -124,3 +131,4 @@ function R(path)
 		       } })
 end
 
+return setmetatable(_M, { __call = function (_, path) return _M.R(path) end })

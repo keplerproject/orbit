@@ -1,7 +1,5 @@
 
-require "orbit.routes"
-
-local R = orbit.routes.R
+local R = require "orbit.routes"
 
 do
    local r = R('/foo')
@@ -14,7 +12,7 @@ do
    local r = R('/foo')
    local t = r:match("/bar")
    assert(not t)
-   assert(r:build("bar") == "/foo")
+   assert(r:build() == "/foo")
 end
 
 do
@@ -81,6 +79,31 @@ do
 end
 
 do
+   local r = R('/*/foo/*')
+   local t = r:match('/bar/foo/bling/baz/boom')
+   assert(#t.splat == 2)
+   assert(t.splat[1] == "bar")
+   assert(t.splat[2] == "bling/baz/boom")
+   assert(r:build{ splat = { "bar", "bling/baz/boom" } } == "/bar/foo/bling/baz/boom")
+end
+
+do
+   local r = R('/*/foo/*')
+   local t = r:match('/bar/foo/')
+   assert(#t.splat == 1)
+   assert(t.splat[1] == "bar")
+   assert(r:build{ splat = { "bar", "bling/baz/boom" } } == "/bar/foo/bling/baz/boom")
+end
+
+do
+   local r = R('/*/foo/*')
+   local t = r:match('/bar/foo')
+   assert(#t.splat == 1)
+   assert(t.splat[1] == "bar")
+   assert(r:build{ splat = { "bar", "bling/baz/boom" } } == "/bar/foo/bling/baz/boom")
+end
+
+do
    local r = R('/:foo/*')
    local t = r:match('/foo/bar/baz')
    assert(#t.splat == 1)
@@ -109,6 +132,27 @@ do
    local r = R('/*')
    local t = r:match("/foo/bar/baz")
    assert(t.splat[1] == "foo/bar/baz")
+   assert(r:build{ splat = { "foo/bar/baz" } } == "/foo/bar/baz")
+end
+
+do
+   local r = R('/*')
+   local t = r:match("/")
+   assert(not t.splat[1])
+   assert(r:build{ splat = { "foo/bar/baz" } } == "/foo/bar/baz")
+end
+
+do
+   local r = R('/*')
+   local t = r:match("/")
+   assert(not t.splat[1])
+   assert(r:build{} == "/")
+end
+
+do
+   local r = R('/*')
+   local t = r:match("")
+   assert(not t.splat[1])
    assert(r:build{ splat = { "foo/bar/baz" } } == "/foo/bar/baz")
 end
 
