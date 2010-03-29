@@ -118,21 +118,20 @@ o ambiente passado para preencher (<em>template</em> <strong>não</strong> herda
 
 <pre class="example">
 #!/usr/bin/env op.cgi 
-<html> 
-<body> 
-<p>Hello Orbit!</p> 
-<p>I am in $web|real_path, and the script is 
-$web|script_name.</p> 
-$lua{[[ 
-if not web.input.msg then 
-web.input.msg = "nothing" 
-end 
-]]} 
-<p>You passed: $web|input|msg.</p> 
-$include{ "bar.op" } 
-</body> 
-</html> 
-</pre>
+&lt;html&gt;
+&lt;body&gt;
+&lt;p&gt;Hello Orbit!&lt;/p&gt;
+&lt;p&gt;I am in $web|real_path, and the script is
+$web|script_name.&lt;/p&gt;
+$lua{[[
+if not web.input.msg then
+web.input.msg = "nothing"
+end
+]]}
+&lt;p&gt;You passed: $web|input|msg.&lt;/p&gt;
+$include{ "bar.op" }
+&lt;/body&gt;
+&lt;/html&gt;</pre>
 
 
 <p>A página <code>bar.op</code> que ela inclui é essa: </p>
@@ -140,7 +139,7 @@ $include{ "bar.op" }
 
 <pre class="example">
 #!/usr/bin/env op.cgi 
-<p>This is bar, and you passed $web|input|msg!</p> 
+&lt;p&gt;This is bar, and you passed $web|input|msg!&lt;/p&gt; 
 </pre>
 
 
