@@ -100,11 +100,11 @@ module("hello", package.seeall, orbit.new)
 -- de visualização.
 
 function index(web)
-return render_index()
+  return render_index()
 end
 
 function say(web, name)
-return render_say(web, name)
+  return render_say(web, name)
 end
 
 -- Constrói a tabela de dispatch das aplicações, você pode 
@@ -127,22 +127,22 @@ hello:dispatch_get(say, "/say/(%a+)")
 -- Função de apoio para as partes comuns de uma página
 
 function render_layout(inner_html)
-return html{
-head{ title"Hello" },
-body{ inner_html }
-}
+  return html{
+    head{ title"Hello" },
+    body{ inner_html }
+  }
 end
 
 function render_hello()
-return p.hello"Hello World!"
+  return p.hello"Hello World!"
 end
 function render_index()
-return render_layout(render_hello())
+  return render_layout(render_hello())
 end
 
 function render_say(web, name)
-return render_layout(render_hello() .. 
-p.hello((web.input.greeting or "Hello ") .. name .. "!"))
+  return render_layout(render_hello() .. 
+		     p.hello((web.input.greeting or "Hello ") .. name .. "!"))
 end
 
 orbit.htmlify(hello, "render_.+")
