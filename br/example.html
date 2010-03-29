@@ -73,7 +73,7 @@
 <p>Você deve criar um arquivo ´blog.lua´, que será o arquivo principal de códigos fontes da nossa aplicação. A primeira coisa que você deve por no arquivo é o código para carregar o Orbit e outras bibliotecas que você usará no seu aplicativo.</p>
 
 
-<pre> 
+<pre class="example"> 
 require "orbit" 
 require "orbit.cache" 
 require "markdown" 
@@ -85,7 +85,7 @@ require "markdown"
 <p>Todas as aplicações Orbit são módulos Lua, portanto incluiremos esta linha:</p>
 
 
-<pre> 
+<pre class="example"> 
 module("blog", package.seeall, orbit.app) 
 </pre> 
 
@@ -97,7 +97,7 @@ module("blog", package.seeall, orbit.app)
 <p>Vamos carregar um script de configuração para o blog (um modelo comum em aplicações). Você pode pegar este script <a href="blog_config.lua">aqui</a>.</p>
 
 
-<pre> 
+<pre class="example"> 
 require "blog_config" 
 </pre> 
 
@@ -105,7 +105,7 @@ require "blog_config"
 <p>As próximas linhas carregam um driver de base de dados LuaSQL (definido na configuração), e configura o mapeador objeto relacional do Orbit.</p>
 
 
-<pre> 
+<pre class="example"> 
 require("luasql." .. database.driver) 
 local env = luasql[database.driver]() 
 mapper.conn = env:connect(unpack(database.conn_data)) 
@@ -118,7 +118,7 @@ mapper.driver = database.driver
 <p>Você precisa iniciar o mapeador antes de criar os modelos de sua aplicação porque o mapeador do Orbit consulta a base de dados durante a criação de modelos para pegar o esquema. Falando em esquema, agora é uma boa hora para criar a base de dados do seu blog. Parto do princípio que você está usando o SQLite3. Crie uma base de dados ´blog.db´ com o script SQL abaixo:</p>
 
 
-<pre> 
+<pre class="example"> 
 CREATE TABLE blog_post 
 ("id" INTEGER PRIMARY KEY NOT NULL, 
 "title" VARCHAR(255) DEFAULT NULL, 
@@ -147,7 +147,7 @@ CREATE TABLE blog_page
 <p>Por último, vamos iniciar o cache de páginas do Orbit antes de criar nossos modelos:</p>
 
 
-<pre> 
+<pre class="example"> 
 local cache = orbit.cache.new(blog, cache_path) 
 </pre> 
 
@@ -159,7 +159,7 @@ local cache = orbit.cache.new(blog, cache_path)
 <p>Nossa aplicação de blog tem três tipos de objetos: posts, comentários e páginas "estáticas" (como a página de "Sobre" do blog, por exemplo). Não é coincidência que também temos três tipos de tabelas na base de dados, cada tabela mapeia um tipo de objeto que a nossa aplicação reconhece, e para cada tipo criaremos um modelo. Primeiro criaremos um objeto modelo para posts:</p>
 
 
-<pre> 
+<pre class="example"> 
 posts = blog:model "post" 
 </pre> 
 
@@ -169,7 +169,7 @@ posts = blog:model "post"
 <p>Você pode usar o método ´find´ pré-definido para todas as buscas na base de dados, mas ajuda simplificar buscas comuns nos seus métodos. Você pode fazer isso adicionando métodos no objeto ´posts´:</p>
 
 
-<pre> 
+<pre class="example"> 
 function posts:find_recent() 
 return self:find_all("published_at is not null", 
 { order = "published_at desc", 
@@ -183,7 +183,7 @@ end
 <p>Outra característica do nosso blog será a página de arquivo que mostra todos os posts de um certo mês e ano. Definiremos um método para isto também:</p>
 
 
-<pre> 
+<pre class="example"> 
 function posts:find_by_month_and_year(month, year) 
 local s = os.time({ year = year, month = month, day = 1 }) 
 local e = os.time({ year = year + math.floor(month / 12), 
@@ -198,7 +198,7 @@ end
 <p>Este é o método mais complicado, já que temos que converter de um mês e ano simples para data de começo e fim no formato Lua padrão. Por último, também definiremos um método para retornar todos os meses (e anos) que tem posts, para mais tarde gerar os links para a seção "Arquivo" no sidebar:</p>
 
 
-<pre> 
+<pre class="example"> 
 function posts:find_months() 
 local months = {} 
 local previous_month = {} 
@@ -229,7 +229,7 @@ a post: </p>
 <p>Também podemos definir métodos para objetos de posts individuais definindo métodos no objeto ´posts´, a única diferença é como eles são usados (você usa ´find<em>recent´ criando ´posts:find</em>recent()´, mas você usará ´find<em>comments´ criando ´p:find</em>comments()´, onde ´p´ é um objeto post específico. Definiremos um método para recuperar todos os comentários de um post:</p>
 
 
-<pre> 
+<pre class="example"> 
 function posts:find_comments() 
 return comments:find_all_by_post_id{ self.id } 
 end 
@@ -241,7 +241,7 @@ end
 <p>Criar o objeto ´comments´ é simples:</p>
 
 
-<pre> 
+<pre class="example"> 
 comments = blog:model "comment" 
 </pre> 
 
@@ -249,7 +249,7 @@ comments = blog:model "comment"
 <p>Vamos adicionar um método de conveniência para comentários que constróem o link de comentário a partir de seus dados:</p>
 
 
-<pre> 
+<pre class="example"> 
 function comments:make_link() 
 local author = self.author or strings.anonymous_author 
 if self.url and self.url ~= "" then 
@@ -266,7 +266,7 @@ end
 <p>O objeto ´pages´ é mais simples ainda, a funcionalidade padrão fornecida pelo mapeador Orbit é suficiente, então criaremos com o ´model´:</p>
 
 
-<pre> 
+<pre class="example"> 
 pages = blog:model "pages" 
 </pre> 
 
@@ -290,7 +290,7 @@ a mapeamentos diversos.</p>
 <p>Abaixo esta o controlador para a pagina principal do blog:</p>
 
 
-<pre> 
+<pre class="example"> 
 function index(web) 
 local ps = posts:find_recent() 
 local ms = posts:find_months() 
@@ -313,7 +313,7 @@ funciona como"decorators").</p>
 <p>Outro importante controlador é o que mostra posts únicos:</p>
 
 
-<pre> 
+<pre class="example"> 
 function view_post(web, post_id, comment_missing) 
 local post = posts:find(tonumber(post_id)) 
 if post then 
@@ -341,7 +341,7 @@ blog:dispatch_get(cache(view_post), "/post/(%d+)")
 
 
 
-<pre> 
+<pre class="example"> 
 function view_archive(web, year, month) 
 local ps = posts:find_by_month_and_year(tonumber(month), 
 tonumber(year)) 
@@ -376,7 +376,7 @@ blog:dispatch_get(cache(view_page), "/page/(%d+)")
 <p>Finalmente você pode também pode definir arquivos estáticos com o método de conveniência <code>dispatch_static</code>.</p>
 
 
-<pre> 
+<pre class="example"> 
 blog:dispatch_static("/head%.jpg", "/style%.css") 
 </pre> 
 
@@ -386,7 +386,7 @@ blog:dispatch_static("/head%.jpg", "/style%.css")
 <p>Tem um controlador para adicionar comentários. Este irá responder ao POST em vez de receber:</p>
 
 
-<pre> 
+<pre class="example"> 
 function add_comment(web, post_id) 
 local input = web.input 
 if string.find(input.comment, "^%s*$") then 
@@ -434,7 +434,7 @@ blog:dispatch_post(add_comment, "/post/(%d+)/addcomment")
 <p>Quando você htmlify uma função, o Orbit muda o ambiente da função permitindo que você gere HTML chamando as tags de funções. É melhor mostrar como funciona do que explicar, então aqui vai a visualização básica da aplicação do blog, ´layout´:</p>
 
 
-<pre> 
+<pre class="example"> 
 function layout(web, args, inner_html) 
 return html{ 
 head{ 
@@ -469,7 +469,7 @@ end
 <p>As funções ´<em>menu´ e ´</em>sidebar´ são apenas visualizações de ajuda para gerar a barra de menu e sidebar do blog:</p>
 
 
-<pre> 
+<pre class="example"> 
 function _menu(web, args) 
 local res = { li(a{ href= web:link("/"), strings.home_page_name }) } 
 for _, page in pairs(args.pages) do 
@@ -498,7 +498,7 @@ end
 
 
 
-<pre> 
+<pre class="example"> 
 function _blogroll(web, blogroll) 
 local res = {} 
 for _, blog_link in ipairs(blogroll) do 
@@ -531,7 +531,7 @@ end
 <p>Agora podemos ir para as funções. de visualização principal. Começaremos com a mais fácil e menor, para páginas renderizadas.</p>
 
 
-<pre> 
+<pre class="example"> 
 function render_page(web, args) 
 return layout(web, args, div.blogentry(markdown(args.page.body))) 
 end 
@@ -543,7 +543,7 @@ end
 <p>Seguindo em frente, escreveremos a visualização para páginas index (e páginas de arquivo):</p>
 
 
-<pre> 
+<pre class="example"> 
 function render_index(web, args) 
 if #args.posts == 0 then 
 return layout(web, args, p(strings.no_posts)) 
@@ -570,7 +570,7 @@ end
 <p>A ajuda do ´_post´ é bem simples:</p>
 
 
-<pre> 
+<pre class="example"> 
 function _post(web, post) 
 return { 
 markdown(post.body), 
@@ -588,7 +588,7 @@ end
 <p>Agora podemos seguir para a piece-de-resistance, a visualização que renderiza posts únicos, junto com seus comentários, e o formulário "post a comment":</p>
 
 
-<pre> 
+<pre class="example"> 
 function render_post(web, args) 
 local res = { 
 h2(span{ style="position: relative; float:left", args.post.title } 
@@ -640,7 +640,7 @@ end
 <p>A ajuda ´_comment´ é bem simples:</p>
 
 
-<pre> 
+<pre class="example"> 
 function _comment(web, comment) 
 return { p(comment.body), 
 p.posted{ 
@@ -656,7 +656,7 @@ end
 <p>Por último, precisamos configurar todas essas funções de visualização para gerador programático de HTML:</p>
 
 
-<pre> 
+<pre class="example"> 
 orbit.htmlify(blog, "layout", "_.+", "render_.+") 
 </pre> 
 
@@ -668,7 +668,7 @@ orbit.htmlify(blog, "layout", "_.+", "render_.+")
 <p>Para esta parte do tutorial é melhor você utilizar o diretório <code>samples/blog</code> da distribuição Orbit (novamente, procure no diretório <code>rocks</code> caso você tenha instalado o Orbit via Kepler ou LuaRocks). Uma aplicação Orbit é uma aplicação WSAPI, portanto a distribuição é bastante simples, basta copiar todos os arquivos (<code>blog.lua</code>, <code>blog_config.lua</code>, <code>blog.db</code>, <code>head.jpg</code>, e <code>style.css</code>) para um diretório em sua raiz web (se você instalou Kepler, este seria o diretório <code>kepler/htdocs</code>), e criar um script disparador neste diretório. O script disparador é bem curto (chame-o de <code>blog.ws</code>):</p>
 
 
-<pre> 
+<pre class="example"> 
 #!/usr/bin/env wsapi.cgi 
 require "blog" 
 return blog 
@@ -676,7 +676,7 @@ return blog
 
 
 
-<pre> 
+<pre class="example"> 
 #!/usr/bin/env wsapi.cgi 
 require "blog" 
 return blog 
