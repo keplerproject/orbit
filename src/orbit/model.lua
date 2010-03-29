@@ -323,16 +323,16 @@ function dao_methods.find(dao, id, inject)
   return fetch_row(dao, sql)
 end
 
-local sql_condition = re.compile([[
-                                     top <- {~ <condition>* ~}
-				     s <- %s+ -> ' ' / ''
-                                     condition <- (<s> '(' <s> <condition> <s> ')' <s> / <simple>) (<conective> <condition>)*
-                                     simple <- <s> (%func <field> <op> '?') -> apply <s> / <s> <field> <op> <field> <s> /
-                                          <s> <field> <op> <s>
-                                     field <- !conective {[%w_]+('.'[%w_]+)?}
-				     op <- {~ <s> [!<>=~]+ <s> / ((%s+ -> ' ') !<conective> %w+)+ <s> ~}
-                                     conective <- [aA][nN][dD] / [oO][rR]
-                                 ]], { func = lpeg.Carg(1) , apply = function (f, field, op) return f(field, op) end })
+condition_parser = re.compile([[
+				  top <- {~ <condition>* ~}
+				  s <- %s+ -> ' ' / ''
+				  condition <- (<s> '(' <s> <condition> <s> ')' <s> / <simple>) (<conective> <condition>)*
+				  simple <- <s> (%func <field> <op> '?') -> apply <s> / <s> <field> <op> <field> <s> /
+				            <s> <field> <op> <s>
+				  field <- !<conective> {[%w_]+('.'[%w_]+)?}
+				  op <- {~ <s> [!<>=~]+ <s> / ((%s+ -> ' ') !<conective> %w+)+ <s> ~}
+				  conective <- [aA][nN][dD] / [oO][rR]
+			      ]], { func = lpeg.Carg(1) , apply = function (f, field, op) return f(field, op) end })
 
 local function build_query(dao, condition, args)
   local i = 0
@@ -344,7 +344,7 @@ local function build_query(dao, condition, args)
   end
   if condition ~= "" then
     condition = " where " ..
-      sql_condition:match(condition, 1,
+      condition_parser:match(condition, 1,
 		  function (field, op)
 		    i = i + 1
 		    if not args[i] then
