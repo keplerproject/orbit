@@ -87,7 +87,7 @@ The first thing you should put in this file is the code to load Orbit and other 
 are going to use in your app:</p>
 
 
-<pre class="example">
+<pre>
 require "orbit"
 require "orbit.cache"
 require "markdown"
@@ -100,7 +100,7 @@ up posts.</p>
 <p>All Orbit applications are Lua modules, so we include this line:</p>
 
 
-<pre class="example">
+<pre>
 module("blog", package.seeall, orbit.app)
 </pre>
 
@@ -120,7 +120,7 @@ want custom pages for your application.</p>
 You can get this script from <a href="blog_config.lua">here</a>.</p>
 
 
-<pre class="example">
+<pre>
 require "blog_config"
 </pre>
 
@@ -129,7 +129,7 @@ require "blog_config"
 and sets up Orbit's OR mapper.</p>
 
 
-<pre class="example">
+<pre>
 require("luasql." .. database.driver)
 local env = luasql[database.driver]()
 mapper.conn = env:connect(unpack(database.conn_data))
@@ -146,7 +146,7 @@ schema, now is a good time to create your blogs' database. I will assume you are
 using SQLite3. Create a <code>blog.db</code> database with the following SQL script:</p>
 
 
-<pre class="example">
+<pre>
 CREATE TABLE blog_post
        ("id" INTEGER PRIMARY KEY NOT NULL,
        "title" VARCHAR(255) DEFAULT NULL,
@@ -176,7 +176,7 @@ database, so you need it for every kind of object you are mapping.</p>
 <p>Finally, let's initialize Orbit's page cache before creating our models:</p>
 
 
-<pre class="example">
+<pre>
 local cache = orbit.cache.new(blog, cache_path)
 </pre>
 
@@ -195,7 +195,7 @@ to a kind of object our application handles, and for each kind we will
 create a model. We first create a model object for posts:</p>
 
 
-<pre class="example">
+<pre>
 posts = blog:model "post"
 </pre>
 
@@ -213,7 +213,7 @@ helps to abstract common queries in your own methods. You can do that by
 adding methods to the <code>posts</code> object:</p>
 
 
-<pre class="example">
+<pre>
 function posts:find_recent()
    return self:find_all("published_at is not null",
             { order = "published_at desc",
@@ -232,7 +232,7 @@ of the blog's sidebar.</p>
 a certain month and year. We will define a method for that too:</p>
 
 
-<pre class="example">
+<pre>
 function posts:find_by_month_and_year(month, year)
    local s = os.time({ year = year, month = month, day = 1 })
    local e = os.time({ year = year + math.floor(month / 12),
@@ -250,7 +250,7 @@ define a method that returns all months (and years) that have posts, to later
 generate the links for the "Archive" section in the sidebar:</p>
 
 
-<pre class="example">
+<pre>
 function posts:find_months()
    local months = {}
    local previous_month = {}
@@ -280,7 +280,7 @@ where <code>p</code> is a particular post object. We will define a method to ret
 a post:</p>
 
 
-<pre class="example">
+<pre>
 function posts:find_comments()
    return comments:find_all_by_post_id{ self.id }
 end
@@ -295,7 +295,7 @@ a future version of Orbit's mapper will let you define these declaratively.</p>
 <p>Creating the <code>comments</code> object is simple:</p>
 
 
-<pre class="example">
+<pre>
 comments = blog:model "comment"
 </pre>
 
@@ -304,7 +304,7 @@ comments = blog:model "comment"
 from the its data:</p>
 
 
-<pre class="example">
+<pre>
 function comments:make_link()
    local author = self.author or strings.anonymous_author
    if self.url and self.url ~= "" then
@@ -322,7 +322,7 @@ end
 by Orbit's mapper is enough, so we just create it with <code>model</code>:</p>
 
 
-<pre class="example">
+<pre>
 pages = blog:model "pages"
 </pre>
 
@@ -348,7 +348,7 @@ written using Lua's string matching syntax, so one controller can answer to mult
 <p>Below is the controller for the main page of the blog:</p>
 
 
-<pre class="example">
+<pre>
 function index(web)
    local ps = posts:find_recent()
    local ms = posts:find_months()
@@ -373,7 +373,7 @@ function (called a <em>view</em> in MVC terminology) to render the actual HTML c
 <p>Another important controller is the one that shows single posts:</p>
 
 
-<pre class="example">
+<pre>
 function view_post(web, post_id, comment_missing)
    local post = posts:find(tonumber(post_id))
    if post then
@@ -408,7 +408,7 @@ error happens in controller/view code.</p>
 <p>Archives and pages are similar in structure:</p>
 
 
-<pre class="example">
+<pre>
 function view_archive(web, year, month)
    local ps = posts:find_by_month_and_year(tonumber(month),
                        tonumber(year))
@@ -446,7 +446,7 @@ the year, so paths are like /archive/2008/05.</p>
 convenience method:</p>
 
 
-<pre class="example">
+<pre>
 blog:dispatch_static("/head%.jpg", "/style%.css")
 </pre>
 
@@ -461,7 +461,7 @@ content; <code>dispatch_static</code> is just a convenience to have "zero-config
 instead of GET:</p>
 
 
-<pre class="example">
+<pre>
 function add_comment(web, post_id)
    local input = web.input
    if string.find(input.comment, "^%s*$") then
@@ -528,7 +528,7 @@ HTML by calling the tags as functions. It's better to show how it works than to 
 here is the basic view of the blog application, <code>layout</code>:</p>
 
 
-<pre class="example">
+<pre>
 function layout(web, args, inner_html)
    return html{
       head{
@@ -574,7 +574,7 @@ as the link).</p>
 and sidebar:</p>
 
 
-<pre class="example">
+<pre>
 function _menu(web, args)
    local res = { li(a{ href= web:link("/"), strings.home_page_name }) }
    for _, page in pairs(args.pages) do
@@ -604,7 +604,7 @@ the <code>web:link</code> method, which generates intra-application links. The <
 function uses a few more convenience functions, for better factoring:</p>
 
 
-<pre class="example">
+<pre>
 function _blogroll(web, blogroll)
    local res = {}
    for _, blog_link in ipairs(blogroll) do
@@ -639,7 +639,7 @@ whichever data was passed by them (all the way from the controller).</p>
 and smallest, one, to render pages:</p>
 
 
-<pre class="example">
+<pre>
 function render_page(web, args)
    return layout(web, args, div.blogentry(markdown(args.page.body)))
 end
@@ -656,7 +656,7 @@ a <code>class</code> attribute equal to "blogentry", instead of a straight
 pages):</p>
 
 
-<pre class="example">
+<pre>
 function render_index(web, args)
    if #args.posts == 0 then
       return layout(web, args, p(strings.no_posts))
@@ -688,7 +688,7 @@ day appear under the same date.</p>
 <p>The <code>_post</code> helper is pretty straightforward:</p>
 
 
-<pre class="example">
+<pre>
 function _post(web, post)
    return {
       markdown(post.body),
@@ -707,7 +707,7 @@ end
 single posts, along with their comments, and the "post a comment" form:</p>
 
 
-<pre class="example">
+<pre>
 function render_post(web, args)
    local res = { 
       h2(span{ style="position: relative; float:left", args.post.title }
@@ -765,7 +765,7 @@ the responsibility of the style sheet).</p>
 <p>The <code>_comment</code> helper is pretty simple:</p>
 
 
-<pre class="example">
+<pre>
 function _comment(web, comment)
    return { p(comment.body),
       p.posted{
@@ -781,7 +781,7 @@ end
 <p>Finally, we need to set all of these view functions up for programmatic HTML generation:</p>
 
 
-<pre class="example">
+<pre>
 orbit.htmlify(blog, "layout", "_.+", "render_.+")
 </pre>
 
@@ -803,7 +803,7 @@ and create a launcher script in this folder. The launcher script is simple (call
 it <code>blog.ws</code>):</p>
 
 
-<pre class="example">
+<pre>
 #!/usr/bin/env wsapi.cgi
 require "blog"
 return blog

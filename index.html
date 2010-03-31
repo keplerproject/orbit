@@ -4,7 +4,6 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 	<title>Orbit</title>
-
     <link rel="stylesheet" href="http://www.keplerproject.org/doc.css" type="text/css"/>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 </head>
@@ -79,6 +78,15 @@ a Xavante instance for development.</p>
 <h2>History</h2>
 
 <ul>
+    <li><p>Version 2.2.0 (31/Mar/2010)</p>
+    <ul>
+        <li>Reparse response to resume the dispatcher</li>
+        <li>better parser for orbit.model conditions, fixes parsing bugs</li>
+        <li><code>orbit</code> launcher has parameters to control logging and port</li>
+        <li><code>op.cgi</code>/<code>op.fcgi</code> launchers have the same parameters as <code>wsapi.cgi</code>/<code>wsapi.fcgi</code></li>
+        <li>Optional <a href="http://www.sinatrarb.com/">Sinatra</a>-like route parser, using LPEG</li>
+        <li>Pluggable route parsers (route patterns can be strings or objects that answer to :match)</li>
+    </ul></li>
     <li><p>Version 2.1.0 (29/Oct/2009)</p>
     <ul>
         <li>better decoupling of orbit and orbit.model</li>
@@ -118,7 +126,7 @@ a Xavante instance for development.</p>
 <p>Below is a very simple Orbit application:</p>
 
 
-<pre class="example">
+<pre>
     #!/usr/bin/env wsapi.cgi
 
     require"orbit"
@@ -191,6 +199,11 @@ a Xavante instance for development.</p>
 </pre>
 
 
+<p>Save this to <code>hello.lua</code>, install <code>wsapi-xavante</code> with LuaRocks, and now you can run this application in two ways:
+the first is to run <code>wsapi</code> in the same directory that you saved the file and point your browser to <code>http://localhost:8080/hello.lua</code>,
+or run <code>orbit hello.lua</code> in the same directory that you saved the file and point your browser to <code>http://localhost:8080/</code>. Now try
+appending <code>index</code>, <code>say/foo</code>, and <code>say/foo?message=bar</code> to the URL.</p>
+
 <p>The example uses Orbit's built-in html generation, but you are free to use any method of generating HTML. 
 One of Orbit's sample applications uses the <a href="http://cosmo.luaforge.net">Cosmo</a> template library, for instance.</p>
 
@@ -206,7 +219,7 @@ The sample applications use this mapper.</p>
 for free. For example, with the blog example we can add a new post like this:</p>
 
 
-<pre class="example">
+<pre>
     $ lua -l luarocks.require -i blog.lua
     > p = blog.posts:new()
     > p.title = "New Post"
