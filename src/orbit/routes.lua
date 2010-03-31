@@ -25,7 +25,7 @@ local param = re.compile[[ {[/%.]} ':' {[%w_]+} &('/' / {'.'} / !.) ]] /
 				   close = lpeg.P"/" + lpeg.P(dot or -1) + lpeg.P(-1) }
 		   return { cap = lpeg.Carg(1) * re.compile([[ [/%.] {%inner+} &(%close) ]], extra) / 
 			function (params, item, delim)
-			  params[name] = wsapi.util.url_decode(item)
+			  params[name] = util.url_decode(item)
 			end,
 		      clean = re.compile([[ [/%.] %inner &(%close) ]], extra),
 		      tag = "param", name = name, prefix = prefix }
@@ -37,7 +37,7 @@ local opt_param = re.compile[[ {[/%.]} '?:' {[%w_]+} '?' &('/' / {'.'} / !.) ]] 
 				       close = lpeg.P"/" + lpeg.P(dot or -1) + lpeg.P(-1) }
 		       return { cap = (lpeg.Carg(1) * re.compile([[ [/%.] {%inner+} &(%close) ]], extra) / 
 				   function (params, item, delim)
-				     params[name] = wsapi.util.url_decode(item)
+				     params[name] = util.url_decode(item)
 				   end)^-1,
 			      clean = re.compile([[ [/%.] %inner &(%close) ]], extra)^-1,
 			      tag = "opt", name = name, prefix = prefix }
@@ -58,7 +58,7 @@ local function fold_caps(cap, acc)
 		function (params, splat)
 		  if not params.splat then params.splat = {} end
 		  if splat and splat ~= "" then
-		    params.splat[#params.splat+1] = wsapi.util.url_decode(splat)
+		    params.splat[#params.splat+1] = util.url_decode(splat)
 		  end
 		end) * acc.cap,
 	   clean = (lpeg.P(cap.prefix) * (lpeg.P(1) - acc.clean)^0)^-1 * acc.clean }
@@ -93,17 +93,17 @@ local function build(parts, params)
 	error("route parameter " .. part.name .. " does not exist")
       end
       local s = string.gsub (params[part.name], "([^%.@]+)",
-			     function (s) return wsapi.util.url_encode(s) end)
+			     function (s) return util.url_encode(s) end)
       res[#res+1] = part.prefix .. s
     elseif part.tag == "splat" then
       local s = string.gsub (params.splat[i] or "", "([^/%.@]+)",
-			     function (s) return wsapi.util.url_encode(s) end)
+			     function (s) return util.url_encode(s) end)
       res[#res+1] = part.prefix .. s
       i = i + 1
     elseif part.tag == "opt" then
       if params and params[part.name] then
 	local s = string.gsub (params[part.name], "([^%.@]+)",
-			       function (s) return wsapi.util.url_encode(s) end)
+			       function (s) return util.url_encode(s) end)
 	res[#res+1] = part.prefix .. s
       end
     else
