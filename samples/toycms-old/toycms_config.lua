@@ -1,7 +1,12 @@
+
+local schema = require "orbit.schema"
+
 module("toycms", package.seeall)
 
 -- Uncomment next line to enable X-Sendfile for sending static files
 -- use_xsendfile = true
+
+logging = true
 
 database = {
   driver = "sqlite3",
@@ -10,10 +15,59 @@ database = {
 --  conn_data = { "blog", "root", "password" }
 }
 
+toycms_schema = schema.loadstring([[
+  table_prefix = "toycms_"
+  post = entity {
+    fields = {
+      id = key(),
+      title = text(),
+      body = long_text(),
+      abstract = long_text(),
+      image = text(),
+      external_url = text(),
+      comment_status = text{ 30 },
+      section_id = integer(),
+      user_id = integer(),
+      in_home = boolean(),
+      published = boolean(),
+      n_comments = integer(),
+      published_at = timestamp()
+    }
+  }
+  comment = entity {
+    fields = {
+      id = key(),
+      post_id = integer(),
+      author = text(),
+      email = text(),
+      url = text(),
+      body = long_text(),
+      approved = boolean(),
+      created_at = timestamp()
+    }
+  }
+  section = entity {
+    fields = {
+      id = key(),
+      title = text(),
+      description = long_text(),
+      tag = text()
+    }
+  }
+  user = entity {
+    fields = {
+      id = key(),
+      login = text(),
+      password = text{ 30 },
+      name = text()
+    }
+  }
+]], "@toycms_schema.lua")
+
 template_name = "blog"
 
 -- Comment this for in-memory caching
-cache_path = toycms.real_path .. "/page_cache"
+--cache_path = toycms.real_path .. "/page_cache"
 
 -- Uncomment the following line to set a url prefix
 -- prefix = "/foobar"
