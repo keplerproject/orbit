@@ -9,8 +9,8 @@ local _M = _M
 setfenv(1, _G)
 
 _M._NAME = "orbit"
-_M._VERSION = "2.1.0"
-_M._COPYRIGHT = "Copyright (C) 2007-2009 Kepler Project"
+_M._VERSION = "2.2.0"
+_M._COPYRIGHT = "Copyright (C) 2007-2010 Kepler Project"
 _M._DESCRIPTION = "MVC Web Development for the Kepler platform"
 
 local REPARSE = {}

@@ -10,6 +10,14 @@ a Xavante instance for development.
 
 ## History
 
+* Version 2.2.0 (31/Mar/2010)
+    * Reparse response to resume the dispatcher
+    * better parser for orbit.model conditions, fixes parsing bugs
+    * `orbit` launcher has parameters to control logging and port
+    * `op.cgi`/`op.fcgi` launchers have the same parameters as `wsapi.cgi`/`wsapi.fcgi`
+    * Optional [Sinatra](http://www.sinatrarb.com/)-like route parser, using LPEG
+    * Pluggable route parsers (route patterns can be strings or objects that answer to :match)
+
 * Version 2.1.0 (29/Oct/2009)
     * better decoupling of orbit and orbit.model
     * support for anything with a match method as patterns
@@ -118,6 +126,11 @@ Below is a very simple Orbit application:
 
     return _M
 </pre>
+
+Save this to `hello.lua`, install `wsapi-xavante` with LuaRocks, and now you can run this application in two ways:
+the first is to run `wsapi` in the same directory that you saved the file and point your browser to `http://localhost:8080/hello.lua`,
+or run `orbit hello.lua` in the same directory that you saved the file and point your browser to `http://localhost:8080/`. Now try
+appending `index`, `say/foo`, and `say/foo?message=bar` to the URL.
 
 The example uses Orbit's built-in html generation, but you are free to use any method of generating HTML. 
 One of Orbit's sample applications uses the [Cosmo](http://cosmo.luaforge.net) template library, for instance.
