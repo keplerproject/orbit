@@ -2179,8 +2179,8 @@ local t = mapper:new('user')
 local rec = {
  ["id"] = 1,
  ["name"] = "Fabio Mascarenhas",
- ["login"] = "mascarenhas@acm.org",
- ["password"] = "password"}
+ ["login"] = "admin",
+ ["password"] = "admin"}
 rec = t:new(rec)
 rec:save(true)
 
