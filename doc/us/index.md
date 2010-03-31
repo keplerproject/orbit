@@ -51,6 +51,17 @@ Ignacio Burgueno for finding the bug)
 
 * Version 1.0: Initial release, obsolete
 
+## Download and Installation
+
+The easiest way to download and install Orbit is via [LuaRocks](http://luarocks.org). You 
+can install Orbit with a simple `luarocks install orbit`. Go to the path where LuaRocks
+put Orbit to see the sample apps and this documentation. LuaRocks will automatically fetch
+and install any dependencies you don't already have.
+
+Do not be alarmed by the size of the Orbit package (~1MB), Orbit itself is a approximately 1%
+of that; most of the package are samples, and a single one is responsible for 50% of the total
+size because it embeds the Sproutcore JavaScript framework.
+
 ## Hello World
 
 Below is a very simple Orbit application:
@@ -158,13 +169,6 @@ for free. For example, with the blog example we can add a new post like this:
 You can also update or delete any of the model items right from your console, just fetch 
 them from the database, change what you want and call `save()` 
 (or `delete()` if you want to remove it).
-
-## Download and Installation
-
-The easiest way to download and install Orbit is via [LuaRocks](http://luarocks.org). You 
-can install Orbit with a simple `luarocks install orbit`. Go to the path where LuaRocks
-put Orbit to see the sample apps and this documentation. LuaRocks will automatically fetch
-and install any dependencies you don't already have.
 
 ## Credits
 
