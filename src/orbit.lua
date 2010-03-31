@@ -410,10 +410,10 @@ function web_methods:link(url, params)
 end
 
 function web_methods:static_link(url)
-  local prefix = self.prefix or ""
+  local prefix = self.prefix or self.script_name
   local is_script = prefix:match("(%.%w+)$")
   if not is_script then return self:link(url) end
-  local vpath = self.path_translated:sub(#self.doc_root+1):match("(.*)/")
+  local vpath = prefix:match("(.*)/") or ""
   return vpath .. url
 end
 
