@@ -21,20 +21,24 @@ function _M.new(app)
     app[k] = v
   end
   app.reparse = "MK_FORWARD"
-  app.blocks = { protos = util.merge(blocks, app.blocks), instances = {} }
-  app:load_config()
-  app:load_themes()
-  app:connect_mapper()
-  app.models = { types = {} }
-  app.plugins = {}
-  app.forms = app.forms or {}
-  app.routes = app.routes or {}
-  app.js = app.js or {}
-  app.css = app.css or {}
-  app:load_plugins()
-  app:connect_blocks()
-  app:connect_routes()
   return app
+end
+
+function _M.methods:load()
+  self.blocks = { protos = util.merge(blocks, self.blocks), instances = {} }
+  self:load_config()
+  self:load_themes()
+  self:connect_mapper()
+  self.models = util.merge({ types = {} }, self.models)
+  self.plugins = {}
+  self.forms = self.forms or {}
+  self.routes = self.routes or {}
+  self.js = self.js or {}
+  self.css = self.css or {}
+  self:load_plugins()
+  self:connect_blocks()
+  self:connect_routes()
+  return self
 end
 
 function _M.methods:load_config()
@@ -91,7 +95,7 @@ function _M.methods:connect_mapper()
   self.mapper = self.mapper or { default = true,
                                  logging = true,
                                  schema = { entities = {} } }
-  if self.config.database then
+  if (not self.mapper.conn) and self.config.database then
     local luasql = require("luasql." .. self.config.database.driver)
     local env = luasql[self.config.database.driver]()
     self.mapper.conn = env:connect(unpack(self.config.database.connection))
@@ -112,9 +116,11 @@ end
 function _M.methods:add_route(route, init)
   if type(route.handler) == "string" then
     self["dispatch_" .. route.method](self, route.name, route.pattern, route.handler)
-  else
-    self["dispatch_" .. route.method](self, route.name, route.pattern, route.handler and
+  else if route.handler then
+    self["dispatch_" .. route.method](self, route.name, route.pattern,
                                       self:wrap(function (...) return route.handler(self, ...) end))
+  else
+    self["dispatch_" .. route.method](self, route.name, route.pattern, self:serve_static())
   end
   if not init then
     self.routes[#self.routes+1] = route
@@ -177,6 +183,7 @@ function _M.methods:htmlify(...)
 end
 
 function _M.methods:model(...)
+  self:connect_mapper()
   if self.mapper.default then
     local model = require "orbit.model"
     local mapper = model.new()
