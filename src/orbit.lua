@@ -114,13 +114,17 @@ function _M.methods:connect_blocks()
 end
 
 function _M.methods:add_route(route, init)
-  if type(route.handler) == "string" then
-    self["dispatch_" .. route.method](self, route.name, route.pattern, route.handler)
-  else if route.handler then
-    self["dispatch_" .. route.method](self, route.name, route.pattern,
-                                      self:wrap(function (...) return route.handler(self, ...) end))
+  if route.method then
+    if type(route.handler) == "string" then
+      self["dispatch_" .. route.method](self, route.name, route.pattern, route.handler)
+    elseif route.handler then
+      self["dispatch_" .. route.method](self, route.name, route.pattern,
+                                        self:wrap(function (...) return route.handler(self, ...) end))
+    else
+      self["dispatch_" .. route.method](self, route.name, route.pattern)
+    end
   else
-    self["dispatch_" .. route.method](self, route.name, route.pattern, self:serve_static())
+    self:dispatch_static(route.name, route.pattern)
   end
   if not init then
     self.routes[#self.routes+1] = route
