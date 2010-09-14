@@ -2,7 +2,7 @@
 
 local orbit = require "orbit"
 
-local hello = {}
+local hello = orbit.new()
 
 hello.config = {
   theme = {
@@ -46,4 +46,4 @@ hello.routes = {
   { pattern = "/say/:name", name = "say", method = "get" },
 }
 
-return orbit.new(hello)
+return hello:load()

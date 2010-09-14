@@ -2,7 +2,7 @@
 
 local orbit = require"orbit"
 
-local songs = {}
+local songs = orbit.new()
 
 songs.config = {
   theme = {
@@ -55,4 +55,4 @@ songs.routes = {
   { pattern = "/", name = "index", method = "get" },
 }
 
-return orbit.new(songs)
+return songs:load()
