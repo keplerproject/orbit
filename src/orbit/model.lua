@@ -176,7 +176,7 @@ end
 local function parse_condition(dao, condition, args)
   condition = string.gsub(condition, "_and_", "|")
   local pairs = {}
-  for field in string.gmatch(condition, "[%w_]+") do
+  for field in string.gmatch(condition, "[_%w]+") do
     local i = #pairs + 1
     local value
     if args[i] == nil then
@@ -329,7 +329,7 @@ condition_parser = re.compile([[
 				  condition <- (<s> '(' <s> <condition> <s> ')' <s> / <simple>) (<conective> <condition>)*
 				  simple <- <s> (%func <field> <op> '?') -> apply <s> / <s> <field> <op> <field> <s> /
 				            <s> <field> <op> <s>
-				  field <- !<conective> {[%w_]+('.'[%w_]+)?}
+				  field <- !<conective> {[_%w]+('.'[_%w]+)?}
 				  op <- {~ <s> [!<>=~]+ <s> / ((%s+ -> ' ') !<conective> %w+)+ <s> ~}
 				  conective <- [aA][nN][dD] / [oO][rR]
 			      ]], { func = lpeg.Carg(1) , apply = function (f, field, op) return f(field, op) end })
