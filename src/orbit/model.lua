@@ -87,6 +87,7 @@ function convert.datetime(v)
 		   day = tonumber(day), hour = tonumber(hour),
 		   min = tonumber(min), sec = tonumber(sec) })
 end
+convert.timestamp = convert.datetime
 
 local function convert_types(row, meta, driver)
   for k, v in pairs(row) do
@@ -134,6 +135,7 @@ end
 function escape.datetime(v)
   return "'" .. os.date("%Y-%m-%d %H:%M:%S", v) .. "'"
 end
+escape.timestamp = escape.datetime
 
 function escape.boolean(v, driver)
   if v then
