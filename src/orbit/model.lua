@@ -40,6 +40,10 @@ function convert.number(v)
   return tonumber(v)
 end
 
+function convert.numeric(v)
+  return tonumber(v)
+end
+
 function convert.varchar(v)
   return tostring(v)
 end
@@ -98,6 +102,10 @@ function escape.int(v)
 end
 
 function escape.number(v)
+  return escape.integer(v)
+end
+
+function escape.numeric(v)
   return escape.integer(v)
 end
 
