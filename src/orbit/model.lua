@@ -26,6 +26,14 @@ function type_names.mysql(t)
   end
 end
 
+function type_names.postgres(t)
+  if t == "bool" then
+    return "boolean"
+  else
+    return string.lower(string.match(t, "(%a+)"))
+  end
+end
+
 local convert = {}
 
 function convert.integer(v)
@@ -37,6 +45,10 @@ function convert.int(v)
 end
 
 function convert.number(v)
+  return tonumber(v)
+end
+
+function convert.numeric(v)
   return tonumber(v)
 end
 
@@ -57,6 +69,8 @@ function convert.boolean(v, driver)
     return v == "t"
   elseif driver == "mysql" then
     return tonumber(v) == 1
+  elseif driver == "postgres" then
+    return v == "t"
   else
     error("driver not supported")
   end
@@ -73,6 +87,7 @@ function convert.datetime(v)
 		   day = tonumber(day), hour = tonumber(hour),
 		   min = tonumber(min), sec = tonumber(sec) })
 end
+convert.timestamp = convert.datetime
 
 local function convert_types(row, meta, driver)
   for k, v in pairs(row) do
@@ -101,6 +116,10 @@ function escape.number(v)
   return escape.integer(v)
 end
 
+function escape.numeric(v)
+  return escape.integer(v)
+end
+
 function escape.varchar(v, driver, conn)
   return "'" .. conn:escape(v) .. "'"
 end
@@ -116,12 +135,13 @@ end
 function escape.datetime(v)
   return "'" .. os.date("%Y-%m-%d %H:%M:%S", v) .. "'"
 end
+escape.timestamp = escape.datetime
 
 function escape.boolean(v, driver)
   if v then
-    if driver == "sqlite3" then return "'t'" else return tostring(v) end
+    if driver == "sqlite3" or driver == "postgres" then return "'t'" else return tostring(v) end
   else
-    if driver == "sqlite3" then return "'f'" else return tostring(v) end
+    if driver == "sqlite3" or driver == "postgres" then return "'f'" else return tostring(v) end
   end
 end
 
