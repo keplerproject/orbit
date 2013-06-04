@@ -36,6 +36,10 @@ end
 
 local convert = {}
 
+function convert.float(v)
+  return tonumber(v)
+end
+
 function convert.integer(v)
   return tonumber(v)
 end
@@ -81,7 +85,7 @@ function convert.binary(v)
 end
 
 function convert.datetime(v)
-  local year, month, day, hour, min, sec = 
+  local year, month, day, hour, min, sec =
     string.match(v, "(%d+)%-(%d+)%-(%d+) (%d+):(%d+):(%d+)")
   return os.time({ year = tonumber(year), month = tonumber(month),
 		   day = tonumber(day), hour = tonumber(hour),
@@ -94,15 +98,19 @@ local function convert_types(row, meta, driver)
     if meta[k] then
       local conv = convert[meta[k].type]
       if conv then
-	row[k] = conv(v, driver)
+        row[k] = conv(v, driver)
       else
-	error("no conversion for type " .. meta[k].type)
+        error("no conversion for type " .. meta[k].type)
       end
     end
   end
 end
 
 local escape = {}
+
+function escape.float(v)
+  return tostring(v)
+end
 
 function escape.integer(v)
   return tostring(v)
@@ -153,7 +161,7 @@ local function escape_values(row)
   local row_escaped = {}
   for i, m in ipairs(row.meta) do
     if row[m.name] == nil then
-      row_escaped[m.name] = "NULL" 
+      row_escaped[m.name] = "NULL"
     else
       local esc = escape[m.type]
       if esc then
@@ -235,7 +243,7 @@ local function build_inject(project, inject, dao)
       model.name .. "_" .. field
   end
   setmetatable(dao.meta, { __index = inject_fields })
-  return table.concat(fields, ", "), dao.table_name .. ", " .. 
+  return table.concat(fields, ", "), dao.table_name .. ", " ..
     model.table_name,  model.name .. "_id = " .. model.table_name .. ".id"
 end
 
@@ -290,7 +298,7 @@ end
 
 function model_methods:new(name, dao)
   dao = dao or {}
-  dao.model, dao.name, dao.table_name, dao.meta, dao.driver = self, name, 
+  dao.model, dao.name, dao.table_name, dao.meta, dao.driver = self, name,
     self.table_prefix .. name, {}, self.driver
   setmetatable(dao, { __index = dao_index })
   local sql = "select * from " .. dao.table_name .. " limit 0"
@@ -406,7 +414,7 @@ local function build_query(dao, condition, args)
     end
     table_list = table.concat({ dao.table_name, unpack(args.from or {}) }, ", ")
   end
-  local sql = select .. field_list .. " from " .. table_list .. 
+  local sql = select .. field_list .. " from " .. table_list ..
     condition .. order .. limit
   if dao.model.logging then log_query(sql) end
   return sql
@@ -417,7 +425,7 @@ function dao_methods.find_first(dao, condition, args)
 end
 
 function dao_methods.find_all(dao, condition, args)
-  return fetch_rows(dao, build_query(dao, condition, args), 
+  return fetch_rows(dao, build_query(dao, condition, args),
 		    (args and args.count) or (condition and condition.count))
 end
 
@@ -466,9 +474,9 @@ local function insert(row)
     table.concat(values, ", ") .. ")"
   if row.model.logging then log_query(sql) end
   local ok, err = row.model.conn:execute(sql)
-  if ok then 
+  if ok then
     row.id = row.id or row.model.conn:getlastautoid()
-  else 
+  else
     error(err)
   end
 end
@@ -485,7 +493,7 @@ function dao_methods.delete(row)
   if row.id then
     local sql = "delete from " .. row.table_name .. " where id = " .. row.id
     if row.model.logging then log_query(sql) end
-    local ok, err = row.model.conn:execute(sql)    
+    local ok, err = row.model.conn:execute(sql)
     if ok then row.id = nil else error(err) end
   end
 end
