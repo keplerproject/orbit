@@ -1,4 +1,3 @@
-
 require "wsapi.request"
 require "wsapi.response"
 require "wsapi.util"
@@ -537,9 +536,9 @@ function _M.run(app_module, wsapi_env)
   local web, res = make_web_object(app_module, wsapi_env)
   repeat
     local reparse = false
-    local ok, response = xpcall(function () 
-				  return handler(web, unpack(captures)) 
-				end, debug.traceback)
+    local ok, response = xpcall(function ()
+                                  return handler(web, unpack(captures))
+                                end, function(msg) return debug.traceback(msg) end)
     if not ok then
       res.status = "500 Internal Server Error"
       res:write(app_module.server_error(web, response))
