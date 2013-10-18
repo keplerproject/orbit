@@ -1,4 +1,3 @@
-
 require "lpeg"
 require "re"
 
@@ -35,6 +34,10 @@ function type_names.postgres(t)
 end
 
 local convert = {}
+
+function convert.real(v)
+  return tonumber(v)
+end
 
 function convert.float(v)
   return tonumber(v)
@@ -107,6 +110,10 @@ local function convert_types(row, meta, driver)
 end
 
 local escape = {}
+
+function escape.real(v)
+  return tostring(v)
+end
 
 function escape.float(v)
   return tostring(v)
