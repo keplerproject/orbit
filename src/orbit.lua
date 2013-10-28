@@ -170,7 +170,8 @@ _M.mime_types = {
   movie = "video/x-sgi-movie",
   ice = "x-conference/x-cooltalk",
   rss = "application/rss+xml",
-  atom = "application/atom+xml"
+  atom = "application/atom+xml",
+  json = "application/json"
 }
 
 _M.app_module_methods = {}
