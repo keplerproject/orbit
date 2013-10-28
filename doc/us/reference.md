@@ -154,7 +154,7 @@ is used as the basis for the model object if present
 
 **a\_model.driver** - the DB driver used
 
-**a\_model.meta** - metainformation about the model, instorspected from the table
+**a\_model.meta** - metainformation about the model, introspected from the table
 
 **a\_model:find(*id*)** - finds and returns the instance of the model with the passed *id* (keyed using
 the `id` column of the table (must be numeric)
