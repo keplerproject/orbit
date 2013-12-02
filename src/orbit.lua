@@ -1,6 +1,7 @@
-require "wsapi.request"
-require "wsapi.response"
-require "wsapi.util"
+local wsapi    = require "wsapi"
+wsapi.request  = require "wsapi.request"
+wsapi.response = require "wsapi.response"
+wsapi.util     = require "wsapi.util"
 
 local _G, setfenv = _G, setfenv
 module("orbit")
