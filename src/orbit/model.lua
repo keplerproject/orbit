@@ -1,6 +1,5 @@
-
-require "lpeg"
-require "re"
+local lpeg = require "lpeg"
+local re = require "re"
 
 module("orbit.model", package.seeall)
 
