@@ -5,8 +5,9 @@
 --
 -----------------------------------------------------------------------------
 
-require "wsapi.xavante"
-require "wsapi.common"
+local wsapi = {}
+wsapi.xavante = require "wsapi.xavante"
+wsapi.common = require "wsapi.common"
 
 module ("orbit.ophandler", package.seeall)
 
