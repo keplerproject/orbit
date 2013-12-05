@@ -1,6 +1,7 @@
-require "wsapi.request"
-require "wsapi.response"
-require "wsapi.util"
+local wsapi = {}
+local wsapi.request = require "wsapi.request"
+local wsapi.require = require "wsapi.response"
+local wsapi.util = require "wsapi.util"
 
 local _G, setfenv = _G, setfenv
 module("orbit")
@@ -8,8 +9,8 @@ local _M = _M
 setfenv(1, _G)
 
 _M._NAME = "orbit"
-_M._VERSION = "2.2.0"
-_M._COPYRIGHT = "Copyright (C) 2007-2010 Kepler Project"
+_M._VERSION = "2.2.1"
+_M._COPYRIGHT = "Copyright (C) 2007-2013 Kepler Project"
 _M._DESCRIPTION = "MVC Web Development for the Kepler platform"
 
 local REPARSE = {}
@@ -170,7 +171,8 @@ _M.mime_types = {
   movie = "video/x-sgi-movie",
   ice = "x-conference/x-cooltalk",
   rss = "application/rss+xml",
-  atom = "application/atom+xml"
+  atom = "application/atom+xml",
+  json = "application/json"
 }
 
 _M.app_module_methods = {}
