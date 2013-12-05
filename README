@@ -15,7 +15,7 @@ History
   bugfix release for Lua 5.1
   NOT 5.2 compliant
   documentation corrections
-  support for Wsapi 1.6 and Cosmo 10
+  support for wsapi 1.6 and Cosmo 10
   additional orbit model datatypes: real, float, timestamp, numeric
   orbit model supports Postgres
   MIME type application/json included
