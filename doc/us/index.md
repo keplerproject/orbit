@@ -10,6 +10,15 @@ a Xavante instance for development.
 
 ## History
 
+* Version 2.2.1 (7/Dec/2013)
+   * bugfix release for Lua 5.1
+   * NOT 5.2 compliant
+   * documentation corrections
+   * support for Wsapi 1.6 and Cosmo 10
+   * additional orbit model datatypes: real, float, timestamp, numeric
+   * orbit model supports Postgres
+   * MIME type application/json included
+
 * Version 2.2.0 (31/Mar/2010)
     * Reparse response to resume the dispatcher
     * better parser for orbit.model conditions, fixes parsing bugs
