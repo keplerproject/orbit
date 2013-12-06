@@ -1,8 +1,8 @@
 #!/usr/bin/env wsapi.cgi
 
-require "orbit"
-require "orbit.cache"
-require "markdown"
+local orbit = require "orbit"
+orbit.cache = require "orbit.cache"
+local markdown = require "markdown"
 
 --
 -- Declares that this is module is an Orbit app
@@ -17,7 +17,7 @@ require "blog_config"
 --
 -- Initializes DB connection for Orbit's default model mapper
 --
-require("luasql." .. database.driver)
+local luasql = require("luasql." .. database.driver)
 local env = luasql[database.driver]()
 mapper.conn = env:connect(unpack(database.conn_data))
 mapper.driver = database.driver
