@@ -15,12 +15,14 @@ if not ok then
   os.exit(1)
 end
 
-require "lfs"
-require "xavante"
-require "xavante.httpd"
-require "xavante.vhostshandler"
-require "xavante.urlhandler"
-require "wsapi.util"
+local lfs = require "lfs"
+local xavante = require "xavante"
+local httpd = require "xavante.httpd"
+local vhostshandler = require "xavante.vhostshandler"
+local urlhandler = require "xavante.urlhandler"
+local util = require "wsapi.util"
+local wsapi = require "wsapi"
+wsapi.xavante = require "wsapi.xavante"
 
 local usage = [[
 Usage: orbit [options] <application.(lua|ws)> <app_args>
