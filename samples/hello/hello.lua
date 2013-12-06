@@ -1,6 +1,6 @@
 #!/usr/bin/env wsapi.cgi
 
-require"orbit"
+local orbit = require "orbit"
 
 -- Orbit applications are usually modules,
 -- orbit.new does the necessary initialization
