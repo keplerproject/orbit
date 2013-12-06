@@ -35,6 +35,10 @@ end
 
 local convert = {}
 
+function convert.real(v)
+  return tonumber(v)
+end
+
 function convert.float(v)
   return tonumber(v)
 end
@@ -106,6 +110,10 @@ local function convert_types(row, meta, driver)
 end
 
 local escape = {}
+
+function escape.real(v)
+  return tostring(v)
+end
 
 function escape.float(v)
   return tostring(v)
@@ -344,9 +352,9 @@ function dao_methods.find(dao, id, inject)
   if not type(id) == "number" then
     error("find error: id must be a number")
   end
-  if dao.logging then log_query(sql) end
   local sql = "select * from " .. dao.table_name ..
     " where id=" .. id
+  if dao.logging then log_query(sql) end
   return fetch_row(dao, sql)
 end
 
