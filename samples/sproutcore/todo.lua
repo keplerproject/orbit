@@ -1,8 +1,8 @@
 #!/usr/bin/env wsapi.cgi
 
-require "orbit"
-require "orbit.cache"
-require "luasql.sqlite3"
+local orbit = require "orbit"
+orbit.cache = require "orbit.cache"
+local luasql = require "luasql.sqlite3"
 
 local encode = require "json.encode"
 local decode = require "json.decode"
