@@ -1,9 +1,9 @@
 #!/usr/bin/env wsapi.cgi
 
-require "orbit"
-require "markdown"
-require "orbit.cache"
-require "cosmo"
+local orbit = require "orbit"
+local markdown = require "markdown"
+orbit.cache = require "orbit.cache"
+local cosmo = require "cosmo"
 
 module("toycms", package.seeall, orbit.new)
 
@@ -13,7 +13,7 @@ require "toycms_config"
 require "toycms_plugins"
 require "toycms_admin"
 
-require("luasql." .. database.driver)
+local luasql = require("luasql." .. database.driver)
 local env = luasql[database.driver]()
 mapper.conn = env:connect(unpack(database.conn_data))
 mapper.driver = database.driver
