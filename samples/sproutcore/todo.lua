@@ -4,8 +4,9 @@ local orbit = require "orbit"
 orbit.cache = require "orbit.cache"
 local luasql = require "luasql.sqlite3"
 
-local encode = require "json.encode"
-local decode = require "json.decode"
+local json = require "json"
+local encode = json.encode
+local decode = json.decode
 
 local todo = orbit.new()
 todo.mapper.conn = luasql.sqlite3():connect(todo.real_path .. "/todo.db")
