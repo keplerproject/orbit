@@ -68,7 +68,7 @@
 <h2>Overview</h2>
 
 <p>Orbit is an MVC web framework for Lua. The design is inspired by lightweight Ruby
-frameworks such as <a href="http://code.whytheluckystiff.net/camping/">Camping</a>. It completely
+frameworks such as <a href="http://en.wikipedia.org/wiki/Camping_%28microframework%29">Camping</a>. It completely
 abandons the CGILua model of "scripts" in favor of applications, where each Orbit
 application can fit in a single file, but you can split it into multiple files if you want.
 All Orbit applications follow the <a href="http://keplerproject.github.com/wsapi">WSAPI</a> protocol, so they currently
@@ -78,6 +78,15 @@ a Xavante instance for development.</p>
 <h2>History</h2>
 
 <ul>
+    <li><p>Version 2.2.1 (07/Dec/2013)</p>
+    <ul>
+        <li>bugfix release for Lua 5.1</li>
+        <li>NOT 5.2 compliant</li>
+        <li>documentation corrections and updates</li>
+        <li>support for Wsapi 1.6 and other dependency modules that no longer use "module"</li>
+        <li>additional orbit model datatypes: real, float, timestamp, numeric</li>
+        <li>MIME type application/json included</li>
+    </ul></li>
     <li><p>Version 2.2.0 (31/Mar/2010)</p>
     <ul>
         <li>Reparse response to resume the dispatcher</li>
@@ -104,10 +113,10 @@ a Xavante instance for development.</p>
     </ul></li>
     <li><p>Version 2.0.2 (10/Mar/2009)</p>
     <ul>
-        <li>url-decodes path captures (suggested by Ignacio Burgueño on a Jul 24 email to the Kepler list)</li>
+        <li>url-decodes path captures (suggested by Ignacio BurgueÃ±o on a Jul 24 email to the Kepler list)</li>
         <li>added tutorial and new examples</li>
         <li>fixed escape.string</li>
-        <li>web:delete_cookie receives a path parameter in order to correctly remove the cookie. Bug report and patch by Ignacio Burgueño</li>
+        <li>web:delete_cookie receives a path parameter in order to correctly remove the cookie. Bug report and patch by Ignacio BurgueÃ±o</li>
         <li>stripping UTF-8 BOM from templates read from disk</li>
         <li>removing SoLazer files in order to make the Orbit package smaller</li>
         <li>added alternate name for integer (int)</li>
@@ -246,7 +255,7 @@ them from the database, change what you want and call <code>save()</code>
 
 <h2>Credits</h2>
 
-<p>Orbit was designed and developed by Fabio Mascarenhas and André Carregal,
+<p>Orbit was designed and developed by Fabio Mascarenhas and AndrÃ© Carregal,
 and is maintained by Fabio Mascarenhas.</p>
 
 <h2>Contact Us</h2>

@@ -3,8 +3,6 @@
 -- Orbit pages launcher, extracts script to launch
 -- from SCRIPT_FILENAME/PATH_TRANSLATED
 
-pcall(require, "luarocks.require")
-
 local common = require "wsapi.common"
 local cgi = require "wsapi.cgi"
 

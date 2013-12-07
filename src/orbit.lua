@@ -1,16 +1,16 @@
 local wsapi    = require "wsapi"
-wsapi.request  = require "wsapi.request"
-wsapi.response = require "wsapi.response"
-wsapi.util     = require "wsapi.util"
+local wsreq    = require "wsapi.request"
+local wsres    = require "wsapi.response"
+local wsutil   = require "wsapi.util"
 
-local _G, setfenv = _G, setfenv
-module("orbit")
-local _M = _M
-setfenv(1, _G)
+local orm
+local orpages
+
+local _M = _M or {}
 
 _M._NAME = "orbit"
-_M._VERSION = "2.2.0"
-_M._COPYRIGHT = "Copyright (C) 2007-2010 Kepler Project"
+_M._VERSION = "2.2.1"
+_M._COPYRIGHT = "Copyright (C) 2007-2013 Kepler Project"
 _M._DESCRIPTION = "MVC Web Development for the Kepler platform"
 
 local REPARSE = {}
@@ -380,10 +380,10 @@ app_module_methods.htmlify = _M.htmlify
 function app_module_methods.model(app_module, ...)
    if app_module.mapper.default then
       local table_prefix = (app_module._NAME and app_module._NAME .. "_") or ""
-      if not orbit.model then
-	    require "orbit.model"
+      if not orm then
+	    orm = require "orbit.model"
       end
-      app_module.mapper = orbit.model.new(app_module.mapper.table_prefix or table_prefix, 
+      app_module.mapper = orm.new(app_module.mapper.table_prefix or table_prefix, 
 			app_module.mapper.conn, app_module.mapper.driver, app_module.mapper.logging)
    end
    return app_module.mapper:new(...)
@@ -400,7 +400,7 @@ function web_methods:link(url, params)
   local prefix = self.prefix or ""
   local suffix = self.suffix or ""
   for k, v in pairs(params or {}) do
-    link[#link + 1] = k .. "=" .. wsapi.util.url_encode(v)
+    link[#link + 1] = k .. "=" .. wsutil.url_encode(v)
   end
   local qs = table.concat(link, "&")
   if qs and qs ~= "" then
@@ -427,8 +427,8 @@ function web_methods:content_type(s)
 end
 
 function web_methods:page(name, env)
-  if not orbit.pages then
-    require "orbit.pages"
+  if not orpages then
+    orpages = require "orbit.pages"
   end
   local filename
   if name:sub(1, 1) == "/" then
@@ -436,19 +436,19 @@ function web_methods:page(name, env)
   else
     filename = self.real_path .. "/" .. name
   end
-  local template = orbit.pages.load(filename)
+  local template = orpages.load(filename)
   if template then
-    return orbit.pages.fill(self, template, env)
+    return orpages.fill(self, template, env)
   end
 end
 
 function web_methods:page_inline(contents, env)
-  if not orbit.pages then
-    require "orbit.pages"
+  if not orpages then
+    orpages = require "orbit.pages"
   end
-  local template = orbit.pages.load(nil, contents)
+  local template = orpages.load(nil, contents)
   if template then
-    return orbit.pages.fill(self, template, env)
+    return orpages.fill(self, template, env)
   end
 end
 
@@ -456,7 +456,7 @@ function web_methods:empty_param(param)
   return self:empty(self.input[param])
 end
 
-for name, func in pairs(wsapi.util) do
+for name, func in pairs(wsutil) do
   web_methods[name] = function (self, ...)
 			return func(...)
 		      end
@@ -478,7 +478,7 @@ local function dispatcher(app_module, method, path, index)
       if #captures > 0 then
 	for i = 1, #captures do
 	  if type(captures[i]) == "string" then
-	    captures[i] = wsapi.util.url_decode(captures[i])
+	    captures[i] = wsutil.url_decode(captures[i])
 	  end
 	end
 	return item.handler, captures, item.wsapi, index
@@ -501,8 +501,8 @@ local function make_web_object(app_module, wsapi_env)
     web.real_path = wsapi_env.APP_PATH
   end
   web.doc_root = wsapi_env.DOCUMENT_ROOT
-  local req = wsapi.request.new(wsapi_env)
-  local res = wsapi.response.new(web.status, web.headers)
+  local req = wsreq.new(wsapi_env)
+  local res = wsres.new(web.status, web.headers)
   web.set_cookie = function (_, name, value)
 		     res:set_cookie(name, value)
 		   end
@@ -564,3 +564,4 @@ function _M.run(app_module, wsapi_env)
 end
 
 return _M
+

@@ -20,9 +20,9 @@ The first thing you should put in this file is the code to load Orbit and other 
 are going to use in your app:
 
 <pre>
-require "orbit"
-require "orbit.cache"
-require "markdown"
+local orbit = require "orbit"
+orbit.cache = require "orbit.cache"
+local markdown = require "markdown"
 </pre>
 
 In this example we are going to use Orbit's page cache, and the Markdown parser for marking
@@ -56,7 +56,7 @@ The next few lines load one of LuaSQL's database driver (defined in the configur
 and sets up Orbit's OR mapper.
 
 <pre>
-require("luasql." .. database.driver)
+local luasql = require("luasql." .. database.driver)
 local env = luasql[database.driver]()
 mapper.conn = env:connect(unpack(database.conn_data))
 mapper.driver = database.driver

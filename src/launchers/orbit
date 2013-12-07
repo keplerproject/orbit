@@ -7,20 +7,20 @@
 --
 -------------------------------------------------------------------------------
 
-pcall(require, "luarocks.require")
-
 local ok, err = pcall(require, "wsapi.xavante") 
 if not ok then
   io.stderr:write("WSAPI Xavante support not loaded:\n" .. err .. "\n\nPlease install wsapi-xavante with LuaRocks\n")
   os.exit(1)
 end
 
-require "lfs"
-require "xavante"
-require "xavante.httpd"
-require "xavante.vhostshandler"
-require "xavante.urlhandler"
-require "wsapi.util"
+local lfs = require "lfs"
+local xavante = require "xavante"
+local httpd = require "xavante.httpd"
+local vhostshandler = require "xavante.vhostshandler"
+local urlhandler = require "xavante.urlhandler"
+local util = require "wsapi.util"
+local wsapi = require "wsapi"
+local wsx = require "wsapi.xavante"
 
 local usage = [[
 Usage: orbit [options] <application.(lua|ws)> <app_args>
@@ -92,7 +92,7 @@ if type(app) == "table" then app = app.run end
 
 xavante.httpd.handle_request = xavante.vhostshandler {
 	[""] = xavante.urlhandler {
-                ["/"] = wsapi.xavante.makeHandler (app, nil, path, path),
+                ["/"] = wsx.makeHandler (app, nil, path, path),
 	}
 }
 

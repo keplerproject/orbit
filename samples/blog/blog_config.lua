@@ -10,7 +10,7 @@ copyright_notice = "Copyright 2007 Foobar"
 
 about_blurb = [[This is an example of a blog built using Orbit. You
 can browse posts and add comments, but to add new posts you have
-to go directly to the database. This will be fixed in the future.]] 
+to go directly to the database. This will be fixed in the future.]]
 
 blogroll = {
   { "http://slashdot.org", "Slashdot"},
@@ -22,8 +22,8 @@ blogroll = {
 -- use_xsendfile = true
 
 database = {
---  driver = "mysql",
---  conn_data = { "blog", "root", "password" }
+-- driver = "mysql",
+-- conn_data = { "blog", "root", "password" }
   driver = "sqlite3",
   conn_data = { blog.real_path .. "/blog.db" }
 }
@@ -151,7 +151,7 @@ end
 function date.en(date)
   date = os.date("*t", date)
   return weekdays.en[date.wday] .. ", " .. months.en[date.month] .. " " ..
-     ordinalize(date.day) .. " " .. date.year 
+     ordinalize(date.day) .. " " .. date.year
 end
 
 function month.en(month)
