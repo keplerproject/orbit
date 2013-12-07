@@ -88,9 +88,9 @@ are going to use in your app:</p>
 
 
 <pre>
-require "orbit"
-require "orbit.cache"
-require "markdown"
+local orbit = require "orbit"
+orbit.cache = require "orbit.cache"
+local markdown = require "markdown"
 </pre>
 
 
@@ -130,7 +130,7 @@ and sets up Orbit's OR mapper.</p>
 
 
 <pre>
-require("luasql." .. database.driver)
+local luasql = require("luasql." .. database.driver)
 local env = luasql[database.driver]()
 mapper.conn = env:connect(unpack(database.conn_data))
 mapper.driver = database.driver
