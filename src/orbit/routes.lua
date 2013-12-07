@@ -17,8 +17,7 @@ local underscore = lpeg.P('_')
 local forward_slash = lpeg.P('/')
 local slash_or_dot = forward_slash + the_dot
 
-local param = lpeg.C(slash_or_dot) * colon * lpeg.C((alpha + number + underscore)^1) * #(slash_or_dot + -1) /
-  function (prefix, name, dot)
+local function cap_param(prefix, name, dot)
     local inner = (1 - lpeg.S('/' .. (dot or '')))^1
     local close = lpeg.P'/' + (dot or -1) + -1
     return {
@@ -28,10 +27,14 @@ local param = lpeg.C(slash_or_dot) * colon * lpeg.C((alpha + number + underscore
       name = name,
       prefix = prefix
     }
-  end
+end
 
-local opt_param = lpeg.C(slash_or_dot) * question_mark * colon * lpeg.C((alpha + number + underscore)^1) * question_mark * #(forward_slash + -1) /
-  function (prefix, name, dot)
+local param_pre = lpeg.C(slash_or_dot) * colon * lpeg.C((alpha + number + underscore)^1)
+
+local param = (param_pre * #(forward_slash + -1) / cap_param) +
+              (param_pre * #the_dot / function (prefix, name) return cap_param(prefix, name, ".") end)
+
+local function cap_opt_param(prefix, name, dot)
     local inner = (1 - lpeg.S('/' .. (dot or '')))^1
     local close = lpeg.P('/') + lpeg.P(dot or -1) + -1
     return {
@@ -41,7 +44,12 @@ local opt_param = lpeg.C(slash_or_dot) * question_mark * colon * lpeg.C((alpha +
       name = name,
       prefix = prefix
     }
-  end
+end
+
+local opt_param_pre = lpeg.C(slash_or_dot) * question_mark * colon * lpeg.C((alpha + number + underscore)^1) * question_mark
+
+local opt_param = (opt_param_pre * #(forward_slash + -1) / cap_opt_param) +
+                  (opt_param_pre * #the_dot / function (prefix, name) return cap_opt_param(prefix, name, ".") end)
 
 local splat = lpeg.P(lpeg.C(forward_slash + the_dot) * asterisk * #(forward_slash + the_dot + -1)) /
   function (prefix)
