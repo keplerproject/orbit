@@ -1,7 +1,7 @@
 ## Overview
 
 Orbit is an MVC web framework for Lua. The design is inspired by lightweight Ruby
-frameworks such as [Camping](http://http://en.wikipedia.org/wiki/Camping_%28microframework%29). It completely
+frameworks such as [Camping](http://en.wikipedia.org/wiki/Camping_%28microframework%29). It completely
 abandons the CGILua model of "scripts" in favor of applications, where each Orbit
 application can fit in a single file, but you can split it into multiple files if you want.
 All Orbit applications follow the [WSAPI](http://keplerproject.github.com/wsapi) protocol, so they currently
