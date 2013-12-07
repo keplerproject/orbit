@@ -1,7 +1,7 @@
 ## Overview
 
 Orbit is an MVC web framework for Lua. The design is inspired by lightweight Ruby
-frameworks such as [Camping](http://code.whytheluckystiff.net/camping/). It completely
+frameworks such as [Camping](http://http://en.wikipedia.org/wiki/Camping_%28microframework%29). It completely
 abandons the CGILua model of "scripts" in favor of applications, where each Orbit
 application can fit in a single file, but you can split it into multiple files if you want.
 All Orbit applications follow the [WSAPI](http://keplerproject.github.com/wsapi) protocol, so they currently
@@ -10,13 +10,12 @@ a Xavante instance for development.
 
 ## History
 
-* Version 2.2.1 (7/Dec/2013)
+* Version 2.2.1 (07/Dec/2013)
    * bugfix release for Lua 5.1
    * NOT 5.2 compliant
-   * documentation corrections
-   * support for Wsapi 1.6 and Cosmo 10
+   * documentation corrections and updates
+   * support for Wsapi 1.6 and other dependency modules that no longer use "module"
    * additional orbit model datatypes: real, float, timestamp, numeric
-   * orbit model supports Postgres
    * MIME type application/json included
 
 * Version 2.2.0 (31/Mar/2010)
