@@ -12,10 +12,10 @@ description = {
   homepage = "http://www.keplerproject.org/orbit"
 }
 
-dependencies = { 'luafilesystem >= 1.5.0', 'lpeg >= 0.9', 'wsapi-xavante', 'cosmo' }
+dependencies = { 'luafilesystem >= 1.6.2', 'lpeg >= 0.12', 'wsapi-xavante >= 1.6', 'cosmo >= 13.01.30' }
 
 source = {
-  -- temporary for testing
+  -- !! temporary for testing !!
   url = "git://github.com/kognix/orbit.git"
 }
 
