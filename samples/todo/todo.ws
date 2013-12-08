@@ -1,9 +1,9 @@
 #!/usr/bin/env wsapi.cgi
 
-require "orbit"
-require "orbit.pages"
-require "cosmo"
-require "luasql.sqlite3"
+local orbit = require "orbit"
+orbit.pages = require "orbit.pages"
+local cosmo = require "cosmo"
+local luasql = require "luasql.sqlite3"
 
 local todo = orbit.new()
 
