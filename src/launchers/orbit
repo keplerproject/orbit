@@ -7,20 +7,20 @@
 --
 -------------------------------------------------------------------------------
 
-local ok, err = pcall(require, "wsapi.xavante") 
+local ok, err = pcall(require, 'wsapi.xavante') 
 if not ok then
-  io.stderr:write("WSAPI Xavante support not loaded:\n" .. err .. "\n\nPlease install wsapi-xavante with LuaRocks\n")
+  io.stderr:write('WSAPI Xavante support not loaded:\n' .. err .. '\n\nPlease install wsapi-xavante with LuaRocks\n')
   os.exit(1)
 end
 
-local lfs = require "lfs"
-local xavante = require "xavante"
-local httpd = require "xavante.httpd"
-local vhostshandler = require "xavante.vhostshandler"
-local urlhandler = require "xavante.urlhandler"
-local util = require "wsapi.util"
-local wsapi = require "wsapi"
-local wsx = require "wsapi.xavante"
+local lfs = require 'lfs'
+local xavante = require 'xavante'
+local httpd = require 'xavante.httpd'
+local vhostshandler = require 'xavante.vhostshandler'
+local urlhandler = require 'xavante.urlhandler'
+local util = require 'wsapi.util'
+local wsapi = require 'wsapi'
+local wsx = require 'wsapi.xavante'
 
 local usage = [[
 Usage: orbit [options] <application.(lua|ws)> <app_args>
@@ -37,7 +37,7 @@ Options:
 
 ]]
 
-local opts, args = wsapi.util.getopt({ ... }, "lp")
+local opts, args = wsapi.util.getopt({ ... }, 'lp')
 
 local app, app_args = args[1], { select(2, unpack(args)) }
 
@@ -49,9 +49,9 @@ end
 if opts.l or opts.log then
   local logfile = opts.l or opts.log
   local tostring = tostring
-  local log = io.open(logfile, "a+")
+  local log = io.open(logfile, 'a+')
   if not log then
-    error("Could not open log file. Please check the write permissions for: " .. logfile)
+    error('Could not open log file. Please check the write permissions for: ' .. logfile)
   end
   io.stdout = log
   io.stderr = log
@@ -59,25 +59,25 @@ if opts.l or opts.log then
     local nargs = select('#', ...)
     for i = 1, nargs-1 do
       log:write(tostring((select(i, ...))))
-      log:write("\t")
+      log:write('\t')
     end
     log:write(tostring(select(nargs, ...)))
-    log:write("\n")
+    log:write('\n')
     log:flush()
   end
 end
 
-local path, name = app:match("^(.+[/\\])?([%w%._%- ]+)$")
+local path, name = app:match('^(.+[/\\])?([%w%._%- ]+)$')
 
 if not path then
-  path, name = "", app
+  path, name = '', app
 end
 
-if app:sub(1, 1) ~= "/" and app:sub(1, 1) ~= "\\" and not app:match("^%a:\\") then
-  path = lfs.currentdir() .. "/" .. path
+if app:sub(1, 1) ~= '/' and app:sub(1, 1) ~= '\\' and not app:match('^%a:\\') then
+  path = lfs.currentdir() .. '/' .. path
 end
 
-package.path = package.path .. ";" .. path .. "?.lua;" .. path .. "?/?.lua"
+package.path = package.path .. ';' .. path .. '?.lua;' .. path .. '?/?.lua'
 
 wsapi.app_path = path
 
@@ -86,21 +86,20 @@ if not app_func then error(err) end
 
 local app = app_func(unpack(app_args))
 
-if not app then app = _G[name:match("(.+)%.")] end
+if not app then app = _G[name:match('(.+)%.')] end
 
-if type(app) == "table" then app = app.run end
+if type(app) == 'table' then app = app.run end
 
 xavante.httpd.handle_request = xavante.vhostshandler {
-	[""] = xavante.urlhandler {
-                ["/"] = wsx.makeHandler (app, nil, path, path),
-	}
+  [''] = xavante.urlhandler {
+    ['/'] = wsx.makeHandler (app, nil, path, path),
+  }
 }
 
-xavante.httpd.register ("*", tonumber(opts.p or opts.port) or 8080, "Xavante 2.0")
+xavante.httpd.register ('*', tonumber(opts.p or opts.port) or 8080, 'Xavante 2.0')
 
 xavante.start_message(function (ports)
-			        print(string.format("Starting Orbit server at port %s",
-				 table.concat(ports, ", "))) 
-	    	      end)
+  print(string.format('Starting Orbit server at port %s', table.concat(ports, ', ')))
+end)
 
 xavante.start()
