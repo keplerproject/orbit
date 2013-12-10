@@ -208,26 +208,35 @@ local function fetch_rows(dao, sql, count)
   return rows
 end
 
+local by_condition_parser = re.compile([[
+  fields <- ({(!conective .)+} (conective {(!conective .)+})*) -> {}  
+  conective <- and / or
+  and <- "_and_" -> "and"
+  or <- "_or_" -> "or"
+]])
+
 local function parse_condition(dao, condition, args)
-  condition = string.gsub(condition, "_and_", "|")
-  local pairs = {}
-  for field in string.gmatch(condition, "[_%w]+") do
-    local i = #pairs + 1
-    local value
-    if args[i] == nil then
-      pairs[i] = field .. " is null"
-    elseif type(args[i]) == "table" then
-      local values = {}
-      for _, value in ipairs(args[i]) do
-	values[#values + 1] = escape[dao.meta[field].type](value, dao.driver, dao.model.conn)
+  local parts = by_condition_parser:match(condition)
+  local j = 1
+  for i, part in ipairs(parts) do
+    if part ~= "or" and part ~= "and" then
+      j = j + 1
+      local value
+      if args[j] == nil then
+        parts[i] = part .. " is null"
+      elseif type(args[j]) == "table" then
+        local values = {}
+        for _, value in ipairs(args[j]) do
+	  values[#values + 1] = escape[dao.meta[part].type](value, dao.driver, dao.model.conn)
+        end
+        parts[i] = part .. " IN (" .. table.concat(values,", ") .. ")"
+      else
+        value = escape[dao.meta[part].type](args[j], dao.driver, dao.model.conn)
+        parts[i] = part .. " = " .. value
       end
-      pairs[i] = field .. " IN (" .. table.concat(values,", ") .. ")"
-    else
-      value = escape[dao.meta[field].type](args[i], dao.driver, dao.model.conn)
-      pairs[i] = field .. " = " .. value
     end
   end
-  return pairs
+  return parts
 end
 
 local function build_inject(project, inject, dao)
@@ -255,14 +264,15 @@ local function build_inject(project, inject, dao)
 end
 
 local function build_query_by(dao, condition, args)
-  local pairs = parse_condition(dao, condition, args)
+  local parts = parse_condition(dao, condition, args)
   local order = ""
   local field_list, table_list, select, limit
   if args.distinct then select = "select distinct " else select = "select " end
   if tonumber(args.count) then limit = " limit " .. tonumber(args.count) else limit = "" end
   if args.order then order = " order by " .. args.order end
   if args.inject then
-    field_list, table_list, pairs[#pairs + 1] = build_inject(args.fields, args.inject,
+    if #parts > 0 then parts[#parts + 1] = "and" end
+    field_list, table_list, parts[#parts + 1] = build_inject(args.fields, args.inject,
       dao)
   else
     if args.fields then
@@ -273,7 +283,7 @@ local function build_query_by(dao, condition, args)
     table_list = dao.table_name
   end
   local sql = select .. field_list .. " from " .. table_list ..
-    " where " .. table.concat(pairs, " and ") .. order .. limit
+    " where " .. table.concat(parts, " ") .. order .. limit
   if dao.model.logging then log_query(sql) end
   return sql
 end
