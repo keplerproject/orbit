@@ -217,7 +217,7 @@ local by_condition_parser = re.compile([[
 
 local function parse_condition(dao, condition, args)
   local parts = by_condition_parser:match(condition)
-  local j = 1
+  local j = 0
   for i, part in ipairs(parts) do
     if part ~= "or" and part ~= "and" then
       j = j + 1
