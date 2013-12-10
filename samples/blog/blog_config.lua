@@ -1,7 +1,4 @@
 
--- Puts all the definitions below in blog's namespace
-module("blog", package.seeall)
-
 blog_title = "Blog"
 
 cache_path = "page_cache"
@@ -25,7 +22,7 @@ database = {
 -- driver = "mysql",
 -- conn_data = { "blog", "root", "password" }
   driver = "sqlite3",
-  conn_data = { blog.real_path .. "/blog.db" }
+  conn_data = { real_path .. "/blog.db" }
 }
 
 recent_count = 7

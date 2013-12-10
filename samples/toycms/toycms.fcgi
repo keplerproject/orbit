@@ -1,11 +1,11 @@
 #!/usr/bin/env lua51
 
-require"lfs"
+local lfs = require "lfs"
 
 lfs.chdir("/path/to/toycms")
 
-require"wsapi.fastcgi"
+local wsfcgi = require "wsapi.fastcgi"
 
-require"toycms"
+local toycms = require"toycms"
 
-wsapi.fastcgi.run(toycms.run)
+wsfcgi.run(toycms.run)

@@ -1,11 +1,11 @@
 
-require "luasql.mysql"
-require "orbit.model"
+local luasql = require "luasql.mysql"
+local orm = require "orbit.model"
 
-local env = luasql.mysql()
+local env = luasql()
 local conn = env:connect("blog", "root", "")
 
-local mapper = orbit.model.new("blog_", conn, "mysql")
+local mapper = orm.new("blog_", conn, "mysql")
 
 
 

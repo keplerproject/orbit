@@ -1,12 +1,12 @@
-require "luasql.sqlite3"
-require "orbit.model"
+local luasql = require "luasql.sqlite3"
+local orm = require "orbit.model"
 
 local args = { ... }
 
-local env = luasql.sqlite3()
+local env = luasql()
 local conn = env:connect(args[1] .. ".db")
 
-local mapper = orbit.model.new("toycms_", conn, "sqlite3")
+local mapper = orm.new("toycms_", conn, "sqlite3")
 
 local tables = { "post", "comment", "user", "section" }
 
@@ -14,13 +14,13 @@ print("local db = '" .. args[1] .. "'")
 
 print [[
 
-require "luasql.mysql"
-require "orbit.model"
+local luasql = require "luasql.mysql"
+local orm = require "orbit.model"
 
-local env = luasql.mysql()
+local env = luasql()
 local conn = env:connect(db, "root", "password")
 
-local mapper = orbit.model.new("toycms_", conn, "mysql")
+local mapper = orm.new("toycms_", conn, "mysql")
 
 ]]
 

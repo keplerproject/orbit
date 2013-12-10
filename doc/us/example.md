@@ -21,22 +21,27 @@ are going to use in your app:
 
 <pre>
 local orbit = require "orbit"
-orbit.cache = require "orbit.cache"
+local orcache = require "orbit.cache"
 local markdown = require "markdown"
+local wsutil = require "wsapi.util"
 </pre>
 
 In this example we are going to use Orbit's page cache, and the Markdown parser for marking
 up posts.
 
-All Orbit applications are Lua modules, so we include this line:
+We will now create the `blog` application and set it as the global environment for the
+rest of the module:
 
 <pre>
-module("blog", package.seeall, orbit.app)
+local blog = setmetatable(orbit.new(), { __index = _G })
+if _VERSION == "Lua 5.2" then
+  _ENV = blog
+else
+  setfenv(1, blog)
+end
 </pre>
 
-This sets up the `blog` module and initializes it as an Orbit application.
-
-`orbit.app` injects quite a lot of stuff in the `blog` module's namespace.
+`orbit.new` injects quite a lot of stuff in the `blog` module's namespace.
 The most important of these are the `dispatch_get`, `dispatch_post`,
 and `model` methods that let you define the main functionality of the
 application. It also defines a `mapper` variable that Orbit uses to create
@@ -49,7 +54,7 @@ Let's load a configuration script for the blog (a common pattern in applications
 You can get this script from [here](blog_config.lua).
 
 <pre>
-require "blog_config"
+wsutil.loadfile("blog_config.lua", blog)()
 </pre>
 
 The next few lines load one of LuaSQL's database driver (defined in the configuration),
@@ -668,6 +673,13 @@ functions in that table with names that match one of the patterns up for
 HTML generation. Here we set the `layout` function, all the `render_` functions,
 and all the helpers (the functions starting with `_`).
 
+We end the file by returning the module:
+
+<pre>
+return blog
+</pre>
+
+
 ## Deployment
 
 For this part of the tutorial it is better if you go to the `samples/blog` folder
@@ -681,8 +693,7 @@ it `blog.ws`):
 
 <pre>
 #!/usr/bin/env wsapi.cgi
-require "blog"
-return blog
+return require "blog"
 </pre>
 
 Depending on your configuration, you might need to install the `luasql-sqlite3` and

@@ -1,5 +1,5 @@
 #!/usr/bin/env wsapi.cgi
 
-require "toycms"
+local toycms = require "toycms"
 
 return toycms.run

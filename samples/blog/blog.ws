@@ -1,3 +1,2 @@
-require "blog"
+return require "blog"
 
-return blog

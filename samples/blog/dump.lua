@@ -1,22 +1,22 @@
-require "luasql.sqlite3"
-require "orbit.model"
+local luasql = require "luasql.sqlite3"
+local orm = require "orbit.model"
 
-local env = luasql.sqlite3()
+local env = luasql()
 local conn = env:connect("blog.db")
 
-local mapper = orbit.model.new("blog_", conn, "sqlite3")
+local mapper = orm.new("blog_", conn, "sqlite3")
 
 local tables = { "post", "comment", "page" }
 
 print [[
 
-require "luasql.mysql"
-require "orbit.model"
+local luasql = require "luasql.mysql"
+local orm = require "orbit.model"
 
-local env = luasql.mysql()
+local env = luasql()
 local conn = env:connect("blog", "root", "password")
 
-local mapper = orbit.model.new("blog_", conn, "mysql")
+local mapper = orm.new("blog_", conn, "mysql")
 
 ]]
 

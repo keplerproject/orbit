@@ -1,14 +1,12 @@
 local db = 'lablua'
 
-require "luasql.mysql"
-require "orbit.model"
+local luasql = require "luasql.mysql"
+local orm = require "orbit.model"
 
-local env = luasql.mysql()
+local env = luasql()
 local conn = env:connect(db, "root", "password")
 
-local mapper = orbit.model.new("toycms_", conn, "mysql")
-
-
+local mapper = orm.new("toycms_", conn, "mysql")
 
 -- Table post
 

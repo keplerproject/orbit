@@ -1,4 +1,3 @@
-module("toycms", package.seeall)
 
 function plugins.date(web)
   return {
@@ -154,3 +153,4 @@ function plugins.index_view(web)
     end
   }
 end
+
