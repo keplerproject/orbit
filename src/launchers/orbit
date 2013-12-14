@@ -37,7 +37,7 @@ Options:
 
 ]]
 
-local opts, args = wsapi.util.getopt({ ... }, "lp")
+local opts, args = util.getopt({ ... }, "lp")
 
 local app, app_args = args[1], { select(2, unpack(args)) }
 
@@ -90,13 +90,13 @@ if not app then app = _G[name:match("(.+)%.")] end
 
 if type(app) == "table" then app = app.run end
 
-xavante.httpd.handle_request = xavante.vhostshandler {
-	[""] = xavante.urlhandler {
+httpd.handle_request = vhostshandler {
+	[""] = urlhandler {
                 ["/"] = wsx.makeHandler (app, nil, path, path),
 	}
 }
 
-xavante.httpd.register ("*", tonumber(opts.p or opts.port) or 8080, "Xavante 2.0")
+httpd.register ("*", tonumber(opts.p or opts.port) or 8080, "Xavante 2.3")
 
 xavante.start_message(function (ports)
 			        print(string.format("Starting Orbit server at port %s",
