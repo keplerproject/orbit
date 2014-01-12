@@ -10,7 +10,7 @@ a Xavante instance for development.
 
 ## History
 
-* Version 2.2.1 (07/Dec/2013)
+* Version 2.2.1 (12/Jan/2014)
     * bugfix release for Lua 5.1
     * NOT 5.2 compliant
     * documentation corrections and updates
