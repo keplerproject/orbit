@@ -12,7 +12,13 @@ description = {
   homepage = "http://www.keplerproject.org/orbit"
 }
 
-dependencies = { 'luafilesystem >= 1.6.2', 'lpeg >= 0.12', 'wsapi-xavante >= 1.6', 'cosmo >= 13.01.30' }
+dependencies = {
+  'luafilesystem >= 1.6.2',
+  'lpeg >= 0.12',
+  'wsapi-xavante >= 1.6',
+  'cosmo >= 13.01.30',
+  'lua >= 5.1, < 5.2',
+}
 
 source = {
   url = "git://github.com/keplerproject/orbit.git",
