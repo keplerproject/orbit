@@ -78,7 +78,7 @@ a Xavante instance for development.</p>
 <h2>History</h2>
 
 <ul>
-    <li><p>Version 2.2.1 (07/Dec/2013)</p>
+    <li><p>Version 2.2.1 (12/Jan/2014)</p>
     <ul>
         <li>bugfix release for Lua 5.1</li>
         <li>NOT 5.2 compliant</li>
@@ -103,7 +103,7 @@ a Xavante instance for development.</p>
         <li>new options for orbit.model finders: distinct, fields</li>
         <li>count option for orbit.model now limits number of rows in the SQL</li>
         <li>logging of queries in orbit.model</li>
-        <li>overhaul of the "orbit" script: better options, --help, sets application paht</li>
+        <li>overhaul of the "orbit" script: better options, --help, sets application path</li>
         <li>content_type method in the web object to set content type</li>
         <li>support for PUT and DELETE (methods <code>dispatch_put</code> and <code>dispatch_delete</code>)</li>
         <li>orbit.model.recycle(*conn_builder<em>, *timeout</em>) function, to make a connection that
@@ -113,10 +113,10 @@ a Xavante instance for development.</p>
     </ul></li>
     <li><p>Version 2.0.2 (10/Mar/2009)</p>
     <ul>
-        <li>url-decodes path captures (suggested by Ignacio BurgueÃÂ±o on a Jul 24 email to the Kepler list)</li>
+        <li>url-decodes path captures (suggested by Ignacio Burgueño on a Jul 24 email to the Kepler list)</li>
         <li>added tutorial and new examples</li>
         <li>fixed escape.string</li>
-        <li>web:delete_cookie receives a path parameter in order to correctly remove the cookie. Bug report and patch by Ignacio BurgueÃÂ±o</li>
+        <li>web:delete_cookie receives a path parameter in order to correctly remove the cookie. Bug report and patch by Ignacio Burgueño</li>
         <li>stripping UTF-8 BOM from templates read from disk</li>
         <li>removing SoLazer files in order to make the Orbit package smaller</li>
         <li>added alternate name for integer (int)</li>
@@ -125,7 +125,7 @@ a Xavante instance for development.</p>
         <li>fixed bugs 13451 and 25418: setting status 500 on application errors not throwing an error if file not exists when invalidating cache</li>
     </ul></li>
     <li><p>Version 2.0.1 (10/Jun/2008): bug-fix release, fixed bug in Orbit pages' redirect function (thanks for
-    Ignacio Burgueno for finding the bug)</p></li>
+    Ignacio Burgueño for finding the bug)</p></li>
     <li><p>Version 2.0 (06/Jun/2008): Complete rewrite of Orbit</p></li>
     <li><p>Version 1.0: Initial release, obsolete</p></li>
 </ul>
@@ -149,7 +149,7 @@ size because it embeds the Sproutcore JavaScript framework.</p>
 <pre>
     #!/usr/bin/env wsapi.cgi
 
-    require"orbit"
+    local orbit = require "orbit"
 
     -- Orbit applications are usually modules,
     -- orbit.new does the necessary initialization
@@ -255,7 +255,7 @@ them from the database, change what you want and call <code>save()</code>
 
 <h2>Credits</h2>
 
-<p>Orbit was designed and developed by Fabio Mascarenhas and AndrÃÂ© Carregal,
+<p>Orbit was designed and developed by Fabio Mascarenhas and André Carregal,
 and is maintained by Fabio Mascarenhas.</p>
 
 <h2>Contact Us</h2>
@@ -264,7 +264,7 @@ and is maintained by Fabio Mascarenhas.</p>
 Comments are welcome!</p>
 
 <p>You can also reach us and other developers and users on the Kepler Project 
-<a href="http://luaforge.net/mail/?group_id=104">mailing list</a>. </p>
+<a href="https://groups.google.com/forum/#!forum/kepler-project">mailing list</a>. </p>
 
 
 

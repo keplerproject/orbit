@@ -89,25 +89,30 @@ are going to use in your app:</p>
 
 <pre>
 local orbit = require "orbit"
-orbit.cache = require "orbit.cache"
+local orcache = require "orbit.cache"
 local markdown = require "markdown"
+local wsutil = require "wsapi.util"
 </pre>
 
 
 <p>In this example we are going to use Orbit's page cache, and the Markdown parser for marking
 up posts.</p>
 
-<p>All Orbit applications are Lua modules, so we include this line:</p>
+<p>We will now create the <code>blog</code> application and set it as the global environment for the
+rest of the module:</p>
 
 
 <pre>
-module("blog", package.seeall, orbit.app)
+local blog = setmetatable(orbit.new(), { __index = _G })
+if _VERSION == "Lua 5.2" then
+  _ENV = blog
+else
+  setfenv(1, blog)
+end
 </pre>
 
 
-<p>This sets up the <code>blog</code> module and initializes it as an Orbit application.</p>
-
-<p><code>orbit.app</code> injects quite a lot of stuff in the <code>blog</code> module's namespace.
+<p><code>orbit.new</code> injects quite a lot of stuff in the <code>blog</code> module's namespace.
 The most important of these are the <code>dispatch_get</code>, <code>dispatch_post</code>,
 and <code>model</code> methods that let you define the main functionality of the
 application. It also defines a <code>mapper</code> variable that Orbit uses to create
@@ -121,7 +126,7 @@ You can get this script from <a href="blog_config.lua">here</a>.</p>
 
 
 <pre>
-require "blog_config"
+wsutil.loadfile("blog_config.lua", blog)()
 </pre>
 
 
@@ -791,6 +796,15 @@ functions in that table with names that match one of the patterns up for
 HTML generation. Here we set the <code>layout</code> function, all the <code>render_</code> functions,
 and all the helpers (the functions starting with <code>_</code>).</p>
 
+<p>We end the file by returning the module:</p>
+
+
+<pre>
+return blog
+</pre>
+
+
+
 <h2>Deployment</h2>
 
 <p>For this part of the tutorial it is better if you go to the <code>samples/blog</code> folder
@@ -805,8 +819,7 @@ it <code>blog.ws</code>):</p>
 
 <pre>
 #!/usr/bin/env wsapi.cgi
-require "blog"
-return blog
+return require "blog"
 </pre>
 
 
