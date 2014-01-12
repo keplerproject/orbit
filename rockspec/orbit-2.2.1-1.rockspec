@@ -15,8 +15,8 @@ description = {
 dependencies = { 'luafilesystem >= 1.6.2', 'lpeg >= 0.12', 'wsapi-xavante >= 1.6', 'cosmo >= 13.01.30' }
 
 source = {
-  -- !! temporary for testing !!
-  url = "git://github.com/kognix/orbit.git"
+  url = "git://github.com/keplerproject/orbit.git",
+  tag = "v2.2.1",
 }
 
 build = {
