@@ -1,4 +1,4 @@
-Orbit 2.2.1
+Orbit 2.2.2
 http://keplerproject.github.com/orbit
 
 Orbit is an MVC web framework for Lua. The design is inspired by lightweight
@@ -10,7 +10,10 @@ Xavante, CGI and Fastcgi. It includes a launcher that makes it easy to launch
 a Xavante instance for development.
 
 History
-
+* Version 2.2.2 (10/Sep/2014)
+  Added the ability to specify the offset in a model. This is useful for implimenting pagination.
+  NOT 5.2 compliant
+  
 * Version 2.2.1 (12/Jan/2014)
   bugfix release for Lua 5.1
   NOT 5.2 compliant
@@ -58,8 +61,6 @@ History
 * Version 2.0 (06/Jun/2008): Complete rewrite of Orbit
 
 * Version 1.0: Initial release, obsolete
-
-Download and Installation
 
 Download and Installation
 

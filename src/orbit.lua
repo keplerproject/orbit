@@ -9,8 +9,8 @@ local orpages
 local _M = _M or {}
 
 _M._NAME = "orbit"
-_M._VERSION = "2.2.1"
-_M._COPYRIGHT = "Copyright (C) 2007-2013 Kepler Project"
+_M._VERSION = "2.2.2"
+_M._COPYRIGHT = "Copyright (C) 2007-2014 Kepler Project"
 _M._DESCRIPTION = "MVC Web Development for the Kepler platform"
 
 local REPARSE = {}

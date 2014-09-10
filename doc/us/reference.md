@@ -168,8 +168,8 @@ Example: `books:find_first("author = ? and year_pub > ?", { "John Doe", 1995, or
 
 **a\_model:find\_all(*condition*, *args*)** - finds and returns all instances of the model that
 matches *condition*; *args* can determine the order (args.order), specify which fields should be returned
-(args.fields, default is all of them), limit the number of returned rows (args.count), return only
-distinct rows (args.distinct), and inject fields from other tables (args.inject)
+(args.fields, default is all of them), limit the number of returned rows (args.count), skip that many rows before beginning to return rows (args.offset),
+return only distinct rows (args.distinct), and inject fields from other tables (args.inject)
 
 Example: `books:find_all("author = ? and year_pub > ?", { "John Doe", 1995, order = "year_pub asc", count = 5, fields = { "id", "title" } })`
 
