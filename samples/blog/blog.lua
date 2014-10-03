@@ -29,7 +29,7 @@ mapper.conn = env:connect(unpack(database.conn_data))
 mapper.driver = database.driver
 
 -- Initializes page cache
-local cache = orbit.cache.new(blog, cache_path)
+local cache = orcache.new(blog, cache_path)
 
 --
 -- Models for this application. Orbit calls mapper:new for each model,
