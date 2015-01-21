@@ -37,7 +37,7 @@ local cache = orcache.new(blog, cache_path)
 -- one (file-based, for example) just redefine the mapper global variable
 --
 
-posts = blog:model "post"
+posts = blog:model "blog_post"
 
 function posts:find_comments()
    return comments:find_all_by_post_id{ self.id }
@@ -74,7 +74,7 @@ function posts:find_months()
    return months
 end
 
-comments = blog:model "comment"
+comments = blog:model "blog_comment"
 
 function comments:make_link()
    local author = self.author or strings.anonymous_author
@@ -87,7 +87,7 @@ function comments:make_link()
    end
 end
 
-pages = blog:model "page"
+pages = blog:model "blog_page"
 
 --
 -- Controllers for this application
