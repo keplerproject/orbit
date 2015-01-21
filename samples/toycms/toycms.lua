@@ -25,10 +25,10 @@ mapper.conn = env:connect(unpack(database.conn_data))
 mapper.driver = database.driver
 
 models = {
-   post = toycms:model "post",
-   comment = toycms:model "comment",
-   section = toycms:model "section",
-   user = toycms:model "user"
+   post = toycms:model "toycms_post",
+   comment = toycms:model "toycms_comment",
+   section = toycms:model "toycms_section",
+   user = toycms:model "toycms_user"
 }
 
 cache = orcache.new(toycms, cache_path)
