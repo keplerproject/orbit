@@ -241,7 +241,7 @@ function _M.new(app_module)
 					 <body><pre>]] .. msg .. [[</pre></body></html>]]
 				 end
    app_module.reparse = REPARSE
-   app_module.dispatch_table = { get = {}, post = {}, put = {}, delete = {} }
+   app_module.dispatch_table = { get = {}, post = {}, put = {}, delete = {}, options = {} }
    return app_module
 end
 
@@ -277,6 +277,13 @@ function app_module_methods.dispatch_delete(app_module, func, ...)
    for _, pat in ipairs{ ... } do
       table.insert(app_module.dispatch_table.delete, { pattern = pat, 
 		      handler = func })
+   end
+end
+
+function app_module_methods.dispatch_options(app_module, func, ...)
+   for _, pat in ipairs{ ... } do
+      table.insert(app_module.dispatch_table.options, { pattern = pat, 
+          handler = func })
    end
 end
 
