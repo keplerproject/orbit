@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if [ $1 == "--help" ]; then
+if [ $1 = "--help" ]; then
   echo "Usage: configure lua51"
   echo "where lua51 is the name of your Lua executable"
   exit 0
