@@ -1,7 +1,7 @@
 #!/usr/bin/env op.cgi
 
 $lua{[[
-  require "luasql.sqlite3"
+  local luasql = require "luasql.sqlite3"
   app.conn = app.conn or recycle(function () return luasql.sqlite3():connect(web.real_path .. "/todo.db") end, 20)
   mapper.conn = app.conn
   todo_list = model("todo_list")
