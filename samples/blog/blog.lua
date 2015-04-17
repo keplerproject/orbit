@@ -1,29 +1,35 @@
 #!/usr/bin/env wsapi.cgi
 
-require "orbit"
-require "orbit.cache"
-require "markdown"
+local orbit = require "orbit"
+local orcache = require "orbit.cache"
+local markdown = require "markdown"
+local wsutil = require "wsapi.util"
 
 --
 -- Declares that this is module is an Orbit app
 --
-module("blog", package.seeall, orbit.new)
+local blog = setmetatable(orbit.new(), { __index = _G })
+if _VERSION == "Lua 5.2" then
+  _ENV = blog
+else
+  setfenv(1, blog)
+end
 
 --
 -- Loads configuration data
 --
-require "blog_config"
+wsutil.loadfile("blog_config.lua", blog)()
 
 --
 -- Initializes DB connection for Orbit's default model mapper
 --
-require("luasql." .. database.driver)
+local luasql = require("luasql." .. database.driver)
 local env = luasql[database.driver]()
 mapper.conn = env:connect(unpack(database.conn_data))
 mapper.driver = database.driver
 
 -- Initializes page cache
-local cache = orbit.cache.new(blog, cache_path)
+local cache = orcache.new(blog, cache_path)
 
 --
 -- Models for this application. Orbit calls mapper:new for each model,
@@ -31,7 +37,7 @@ local cache = orbit.cache.new(blog, cache_path)
 -- one (file-based, for example) just redefine the mapper global variable
 --
 
-posts = blog:model "post"
+posts = blog:model "blog_post"
 
 function posts:find_comments()
    return comments:find_all_by_post_id{ self.id }
@@ -68,7 +74,7 @@ function posts:find_months()
    return months
 end
 
-comments = blog:model "comment"
+comments = blog:model "blog_comment"
 
 function comments:make_link()
    local author = self.author or strings.anonymous_author
@@ -81,7 +87,7 @@ function comments:make_link()
    end
 end
 
-pages = blog:model "page"
+pages = blog:model "blog_page"
 
 --
 -- Controllers for this application
@@ -340,3 +346,5 @@ end
 -- Adds html functions to the view functions
 
 orbit.htmlify(blog, "layout", "_.+", "render_.+")
+
+return blog

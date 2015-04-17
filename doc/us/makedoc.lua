@@ -1,5 +1,5 @@
 local cosmo = require "cosmo"
-require "markdown"
+local markdown = require "markdown"
 
 local pages = {
   { name = "Home", file = "index", sections = {} },

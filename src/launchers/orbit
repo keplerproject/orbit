@@ -7,20 +7,20 @@
 --
 -------------------------------------------------------------------------------
 
-pcall(require, "luarocks.require")
-
 local ok, err = pcall(require, "wsapi.xavante") 
 if not ok then
   io.stderr:write("WSAPI Xavante support not loaded:\n" .. err .. "\n\nPlease install wsapi-xavante with LuaRocks\n")
   os.exit(1)
 end
 
-require "lfs"
-require "xavante"
-require "xavante.httpd"
-require "xavante.vhostshandler"
-require "xavante.urlhandler"
-require "wsapi.util"
+local lfs = require "lfs"
+local xavante = require "xavante"
+local httpd = require "xavante.httpd"
+local vhostshandler = require "xavante.vhostshandler"
+local urlhandler = require "xavante.urlhandler"
+local util = require "wsapi.util"
+local wsapi = require "wsapi"
+local wsx = require "wsapi.xavante"
 
 local usage = [[
 Usage: orbit [options] <application.(lua|ws)> <app_args>
@@ -37,7 +37,7 @@ Options:
 
 ]]
 
-local opts, args = wsapi.util.getopt({ ... }, "lp")
+local opts, args = util.getopt({ ... }, "lp")
 
 local app, app_args = args[1], { select(2, unpack(args)) }
 
@@ -90,13 +90,13 @@ if not app then app = _G[name:match("(.+)%.")] end
 
 if type(app) == "table" then app = app.run end
 
-xavante.httpd.handle_request = xavante.vhostshandler {
-	[""] = xavante.urlhandler {
-                ["/"] = wsapi.xavante.makeHandler (app, nil, path, path),
+httpd.handle_request = vhostshandler {
+	[""] = urlhandler {
+                ["/"] = wsx.makeHandler (app, nil, path, path),
 	}
 }
 
-xavante.httpd.register ("*", tonumber(opts.p or opts.port) or 8080, "Xavante 2.0")
+httpd.register ("*", tonumber(opts.p or opts.port) or 8080, "Xavante 2.3")
 
 xavante.start_message(function (ports)
 			        print(string.format("Starting Orbit server at port %s",

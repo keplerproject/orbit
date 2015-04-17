@@ -1,7 +1,7 @@
 ## Overview
 
 Orbit is an MVC web framework for Lua. The design is inspired by lightweight Ruby
-frameworks such as [Camping](http://code.whytheluckystiff.net/camping/). It completely
+frameworks such as [Camping](http://en.wikipedia.org/wiki/Camping_%28microframework%29). It completely
 abandons the CGILua model of "scripts" in favor of applications, where each Orbit
 application can fit in a single file, but you can split it into multiple files if you want.
 All Orbit applications follow the [WSAPI](http://keplerproject.github.com/wsapi) protocol, so they currently
@@ -9,6 +9,14 @@ work with Xavante, CGI and Fastcgi. It includes a launcher that makes it easy to
 a Xavante instance for development.
 
 ## History
+
+* Version 2.2.1 (12/Jan/2014)
+    * bugfix release for Lua 5.1
+    * NOT 5.2 compliant
+    * documentation corrections and updates
+    * support for Wsapi 1.6 and other dependency modules that no longer use "module"
+    * additional orbit model datatypes: real, float, timestamp, numeric
+    * MIME type application/json included
 
 * Version 2.2.0 (31/Mar/2010)
     * Reparse response to resume the dispatcher
@@ -24,7 +32,7 @@ a Xavante instance for development.
     * new options for orbit.model finders: distinct, fields
     * count option for orbit.model now limits number of rows in the SQL
     * logging of queries in orbit.model
-    * overhaul of the "orbit" script: better options, --help, sets application paht
+    * overhaul of the "orbit" script: better options, --help, sets application path
     * content_type method in the web object to set content type
     * support for PUT and DELETE (methods `dispatch_put` and `dispatch_delete`)
     * orbit.model.recycle(*conn_builder*, *timeout*) function, to make a connection that
@@ -45,7 +53,7 @@ a Xavante instance for development.
     * fixed bugs 13451 and 25418: setting status 500 on application errors not throwing an error if file not exists when invalidating cache
 
 * Version 2.0.1 (10/Jun/2008): bug-fix release, fixed bug in Orbit pages' redirect function (thanks for
-Ignacio Burgueno for finding the bug)
+Ignacio Burgueño for finding the bug)
 
 * Version 2.0 (06/Jun/2008): Complete rewrite of Orbit
 
@@ -69,7 +77,7 @@ Below is a very simple Orbit application:
 <pre>
     #!/usr/bin/env wsapi.cgi
 
-    require"orbit"
+    local orbit = require "orbit"
 
     -- Orbit applications are usually modules,
     -- orbit.new does the necessary initialization
@@ -181,4 +189,4 @@ For more information please [contact us](mailto:info-NO-SPAM-THANKS@keplerprojec
 Comments are welcome!
 
 You can also reach us and other developers and users on the Kepler Project 
-[mailing list](http://luaforge.net/mail/?group_id=104). 
+[mailing list](https://groups.google.com/forum/#!forum/kepler-project). 

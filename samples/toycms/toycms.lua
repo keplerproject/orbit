@@ -1,31 +1,37 @@
 #!/usr/bin/env wsapi.cgi
 
-require "orbit"
-require "markdown"
-require "orbit.cache"
-require "cosmo"
+local orbit = require "orbit"
+local markdown = require "markdown"
+local orcache = require "orbit.cache"
+local cosmo = require "cosmo"
+local wsutil = require "wsapi.util"
 
-module("toycms", package.seeall, orbit.new)
+local toycms = setmetatable(orbit.new(), { __index = _G })
+if _VERSION == "Lua 5.2" then
+  _ENV = toycms
+else
+  setfenv(1, toycms)
+end
 
 plugins = {}
 
-require "toycms_config"
-require "toycms_plugins"
-require "toycms_admin"
+wsutil.loadfile("toycms_config.lua", toycms)()
+wsutil.loadfile("toycms_plugins.lua", toycms)()
+wsutil.loadfile("toycms_admin.lua", toycms)(toycms)
 
-require("luasql." .. database.driver)
+local luasql = require("luasql." .. database.driver)
 local env = luasql[database.driver]()
 mapper.conn = env:connect(unpack(database.conn_data))
 mapper.driver = database.driver
 
 models = {
-   post = toycms:model "post",
-   comment = toycms:model "comment",
-   section = toycms:model "section",
-   user = toycms:model "user"
+   post = toycms:model "toycms_post",
+   comment = toycms:model "toycms_comment",
+   section = toycms:model "toycms_section",
+   user = toycms:model "toycms_user"
 }
 
-cache = orbit.cache.new(toycms, cache_path)
+cache = orcache.new(toycms, cache_path)
 
 function models.post:find_comments()
    return models.comment:find_all_by_approved_and_post_id{ true,
@@ -68,7 +74,7 @@ local template_cache = {}
 function load_template(name)
    local template = template_cache[name]
    if not template then
-      local template_file = io.open(toycms.real_path .. "/templates/" ..
+      local template_file = io.open(real_path .. "/templates/" ..
 				    template_name .. "/" .. name, "rb")
       if template_file then
   	 template = cosmo.compile(template_file:read("*a"))
@@ -170,7 +176,7 @@ function new_post_env(web, post, section)
 		   if not has_block then
 		     local out = {}
 		     local template = load_template((arg and arg.template) or 
-						  "comment.html")
+						           "comment.html")
 		   end
 		   for _, comment in ipairs(comments) do
 		     if has_block then
@@ -262,8 +268,8 @@ function view_post(type)
 	     if not post then return not_found(web) end
 	     local section = models.section:find(post.section_id)
 	     local template = load_template("post_" .. 
-					    tostring(section.tag) ..
-					    "." .. type) or
+				            tostring(section.tag) ..
+				            "." .. type) or
 	                      load_template("post." .. type)
 	     if template then
 		web.input.section_id = post.section_id
@@ -330,10 +336,9 @@ function add_comment(web, post_id)
 	    post.n_comments = (post.n_comments or 0) + 1
 	    post:save()
 	    cache:invalidate("/", "/xml", "/section/" .. post.section_id,
-			  "/section/" .. post.section_id .. "/xml",
-			  "/post/" .. post.id, "/post/" .. post.id .. "/xml",
-			  "/archive/" .. 
-				os.date("%Y/%m", post.published_at))
+			     "/section/" .. post.section_id .. "/xml",
+			     "/post/" .. post.id, "/post/" .. post.id .. "/xml",
+			     "/archive/" .. os.date("%Y/%m", post.published_at))
 	 else comment.approved = false end
 	 comment:save()
 	 return web:redirect(web:link("/post/" .. post_id))
@@ -362,4 +367,5 @@ function check_user(web)
   return models.user:find_by_id_and_password{ user_id, password }
 end
 
-return _M
+return toycms
+

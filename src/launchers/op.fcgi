@@ -2,8 +2,6 @@
 
 -- Orbit pages launcher, extracts script to launch
 
-pcall(require, "luarocks.require")
-
 local common = require "wsapi.common"
 
 local ok, err = pcall(require, "wsapi.fastcgi")

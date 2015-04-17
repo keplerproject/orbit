@@ -1,5 +1,4 @@
-
-require "lfs"
+local lfs = require "lfs"
 
 module("orbit.cache", package.seeall)
 

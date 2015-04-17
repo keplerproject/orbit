@@ -1,6 +1,5 @@
-
-require "lpeg"
-require "re"
+local lpeg = require "lpeg"
+local re   = require "re"
 
 module("orbit.model", package.seeall)
 
@@ -35,6 +34,14 @@ function type_names.postgres(t)
 end
 
 local convert = {}
+
+function convert.real(v)
+  return tonumber(v)
+end
+
+function convert.float(v)
+  return tonumber(v)
+end
 
 function convert.integer(v)
   return tonumber(v)
@@ -81,7 +88,7 @@ function convert.binary(v)
 end
 
 function convert.datetime(v)
-  local year, month, day, hour, min, sec = 
+  local year, month, day, hour, min, sec =
     string.match(v, "(%d+)%-(%d+)%-(%d+) (%d+):(%d+):(%d+)")
   return os.time({ year = tonumber(year), month = tonumber(month),
 		   day = tonumber(day), hour = tonumber(hour),
@@ -94,15 +101,23 @@ local function convert_types(row, meta, driver)
     if meta[k] then
       local conv = convert[meta[k].type]
       if conv then
-	row[k] = conv(v, driver)
+        row[k] = conv(v, driver)
       else
-	error("no conversion for type " .. meta[k].type)
+        error("no conversion for type " .. meta[k].type)
       end
     end
   end
 end
 
 local escape = {}
+
+function escape.real(v)
+  return tostring(v)
+end
+
+function escape.float(v)
+  return tostring(v)
+end
 
 function escape.integer(v)
   return tostring(v)
@@ -153,7 +168,7 @@ local function escape_values(row)
   local row_escaped = {}
   for i, m in ipairs(row.meta) do
     if row[m.name] == nil then
-      row_escaped[m.name] = "NULL" 
+      row_escaped[m.name] = "NULL"
     else
       local esc = escape[m.type]
       if esc then
@@ -193,26 +208,35 @@ local function fetch_rows(dao, sql, count)
   return rows
 end
 
+local by_condition_parser = re.compile([[
+  fields <- ({(!conective .)+} (conective {(!conective .)+})*) -> {}  
+  conective <- and / or
+  and <- "_and_" -> "and"
+  or <- "_or_" -> "or"
+]])
+
 local function parse_condition(dao, condition, args)
-  condition = string.gsub(condition, "_and_", "|")
-  local pairs = {}
-  for field in string.gmatch(condition, "[_%w]+") do
-    local i = #pairs + 1
-    local value
-    if args[i] == nil then
-      pairs[i] = field .. " is null"
-    elseif type(args[i]) == "table" then
-      local values = {}
-      for _, value in ipairs(args[i]) do
-	values[#values + 1] = escape[dao.meta[field].type](value, dao.driver, dao.model.conn)
+  local parts = by_condition_parser:match(condition)
+  local j = 0
+  for i, part in ipairs(parts) do
+    if part ~= "or" and part ~= "and" then
+      j = j + 1
+      local value
+      if args[j] == nil then
+        parts[i] = part .. " is null"
+      elseif type(args[j]) == "table" then
+        local values = {}
+        for _, value in ipairs(args[j]) do
+	  values[#values + 1] = escape[dao.meta[part].type](value, dao.driver, dao.model.conn)
+        end
+        parts[i] = part .. " IN (" .. table.concat(values,", ") .. ")"
+      else
+        value = escape[dao.meta[part].type](args[j], dao.driver, dao.model.conn)
+        parts[i] = part .. " = " .. value
       end
-      pairs[i] = field .. " IN (" .. table.concat(values,", ") .. ")"
-    else
-      value = escape[dao.meta[field].type](args[i], dao.driver, dao.model.conn)
-      pairs[i] = field .. " = " .. value
     end
   end
-  return pairs
+  return parts
 end
 
 local function build_inject(project, inject, dao)
@@ -235,19 +259,21 @@ local function build_inject(project, inject, dao)
       model.name .. "_" .. field
   end
   setmetatable(dao.meta, { __index = inject_fields })
-  return table.concat(fields, ", "), dao.table_name .. ", " .. 
+  return table.concat(fields, ", "), dao.table_name .. ", " ..
     model.table_name,  model.name .. "_id = " .. model.table_name .. ".id"
 end
 
 local function build_query_by(dao, condition, args)
-  local pairs = parse_condition(dao, condition, args)
+  local parts = parse_condition(dao, condition, args)
   local order = ""
-  local field_list, table_list, select, limit
+  local field_list, table_list, select, limit, offset
   if args.distinct then select = "select distinct " else select = "select " end
   if tonumber(args.count) then limit = " limit " .. tonumber(args.count) else limit = "" end
+  if tonumber(args.offset) then offset = " offset " .. tonumber(args.offset) else offset = "" end
   if args.order then order = " order by " .. args.order end
   if args.inject then
-    field_list, table_list, pairs[#pairs + 1] = build_inject(args.fields, args.inject,
+    if #parts > 0 then parts[#parts + 1] = "and" end
+    field_list, table_list, parts[#parts + 1] = build_inject(args.fields, args.inject,
       dao)
   else
     if args.fields then
@@ -258,7 +284,7 @@ local function build_query_by(dao, condition, args)
     table_list = dao.table_name
   end
   local sql = select .. field_list .. " from " .. table_list ..
-    " where " .. table.concat(pairs, " and ") .. order .. limit
+    " where " .. table.concat(parts, " ") .. order .. limit .. offset
   if dao.model.logging then log_query(sql) end
   return sql
 end
@@ -290,7 +316,7 @@ end
 
 function model_methods:new(name, dao)
   dao = dao or {}
-  dao.model, dao.name, dao.table_name, dao.meta, dao.driver = self, name, 
+  dao.model, dao.name, dao.table_name, dao.meta, dao.driver = self, name,
     self.table_prefix .. name, {}, self.driver
   setmetatable(dao, { __index = dao_index })
   local sql = "select * from " .. dao.table_name .. " limit 0"
@@ -337,9 +363,9 @@ function dao_methods.find(dao, id, inject)
   if not type(id) == "number" then
     error("find error: id must be a number")
   end
-  if dao.logging then log_query(sql) end
   local sql = "select * from " .. dao.table_name ..
     " where id=" .. id
+  if dao.logging then log_query(sql) end
   return fetch_row(dao, sql)
 end
 
@@ -386,9 +412,10 @@ local function build_query(dao, condition, args)
   end
   local order = ""
   if args.order then order = " order by " .. args.order end
-  local field_list, table_list, select, limit
+  local field_list, table_list, select, limit, offset
   if args.distinct then select = "select distinct " else select = "select " end
   if tonumber(args.count) then limit = " limit " .. tonumber(args.count) else limit = "" end
+  if tonumber(args.offset) then offset = " offset " .. tonumber(args.offset) else offset = "" end
   if args.inject then
     local inject_condition
     field_list, table_list, inject_condition = build_inject(args.fields, args.inject,
@@ -406,8 +433,8 @@ local function build_query(dao, condition, args)
     end
     table_list = table.concat({ dao.table_name, unpack(args.from or {}) }, ", ")
   end
-  local sql = select .. field_list .. " from " .. table_list .. 
-    condition .. order .. limit
+  local sql = select .. field_list .. " from " .. table_list ..
+    condition .. order .. limit .. offset
   if dao.model.logging then log_query(sql) end
   return sql
 end
@@ -417,7 +444,7 @@ function dao_methods.find_first(dao, condition, args)
 end
 
 function dao_methods.find_all(dao, condition, args)
-  return fetch_rows(dao, build_query(dao, condition, args), 
+  return fetch_rows(dao, build_query(dao, condition, args),
 		    (args and args.count) or (condition and condition.count))
 end
 
@@ -466,9 +493,9 @@ local function insert(row)
     table.concat(values, ", ") .. ")"
   if row.model.logging then log_query(sql) end
   local ok, err = row.model.conn:execute(sql)
-  if ok then 
+  if ok then
     row.id = row.id or row.model.conn:getlastautoid()
-  else 
+  else
     error(err)
   end
 end
@@ -485,7 +512,7 @@ function dao_methods.delete(row)
   if row.id then
     local sql = "delete from " .. row.table_name .. " where id = " .. row.id
     if row.model.logging then log_query(sql) end
-    local ok, err = row.model.conn:execute(sql)    
+    local ok, err = row.model.conn:execute(sql)
     if ok then row.id = nil else error(err) end
   end
 end

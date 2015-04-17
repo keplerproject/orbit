@@ -1,12 +1,12 @@
 #!/usr/bin/env lua
 
-require"lfs"
+local lfs = require "lfs"
 
 lfs.chdir("/home/mascarenhas/work/orbit/samples/songs")
 
-require"wsapi.fastcgi"
+local wsfcgi = require "wsapi.fastcgi"
 
-require"songs"
+local sontgs = require "songs"
 
-wsapi.fastcgi.run(songs.run)
+wsfcgi.run(songs.run)
 

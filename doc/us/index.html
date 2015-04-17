@@ -68,7 +68,7 @@
 <h2>Overview</h2>
 
 <p>Orbit is an MVC web framework for Lua. The design is inspired by lightweight Ruby
-frameworks such as <a href="http://code.whytheluckystiff.net/camping/">Camping</a>. It completely
+frameworks such as <a href="http://en.wikipedia.org/wiki/Camping_%28microframework%29">Camping</a>. It completely
 abandons the CGILua model of "scripts" in favor of applications, where each Orbit
 application can fit in a single file, but you can split it into multiple files if you want.
 All Orbit applications follow the <a href="http://keplerproject.github.com/wsapi">WSAPI</a> protocol, so they currently
@@ -78,6 +78,15 @@ a Xavante instance for development.</p>
 <h2>History</h2>
 
 <ul>
+    <li><p>Version 2.2.1 (12/Jan/2014)</p>
+    <ul>
+        <li>bugfix release for Lua 5.1</li>
+        <li>NOT 5.2 compliant</li>
+        <li>documentation corrections and updates</li>
+        <li>support for Wsapi 1.6 and other dependency modules that no longer use "module"</li>
+        <li>additional orbit model datatypes: real, float, timestamp, numeric</li>
+        <li>MIME type application/json included</li>
+    </ul></li>
     <li><p>Version 2.2.0 (31/Mar/2010)</p>
     <ul>
         <li>Reparse response to resume the dispatcher</li>
@@ -94,7 +103,7 @@ a Xavante instance for development.</p>
         <li>new options for orbit.model finders: distinct, fields</li>
         <li>count option for orbit.model now limits number of rows in the SQL</li>
         <li>logging of queries in orbit.model</li>
-        <li>overhaul of the "orbit" script: better options, --help, sets application paht</li>
+        <li>overhaul of the "orbit" script: better options, --help, sets application path</li>
         <li>content_type method in the web object to set content type</li>
         <li>support for PUT and DELETE (methods <code>dispatch_put</code> and <code>dispatch_delete</code>)</li>
         <li>orbit.model.recycle(*conn_builder<em>, *timeout</em>) function, to make a connection that
@@ -116,7 +125,7 @@ a Xavante instance for development.</p>
         <li>fixed bugs 13451 and 25418: setting status 500 on application errors not throwing an error if file not exists when invalidating cache</li>
     </ul></li>
     <li><p>Version 2.0.1 (10/Jun/2008): bug-fix release, fixed bug in Orbit pages' redirect function (thanks for
-    Ignacio Burgueno for finding the bug)</p></li>
+    Ignacio Burgueño for finding the bug)</p></li>
     <li><p>Version 2.0 (06/Jun/2008): Complete rewrite of Orbit</p></li>
     <li><p>Version 1.0: Initial release, obsolete</p></li>
 </ul>
@@ -140,7 +149,7 @@ size because it embeds the Sproutcore JavaScript framework.</p>
 <pre>
     #!/usr/bin/env wsapi.cgi
 
-    require"orbit"
+    local orbit = require "orbit"
 
     -- Orbit applications are usually modules,
     -- orbit.new does the necessary initialization
@@ -255,7 +264,7 @@ and is maintained by Fabio Mascarenhas.</p>
 Comments are welcome!</p>
 
 <p>You can also reach us and other developers and users on the Kepler Project 
-<a href="http://luaforge.net/mail/?group_id=104">mailing list</a>. </p>
+<a href="https://groups.google.com/forum/#!forum/kepler-project">mailing list</a>. </p>
 
 
 

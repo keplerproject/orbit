@@ -1,6 +1,6 @@
 #!/usr/bin/env wsapi.cgi
  
-require "orbit"
+local orbit = require "orbit"
 local R = require "orbit.routes"
 
 local hello = orbit.new()

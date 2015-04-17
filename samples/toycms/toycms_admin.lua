@@ -1,5 +1,6 @@
 
-module("toycms", package.seeall)
+local orbit = require "orbit"
+local toycms = ...
 
 -- Admin interface
 
@@ -645,3 +646,4 @@ function render_manage_comments(web, params)
 end
 
 orbit.htmlify(toycms, "_.+", "admin_layout", "render_.+")
+

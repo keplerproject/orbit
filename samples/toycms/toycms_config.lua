@@ -1,11 +1,10 @@
-module("toycms", package.seeall)
 
 -- Uncomment next line to enable X-Sendfile for sending static files
 -- use_xsendfile = true
 
 database = {
   driver = "sqlite3",
-  conn_data = { toycms.real_path .. "/blog.db" }
+  conn_data = { real_path .. "/blog.db" }
 --  driver = "mysql",
 --  conn_data = { "blog", "root", "password" }
 }
@@ -13,7 +12,7 @@ database = {
 template_name = "blog"
 
 -- Comment this for in-memory caching
-cache_path = toycms.real_path .. "/page_cache"
+cache_path = real_path .. "/page_cache"
 
 -- Uncomment the following line to set a url prefix
 -- prefix = "/foobar"

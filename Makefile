@@ -11,12 +11,12 @@ install:
 	mkdir -p $(LUA_DIR)
 	cp src/orbit.lua $(LUA_DIR)
 	mkdir -p $(LUA_DIR)/orbit
-	cp src/model.lua $(LUA_DIR)/orbit
-	cp src/cache.lua $(LUA_DIR)/orbit
-	cp src/pages.lua $(LUA_DIR)/orbit
-	cp src/ophandler.lua $(LUA_DIR)/orbit
+	cp src/orbit/model.lua $(LUA_DIR)/orbit
+	cp src/orbit/cache.lua $(LUA_DIR)/orbit
+	cp src/orbit/pages.lua $(LUA_DIR)/orbit
+	cp src/orbit/ophandler.lua $(LUA_DIR)/orbit
 	mkdir -p $(BIN_DIR)
-	cp src/orbit $(BIN_DIR)
+	cp src/launchers/orbit $(BIN_DIR)
 	if [ -f ./wsapi/Makefile ]; then \
 	  cd wsapi && make install; \
 	fi
