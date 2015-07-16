@@ -24,38 +24,38 @@
 </div> <!-- id="product" -->
 
 <div id="main">
-	
+
 <div id="navigation">
 <h1>Orbit</h1>
 	<ul>
 
 		<li><strong>Home</strong>
-			<ul> 
-                            
+			<ul>
+
 			</ul>
 		</li>
 
 		<li><a href="pages.html">Pages</a>
-			<ul> 
-                            
+			<ul>
+
 			</ul>
 		</li>
 
 		<li><a href="reference.html">Reference</a>
-			<ul> 
-                            
+			<ul>
+
 			</ul>
 		</li>
 
 		<li><a href="example.html">Tutorial</a>
-			<ul> 
-                            
+			<ul>
+
 			</ul>
 		</li>
 
 		<li><a href="license.html">License</a>
-			<ul> 
-                            
+			<ul>
+
 			</ul>
 		</li>
 
@@ -78,6 +78,16 @@ a Xavante instance for development.</p>
 <h2>History</h2>
 
 <ul>
+	<li><p>Version 2.2.3 (16/Jul/2015)</p>
+    <ul>
+        <li>Fixed model:save() when using Postgres. The 'id' was being set to "NULL" and that violates the primary key constraint.</li>
+        <li>NOT 5.2 compliant</li>
+    </ul></li>
+	<li><p>Version 2.2.2 (10/Sep/2014)</p>
+    <ul>
+        <li>Added the ability to specify the offset in a model. This is useful for implimenting pagination.</li>
+        <li>NOT 5.2 compliant</li>
+    </ul></li>
     <li><p>Version 2.2.1 (12/Jan/2014)</p>
     <ul>
         <li>bugfix release for Lua 5.1</li>
@@ -132,7 +142,7 @@ a Xavante instance for development.</p>
 
 <h2>Download and Installation</h2>
 
-<p>The easiest way to download and install Orbit is via <a href="http://luarocks.org">LuaRocks</a>. You 
+<p>The easiest way to download and install Orbit is via <a href="http://luarocks.org">LuaRocks</a>. You
 can install Orbit with a simple <code>luarocks install orbit</code>. Go to the path where LuaRocks
 put Orbit to see the sample apps and this documentation. LuaRocks will automatically fetch
 and install any dependencies you don't already have.</p>
@@ -209,7 +219,7 @@ size because it embeds the Sproutcore JavaScript framework.</p>
     end
 
     function render_say(web, name)
-       return render_layout(render_hello() .. 
+       return render_layout(render_hello() ..
          p.hello((web.input.greeting or "Hello ") .. name .. "!"))
     end
 
@@ -224,18 +234,18 @@ the first is to run <code>wsapi</code> in the same directory that you saved the 
 or run <code>orbit hello.lua</code> in the same directory that you saved the file and point your browser to <code>http://localhost:8080/</code>. Now try
 appending <code>index</code>, <code>say/foo</code>, and <code>say/foo?message=bar</code> to the URL.</p>
 
-<p>The example uses Orbit's built-in html generation, but you are free to use any method of generating HTML. 
+<p>The example uses Orbit's built-in html generation, but you are free to use any method of generating HTML.
 One of Orbit's sample applications uses the <a href="http://cosmo.luaforge.net">Cosmo</a> template library, for instance.</p>
 
 <h2>OR Mapping</h2>
 
-<p>Orbit also includes a basic OR mapper that currently only works with 
+<p>Orbit also includes a basic OR mapper that currently only works with
 <a href="http://github.com/keplerproject/luasql">LuaSQL's</a> SQLite3 and MySQL drivers. The mapper provides
 dynamic find methods, a la Rails' ActiveRecord (find_by_field1_and_field2{val1, val2}),
-as well as templates for conditions (find_by("field1 = ? or field1 = ?", { val1, val2 })). 
+as well as templates for conditions (find_by("field1 = ? or field1 = ?", { val1, val2 })).
 The sample applications use this mapper.</p>
 
-<p>A nice side-effect of the Orbit application model is that we get an "application console" 
+<p>A nice side-effect of the Orbit application model is that we get an "application console"
 for free. For example, with the blog example we can add a new post like this:</p>
 
 
@@ -249,8 +259,8 @@ for free. For example, with the blog example we can add a new post like this:</p
 </pre>
 
 
-<p>You can also update or delete any of the model items right from your console, just fetch 
-them from the database, change what you want and call <code>save()</code> 
+<p>You can also update or delete any of the model items right from your console, just fetch
+them from the database, change what you want and call <code>save()</code>
 (or <code>delete()</code> if you want to remove it).</p>
 
 <h2>Credits</h2>
@@ -263,7 +273,7 @@ and is maintained by Fabio Mascarenhas.</p>
 <p>For more information please <a href="mailto:info-NO-SPAM-THANKS@keplerproject.org">contact us</a>.
 Comments are welcome!</p>
 
-<p>You can also reach us and other developers and users on the Kepler Project 
+<p>You can also reach us and other developers and users on the Kepler Project
 <a href="https://groups.google.com/forum/#!forum/kepler-project">mailing list</a>. </p>
 
 
