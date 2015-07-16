@@ -9,8 +9,8 @@ local orpages
 local _M = _M or {}
 
 _M._NAME = "orbit"
-_M._VERSION = "2.2.2"
-_M._COPYRIGHT = "Copyright (C) 2007-2014 Kepler Project"
+_M._VERSION = "2.2.3"
+_M._COPYRIGHT = "Copyright (C) 2007-2015 Kepler Project"
 _M._DESCRIPTION = "MVC Web Development for the Kepler platform"
 
 local REPARSE = {}
@@ -210,8 +210,8 @@ local function make_tag(name, data, class)
     local open_tag = "<" .. name .. class .. " " ..
       table.concat(attrs, " ") .. ">"
     local close_tag = "</" .. name .. ">"
-    return open_tag .. flatten(data) .. close_tag       
-  end      
+    return open_tag .. flatten(data) .. close_tag
+  end
 end
 
 function _M.new(app_module)
@@ -223,7 +223,7 @@ function _M.new(app_module)
    for k, v in pairs(app_module_methods) do
       app_module[k] = v
    end
-   app_module.run = function (wsapi_env) 
+   app_module.run = function (wsapi_env)
 		       return _M.run(app_module, wsapi_env)
 		    end
    app_module.real_path = wsapi.app_path or "."
@@ -233,7 +233,7 @@ function _M.new(app_module)
 			     return [[<html>
 				   <head><title>Not Found</title></head>
 				      <body><p>Not found!</p></body></html>]]
-			  end  
+			  end
    app_module.server_error = function (web, msg)
 				web.status = "500 Server Error"
 				return [[<html>
@@ -254,35 +254,35 @@ end
 
 function app_module_methods.dispatch_get(app_module, func, ...)
    for _, pat in ipairs{ ... } do
-      table.insert(app_module.dispatch_table.get, { pattern = pat, 
+      table.insert(app_module.dispatch_table.get, { pattern = pat,
 		      handler = func })
    end
 end
 
 function app_module_methods.dispatch_post(app_module, func, ...)
    for _, pat in ipairs{ ... } do
-      table.insert(app_module.dispatch_table.post, { pattern = pat, 
+      table.insert(app_module.dispatch_table.post, { pattern = pat,
 		      handler = func })
    end
 end
 
 function app_module_methods.dispatch_put(app_module, func, ...)
    for _, pat in ipairs{ ... } do
-      table.insert(app_module.dispatch_table.put, { pattern = pat, 
+      table.insert(app_module.dispatch_table.put, { pattern = pat,
 		      handler = func })
    end
 end
 
 function app_module_methods.dispatch_delete(app_module, func, ...)
    for _, pat in ipairs{ ... } do
-      table.insert(app_module.dispatch_table.delete, { pattern = pat, 
+      table.insert(app_module.dispatch_table.delete, { pattern = pat,
 		      handler = func })
    end
 end
 
 function app_module_methods.dispatch_options(app_module, func, ...)
    for _, pat in ipairs{ ... } do
-      table.insert(app_module.dispatch_table.options, { pattern = pat, 
+      table.insert(app_module.dispatch_table.options, { pattern = pat,
           handler = func })
    end
 end
@@ -302,7 +302,7 @@ end
 function app_module_methods.serve_static(app_module, web, filename)
    local ext = string.match(filename, "%.([^%.]+)$")
    if app_module.use_xsendfile then
-      web.headers["Content-Type"] = _M.mime_types[ext] or 
+      web.headers["Content-Type"] = _M.mime_types[ext] or
 	 "application/octet-stream"
       web.headers["X-Sendfile"] = filename
       return "xsendfile"
@@ -311,7 +311,7 @@ function app_module_methods.serve_static(app_module, web, filename)
       if not file then
 	 return app_module.not_found(web)
       else
-	 web.headers["Content-Type"] = _M.mime_types[ext] or 
+	 web.headers["Content-Type"] = _M.mime_types[ext] or
 	    "application/octet-stream"
 	 local contents = file:read("*a")
 	 file:close()
@@ -372,7 +372,7 @@ function _M.htmlify(app_module, ...)
 	  htmlify_func(patt)
 	else
 	  for name, func in pairs(app_module) do
-	    if string.match(name, "^" .. patt .. "$") and 
+	    if string.match(name, "^" .. patt .. "$") and
 	         type(func) == "function" then
 	       htmlify_func(func)
 	    end
@@ -390,7 +390,7 @@ function app_module_methods.model(app_module, ...)
       if not orm then
 	    orm = require "orbit.model"
       end
-      app_module.mapper = orm.new(app_module.mapper.table_prefix or table_prefix, 
+      app_module.mapper = orm.new(app_module.mapper.table_prefix or table_prefix,
 			app_module.mapper.conn, app_module.mapper.driver, app_module.mapper.logging)
    end
    return app_module.mapper:new(...)
@@ -533,8 +533,8 @@ function _M.run(app_module, wsapi_env)
   handler = handler or app_module.not_found
   captures = captures or {}
   if wsapi_handler then
-    local ok, status, headers, res = xpcall(function () 
-					      return handler(wsapi_env, unpack(captures)) 
+    local ok, status, headers, res = xpcall(function ()
+					      return handler(wsapi_env, unpack(captures))
 					    end, debug.traceback)
     if ok then
       return status, headers, res

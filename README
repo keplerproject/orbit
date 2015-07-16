@@ -1,4 +1,4 @@
-Orbit 2.2.2
+Orbit 2.2.3
 http://keplerproject.github.com/orbit
 
 Orbit is an MVC web framework for Lua. The design is inspired by lightweight
@@ -10,10 +10,14 @@ Xavante, CGI and Fastcgi. It includes a launcher that makes it easy to launch
 a Xavante instance for development.
 
 History
+* Version 2.2.3 (16/Jul/2015)
+  Fixed model:save() when using Postgres. The 'id' was being set to "NULL" and that violates the primary key constraint.
+  NOT 5.2 compliant
+
 * Version 2.2.2 (10/Sep/2014)
   Added the ability to specify the offset in a model. This is useful for implimenting pagination.
   NOT 5.2 compliant
-  
+
 * Version 2.2.1 (12/Jan/2014)
   bugfix release for Lua 5.1
   NOT 5.2 compliant
@@ -42,7 +46,7 @@ History
   orbit.model.recycle(*conn_builder*, *timeout*) function, to make a connection that automatically reopens after a certain time
   more samples in the samples folder
   added a "higher-order" $if to Orbit Pages
-  
+
 * Version 2.0.2 (10/Mar/2009)
   url-decodes path captures (suggested by Ignacio Burgueno on a Jul 24 email to the Kepler list)
   added tutorial and new examples

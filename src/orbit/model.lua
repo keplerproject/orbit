@@ -209,7 +209,7 @@ local function fetch_rows(dao, sql, count)
 end
 
 local by_condition_parser = re.compile([[
-  fields <- ({(!conective .)+} (conective {(!conective .)+})*) -> {}  
+  fields <- ({(!conective .)+} (conective {(!conective .)+})*) -> {}
   conective <- and / or
   and <- "_and_" -> "and"
   or <- "_or_" -> "or"
@@ -485,16 +485,23 @@ local function insert(row)
   end
   local columns, values = {}, {}
   for k, v in pairs(row_escaped) do
-    table.insert(columns, k)
-    table.insert(values, v)
+    if row.driver ~= "postgres" or k ~= "id" and v ~= "NULL" then
+      table.insert(columns, k)
+      table.insert(values, v)
+    end
   end
   local sql = "insert into " .. row.table_name ..
     " (" .. table.concat(columns, ", ") .. ") values (" ..
     table.concat(values, ", ") .. ")"
+  if row.driver == "postgres" then sql = sql .. " returning id" end
   if row.model.logging then log_query(sql) end
   local ok, err = row.model.conn:execute(sql)
   if ok then
-    row.id = row.id or row.model.conn:getlastautoid()
+    if row.driver ~= "postgres" then
+      row.id = row.id or row.model.conn:getlastautoid()
+    else
+      row.id = row.id or tonumber( ok:fetch() )
+    end
   else
     error(err)
   end
