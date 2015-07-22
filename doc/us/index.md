@@ -10,6 +10,18 @@ a Xavante instance for development.
 
 ## History
 
+* Version 2.2.4 (22/Jul/2015)
+	* Fixed a cursor leak when using Postgres and inserting.
+    * NOT 5.2 compliant
+
+* Version 2.2.3 (16/Jul/2015)
+	* Fixed model:save() when using Postgres. The 'id' was being set to "NULL" and that violates the primary key constraint.
+    * NOT 5.2 compliant
+
+* Version 2.2.2 (10/Sep/2014)
+	* Added the ability to specify the offset in a model. This is useful for implimenting pagination.
+    * NOT 5.2 compliant
+
 * Version 2.2.1 (12/Jan/2014)
     * bugfix release for Lua 5.1
     * NOT 5.2 compliant
@@ -61,7 +73,7 @@ Ignacio Burgueño for finding the bug)
 
 ## Download and Installation
 
-The easiest way to download and install Orbit is via [LuaRocks](http://luarocks.org). You 
+The easiest way to download and install Orbit is via [LuaRocks](http://luarocks.org). You
 can install Orbit with a simple `luarocks install orbit`. Go to the path where LuaRocks
 put Orbit to see the sample apps and this documentation. LuaRocks will automatically fetch
 and install any dependencies you don't already have.
@@ -131,13 +143,13 @@ Below is a very simple Orbit application:
     function render_hello()
        return p.hello"Hello World!"
     end
-    
+
     function render_index()
        return render_layout(render_hello())
     end
 
     function render_say(web, name)
-       return render_layout(render_hello() .. 
+       return render_layout(render_hello() ..
          p.hello((web.input.greeting or "Hello ") .. name .. "!"))
     end
 
@@ -151,18 +163,18 @@ the first is to run `wsapi` in the same directory that you saved the file and po
 or run `orbit hello.lua` in the same directory that you saved the file and point your browser to `http://localhost:8080/`. Now try
 appending `index`, `say/foo`, and `say/foo?message=bar` to the URL.
 
-The example uses Orbit's built-in html generation, but you are free to use any method of generating HTML. 
+The example uses Orbit's built-in html generation, but you are free to use any method of generating HTML.
 One of Orbit's sample applications uses the [Cosmo](http://cosmo.luaforge.net) template library, for instance.
 
 ## OR Mapping
 
-Orbit also includes a basic OR mapper that currently only works with 
+Orbit also includes a basic OR mapper that currently only works with
 [LuaSQL's](http://github.com/keplerproject/luasql) SQLite3 and MySQL drivers. The mapper provides
 dynamic find methods, a la Rails' ActiveRecord (find\_by\_field1\_and\_field2{val1, val2}),
-as well as templates for conditions (find_by("field1 = ? or field1 = ?", { val1, val2 })). 
+as well as templates for conditions (find_by("field1 = ? or field1 = ?", { val1, val2 })).
 The sample applications use this mapper.
 
-A nice side-effect of the Orbit application model is that we get an "application console" 
+A nice side-effect of the Orbit application model is that we get an "application console"
 for free. For example, with the blog example we can add a new post like this:
 
 <pre>
@@ -174,8 +186,8 @@ for free. For example, with the blog example we can add a new post like this:
     > p:save()
 </pre>
 
-You can also update or delete any of the model items right from your console, just fetch 
-them from the database, change what you want and call `save()` 
+You can also update or delete any of the model items right from your console, just fetch
+them from the database, change what you want and call `save()`
 (or `delete()` if you want to remove it).
 
 ## Credits
@@ -188,5 +200,5 @@ and is maintained by Fabio Mascarenhas.
 For more information please [contact us](mailto:info-NO-SPAM-THANKS@keplerproject.org).
 Comments are welcome!
 
-You can also reach us and other developers and users on the Kepler Project 
-[mailing list](https://groups.google.com/forum/#!forum/kepler-project). 
+You can also reach us and other developers and users on the Kepler Project
+[mailing list](https://groups.google.com/forum/#!forum/kepler-project).

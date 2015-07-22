@@ -78,6 +78,11 @@ a Xavante instance for development.</p>
 <h2>History</h2>
 
 <ul>
+	<li><p>Version 2.2.4 (22/Jul/2015)</p>
+    <ul>
+        <li>Fixed a cursor leak when using Postgres and inserting.</li>
+        <li>NOT 5.2 compliant</li>
+    </ul></li>
 	<li><p>Version 2.2.3 (16/Jul/2015)</p>
     <ul>
         <li>Fixed model:save() when using Postgres. The 'id' was being set to "NULL" and that violates the primary key constraint.</li>
