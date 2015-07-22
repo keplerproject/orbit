@@ -501,6 +501,7 @@ local function insert(row)
       row.id = row.id or row.model.conn:getlastautoid()
     else
       row.id = row.id or tonumber( ok:fetch() )
+      ok:close()
     end
   else
     error(err)
