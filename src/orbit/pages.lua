@@ -37,7 +37,7 @@ function load(filename, contents)
        end
        contents = file:read("*a")
        file:close()
-       if contents:sub(1,3) == BOM then contents = contens:sub(4) end
+       if contents:sub(1,3) == BOM then contents = contents:sub(4) end
      end
      template = cosmo.compile(remove_shebang(contents))
      template_cache[filename] = template
