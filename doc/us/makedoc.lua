@@ -22,7 +22,7 @@ local template = [==[
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 	<title>$name</title>
-    <link rel="stylesheet" href="http://www.keplerproject.org/doc.css" type="text/css"/>
+    <link rel="stylesheet" href="doc.css" type="text/css"/>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 </head>
 
@@ -33,9 +33,7 @@ local template = [==[
 <div id="product">
 
 	<div id="product_logo">
-        <a href="http://www.keplerproject.org">
 		<img alt="$name" src="$logo"/>
-	    </a>
     </div>
 	<div id="product_name"><big><strong>$name</strong></big></div>
 	<div id="product_description">$blurb</div>

@@ -19,7 +19,7 @@ You should create a `blog.lua` file, which will be the main source file for our 
 The first thing you should put in this file is the code to load Orbit and other libraries you
 are going to use in your app:
 
-<pre>
+<pre class="example">
 local orbit = require "orbit"
 local orcache = require "orbit.cache"
 local markdown = require "markdown"
@@ -32,7 +32,7 @@ up posts.
 We will now create the `blog` application and set it as the global environment for the
 rest of the module:
 
-<pre>
+<pre class="example">
 local blog = setmetatable(orbit.new(), { __index = _G })
 if _VERSION == "Lua 5.2" then
   _ENV = blog
@@ -53,14 +53,14 @@ want custom pages for your application.
 Let's load a configuration script for the blog (a common pattern in applications).
 You can get this script from [here](blog_config.lua).
 
-<pre>
+<pre class="example">
 wsutil.loadfile("blog_config.lua", blog)()
 </pre>
 
 The next few lines load one of LuaSQL's database driver (defined in the configuration),
 and sets up Orbit's OR mapper.
 
-<pre>
+<pre class="example">
 local luasql = require("luasql." .. database.driver)
 local env = luasql[database.driver]()
 mapper.conn = env:connect(unpack(database.conn_data))
@@ -75,7 +75,7 @@ Orbit's mapper hits the database on model creation to get the schema. Speaking o
 schema, now is a good time to create your blogs' database. I will assume you are
 using SQLite3. Create a `blog.db` database with the following SQL script:
 
-<pre>
+<pre class="example">
 CREATE TABLE blog_post
        ("id" INTEGER PRIMARY KEY NOT NULL,
        "title" VARCHAR(255) DEFAULT NULL,
@@ -103,7 +103,7 @@ database, so you need it for every kind of object you are mapping.
 
 Finally, let's initialize Orbit's page cache before creating our models:
 
-<pre>
+<pre class="example">
 local cache = orbit.cache.new(blog, cache_path)
 </pre>
 
@@ -120,7 +120,7 @@ coincidence that we also have three tables in the database, each table maps
 to a kind of object our application handles, and for each kind we will
 create a model. We first create a model object for posts:
 
-<pre>
+<pre class="example">
 posts = blog:model "post"
 </pre>
 
@@ -136,7 +136,7 @@ You can use the predefined `find` methods for all queries to the database, but i
 helps to abstract common queries in your own methods. You can do that by
 adding methods to the `posts` object:
 
-<pre>
+<pre class="example">
 function posts:find_recent()
    return self:find_all("published_at is not null",
 			{ order = "published_at desc",
@@ -153,7 +153,7 @@ of the blog's sidebar.
 Another feature of our blog is going to be archive pages that show all posts of
 a certain month and year. We will define a method for that too:
 
-<pre>
+<pre class="example">
 function posts:find_by_month_and_year(month, year)
    local s = os.time({ year = year, month = month, day = 1 })
    local e = os.time({ year = year + math.floor(month / 12),
@@ -169,7 +169,7 @@ year to start and end dates in the standard Lua format. Finally, we will also
 define a method that returns all months (and years) that have posts, to later
 generate the links for the "Archive" section in the sidebar:
 
-<pre>
+<pre class="example">
 function posts:find_months()
    local months = {}
    local previous_month = {}
@@ -197,7 +197,7 @@ by doing `posts:find_recent()`, but you will use `find_comments` by doing `p:fin
 where `p` is a particular post object. We will define a method to retrieve all comments of
 a post:
 
-<pre>
+<pre class="example">
 function posts:find_comments()
    return comments:find_all_by_post_id{ self.id }
 end
@@ -210,14 +210,14 @@ a future version of Orbit's mapper will let you define these declaratively.
 
 Creating the `comments` object is simple:
 
-<pre>
+<pre class="example">
 comments = blog:model "comment"
 </pre>
 
 Let's just add a convenience method for comments that build the comment's link
 from the its data:
 
-<pre>
+<pre class="example">
 function comments:make_link()
    local author = self.author or strings.anonymous_author
    if self.url and self.url ~= "" then
@@ -233,7 +233,7 @@ end
 The `pages` object is even simpler, the default functionality provided
 by Orbit's mapper is enough, so we just create it with `model`:
 
-<pre>
+<pre class="example">
 pages = blog:model "pages"
 </pre>
 
@@ -257,7 +257,7 @@ written using Lua's string matching syntax, so one controller can answer to mult
 
 Below is the controller for the main page of the blog:
 
-<pre>
+<pre class="example">
 function index(web)
    local ps = posts:find_recent()
    local ms = posts:find_months()
@@ -280,7 +280,7 @@ function (called a *view* in MVC terminology) to render the actual HTML code.
 
 Another important controller is the one that shows single posts:
 
-<pre>
+<pre class="example">
 function view_post(web, post_id, comment_missing)
    local post = posts:find(tonumber(post_id))
    if post then
@@ -313,7 +313,7 @@ error happens in controller/view code.
 
 Archives and pages are similar in structure:
 
-<pre>
+<pre class="example">
 function view_archive(web, year, month)
    local ps = posts:find_by_month_and_year(tonumber(month),
 					   tonumber(year))
@@ -349,7 +349,7 @@ the year, so paths are like /archive/2008/05.
 Finally, you can also set up Orbit to serve static files with the `dispatch_static`
 convenience method:
 
-<pre>
+<pre class="example">
 blog:dispatch_static("/head%.jpg", "/style%.css")
 </pre>
 
@@ -362,7 +362,7 @@ content; `dispatch_static` is just a convenience to have "zero-configuration" ap
 There is one controller left, for adding comments. This one will answer to POST
 instead of GET:
 
-<pre>
+<pre class="example">
 function add_comment(web, post_id)
    local input = web.input
    if string.find(input.comment, "^%s*$") then
@@ -427,7 +427,7 @@ When you htmlify a function, Orbit changes the function's environment to let you
 HTML by calling the tags as functions. It's better to show how it works than to explain, so
 here is the basic view of the blog application, `layout`:
 
-<pre>
+<pre class="example">
 function layout(web, args, inner_html)
    return html{
       head{
@@ -471,7 +471,7 @@ as the link).
 The `_menu` and `_sidebar` functions are just helper views to generate the blog's menubar
 and sidebar:
 
-<pre>
+<pre class="example">
 function _menu(web, args)
    local res = { li(a{ href= web:link("/"), strings.home_page_name }) }
    for _, page in pairs(args.pages) do
@@ -499,7 +499,7 @@ to a concatenation function) and Orbit's programmatic HTML. They also use
 the `web:link` method, which generates intra-application links. The `sidebar`
 function uses a few more convenience functions, for better factoring:
 
-<pre>
+<pre class="example">
 function _blogroll(web, blogroll)
    local res = {}
    for _, blog_link in ipairs(blogroll) do
@@ -532,7 +532,7 @@ whichever data was passed by them (all the way from the controller).
 We can now get to the main view functions. Let's start with the easiest,
 and smallest, one, to render pages:
 
-<pre>
+<pre class="example">
 function render_page(web, args)
    return layout(web, args, div.blogentry(markdown(args.page.body)))
 end
@@ -547,7 +547,7 @@ a `class` attribute equal to "blogentry", instead of a straight
 Moving on, we will now write the view for index pages (and archive
 pages):
 
-<pre>
+<pre class="example">
 function render_index(web, args)
    if #args.posts == 0 then
       return layout(web, args, p(strings.no_posts))
@@ -577,7 +577,7 @@ day appear under the same date.
 
 The `_post` helper is pretty straightforward:
 
-<pre>
+<pre class="example">
 function _post(web, post)
    return {
       markdown(post.body),
@@ -594,7 +594,7 @@ end
 Now we can finally move to the piece-de-resistance, the view that renders
 single posts, along with their comments, and the "post a comment" form:
 
-<pre>
+<pre class="example">
 function render_post(web, args)
    local res = { 
       h2(span{ style="position: relative; float:left", args.post.title }
@@ -650,7 +650,7 @@ the responsibility of the style sheet).
 
 The `_comment` helper is pretty simple:
 
-<pre>
+<pre class="example">
 function _comment(web, comment)
    return { p(comment.body),
       p.posted{
@@ -664,7 +664,7 @@ end
 
 Finally, we need to set all of these view functions up for programmatic HTML generation:
 
-<pre>
+<pre class="example">
 orbit.htmlify(blog, "layout", "_.+", "render_.+")
 </pre>
 
@@ -675,7 +675,7 @@ and all the helpers (the functions starting with `_`).
 
 We end the file by returning the module:
 
-<pre>
+<pre class="example">
 return blog
 </pre>
 
@@ -691,7 +691,7 @@ web server's docroot (if you installed Kepler, to a folder inside `kepler/htdocs
 and create a launcher script in this folder. The launcher script is simple (call 
 it `blog.ws`):
 
-<pre>
+<pre class="example">
 #!/usr/bin/env wsapi.cgi
 return require "blog"
 </pre>
