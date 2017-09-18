@@ -15,9 +15,7 @@
 <div id="product">
 
 	<div id="product_logo">
-        <a href="http://www.keplerproject.org">
 		<img alt="Orbit" src="orbit.png"/>
-	    </a>
     </div>
 	<div id="product_name"><big><strong>Orbit</strong></big></div>
 	<div id="product_description">MVC for Lua Web Development</div>
@@ -235,8 +233,8 @@ matches <em>condition</em>; <em>args</em> can determine the order (args.order), 
 
 <p><strong>a_model:find_all(<em>condition</em>, <em>args</em>)</strong> - finds and returns all instances of the model that
 matches <em>condition</em>; <em>args</em> can determine the order (args.order), specify which fields should be returned
-(args.fields, default is all of them), limit the number of returned rows (args.count), return only
-distinct rows (args.distinct), and inject fields from other tables (args.inject)</p>
+(args.fields, default is all of them), limit the number of returned rows (args.count), skip that many rows before beginning to return rows (args.offset),
+return only distinct rows (args.distinct), and inject fields from other tables (args.inject)</p>
 
 <p>Example: <code>books:find_all("author = ? and year_pub &gt; ?", { "John Doe", 1995, order = "year_pub asc", count = 5, fields = { "id", "title" } })</code></p>
 
