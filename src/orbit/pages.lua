@@ -110,9 +110,9 @@ local function make_env(web, initial)
   end
   function env.include(name, subt_env)
     local filename
-    if type(name) == "table" then 
+    if type(name) == "table" then
+      subt_env = name[2] 
       name = name[1] 
-      subt_env = name[2]
     end
     if name:sub(1, 1) == "/" then
       filename = web.doc_root .. name
