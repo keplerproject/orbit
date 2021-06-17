@@ -1,17 +1,17 @@
-
 local orbit = require "orbit"
 local model = require "orbit.model"
 local cosmo = require "cosmo"
 
 local io, string = io, string
-local setmetatable, loadstring, setfenv = setmetatable, loadstring, setfenv
+local setmetatable, loadstring = setmetatable, loadstring or load
+local setfenv = setfenv or require("orbit.envfunc").setfenv
 local type, error, tostring = type, error, tostring
 local print, pcall, xpcall, traceback = print, pcall, xpcall, debug.traceback
-local select, unpack = select, unpack
+local select, unpack = select, unpack or table.unpack
 
 local _G = _G
 
-module("orbit.pages", orbit.new)
+local _M = {}
 
 local template_cache = {}
 
@@ -26,7 +26,7 @@ local function splitpath(filename)
   return path, file
 end
 
-function load(filename, contents)
+function _M.load(filename, contents)
   filename = filename or contents
   local template = template_cache[filename]
   if not template then
@@ -143,7 +143,7 @@ local function make_env(web, initial)
   return env
 end
 
-function fill(web, template, env)
+function _M.fill(web, template, env)
   if template then
     local ok, res = xpcall(function () return template(make_env(web, env)) end,
 			   function (msg) 
@@ -163,7 +163,7 @@ function fill(web, template, env)
   end
 end
 
-function handle_get(web)
+function _M.handle_get(web)
   local filename = web.path_translated
   web.real_path = splitpath(filename)
   local res = fill(web, load(filename))
@@ -177,6 +177,6 @@ function handle_get(web)
   end
 end
 
-handle_post = handle_get
+_M.handle_post = _M.handle_get
 
 return _M

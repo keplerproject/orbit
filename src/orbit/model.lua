@@ -1,11 +1,13 @@
 local lpeg = require "lpeg"
 local re   = require "re"
 
-module("orbit.model", package.seeall)
+local unpack   = unpack or table.unpack
 
-model_methods = {}
+local _M ={}
 
-dao_methods = {}
+_M.model_methods = {}
+
+_M.dao_methods = {}
 
 local type_names = {}
 
@@ -260,7 +262,7 @@ local function build_inject(project, inject, dao)
   end
   setmetatable(dao.meta, { __index = inject_fields })
   return table.concat(fields, ", "), dao.table_name .. ", " ..
-    model.table_name,  model.name .. "_id = " .. model.table_name .. ".id"
+    model.table_name,  dao.table_name .. "." .. model.name .. "_id = " .. model.table_name .. ".id"
 end
 
 local function build_query_by(dao, condition, args)
@@ -298,7 +300,7 @@ local function find_all_by(dao, condition, args)
 end
 
 local function dao_index(dao, name)
-  local m = dao_methods[name]
+  local m = _M.dao_methods[name]
   if m then
     return m
   else
@@ -314,7 +316,7 @@ local function dao_index(dao, name)
   end
 end
 
-function model_methods:new(name, dao)
+function _M.model_methods:new(name, dao)
   dao = dao or {}
   dao.model, dao.name, dao.table_name, dao.meta, dao.driver = self, name,
     self.table_prefix .. name, {}, self.driver
@@ -334,7 +336,7 @@ function model_methods:new(name, dao)
   return dao
 end
 
-function recycle(fresh_conn, timeout)
+function _M.recycle(fresh_conn, timeout)
   local created_at = os.time()
   local conn = fresh_conn()
   timeout = timeout or 20000
@@ -352,14 +354,14 @@ function recycle(fresh_conn, timeout)
 			 })
 end
 
-function new(table_prefix, conn, driver, logging)
+function _M.new(table_prefix, conn, driver, logging)
   driver = driver or "sqlite3"
   local app_model = { table_prefix = table_prefix or "", conn = conn, driver = driver or "sqlite3", logging = logging, models = {} }
-  setmetatable(app_model, { __index = model_methods })
+  setmetatable(app_model, { __index = _M.model_methods })
   return app_model
 end
 
-function dao_methods.find(dao, id, inject)
+function _M.dao_methods.find(dao, id, inject)
   if not type(id) == "number" then
     error("find error: id must be a number")
   end
@@ -439,16 +441,16 @@ local function build_query(dao, condition, args)
   return sql
 end
 
-function dao_methods.find_first(dao, condition, args)
+function _M.dao_methods.find_first(dao, condition, args)
   return fetch_row(dao, build_query(dao, condition, args))
 end
 
-function dao_methods.find_all(dao, condition, args)
+function _M.dao_methods.find_all(dao, condition, args)
   return fetch_rows(dao, build_query(dao, condition, args),
 		    (args and args.count) or (condition and condition.count))
 end
 
-function dao_methods.new(dao, row)
+function _M.dao_methods.new(dao, row)
   row = row or {}
   setmetatable(row, { __index = dao })
   return row
@@ -508,7 +510,7 @@ local function insert(row)
   end
 end
 
-function dao_methods.save(row, force_insert)
+function _M.dao_methods.save(row, force_insert)
   if row.id and (not force_insert) then
     update(row)
   else
@@ -516,7 +518,7 @@ function dao_methods.save(row, force_insert)
   end
 end
 
-function dao_methods.delete(row)
+function _M.dao_methods.delete(row)
   if row.id then
     local sql = "delete from " .. row.table_name .. " where id = " .. row.id
     if row.model.logging then log_query(sql) end
@@ -524,3 +526,5 @@ function dao_methods.delete(row)
     if ok then row.id = nil else error(err) end
   end
 end
+
+return _M
