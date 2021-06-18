@@ -1,7 +1,6 @@
 local lfs = require "lfs"
 
-module("orbit.cache", package.seeall)
-
+local _M = {}
 local function pathinfo_to_file(path_info)
    local atom = path_info:find("/xml$")
    if atom then
@@ -18,7 +17,7 @@ local function pathinfo_to_file(path_info)
    end
 end
 
-function get(cache, key)
+function _M.get(cache, key)
   if not cache.base_path then
      local headers = {}
      if key:find("/xml$") then 
@@ -48,7 +47,7 @@ local function writefile(filename, contents)
   end
 end
 
-function set(cache, key, value)
+function _M.set(cache, key, value)
   if not cache.base_path then
      cache.values[key] = value
   else
@@ -74,7 +73,7 @@ local function cached(cache, f)
 	 end
 end
 
-function invalidate(cache, ...)
+function _M.invalidate(cache, ...)
    for _, key in ipairs{...} do
       if not cache.base_path then
 	 cache.values[key] = nil
@@ -85,7 +84,7 @@ function invalidate(cache, ...)
    end
 end
 
-function nuke(cache)
+function _M.nuke(cache)
    if not cache.base_path then 
       cache.values = {}
    else
@@ -97,7 +96,7 @@ function nuke(cache)
    end
 end
 
-function new(app, base_path)
+function _M.new(app, base_path)
    local values
    if not base_path then
       values = {}
@@ -116,3 +115,4 @@ function new(app, base_path)
 						end })
    return cache
 end
+return _M

@@ -3,8 +3,13 @@ local wsreq    = require "wsapi.request"
 local wsres    = require "wsapi.response"
 local wsutil   = require "wsapi.util"
 
+local unpack   = unpack or table.unpack
+local setfenv = setfenv or require("orbit.envfunc").setfenv
+local getfenv = getfenv or require("orbit.envfunc").getfenv
+
 local orm
 local orpages
+
 
 local _M = _M or {}
 

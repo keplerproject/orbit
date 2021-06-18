@@ -4,12 +4,13 @@ local orbit = require "orbit"
 local orcache = require "orbit.cache"
 local markdown = require "markdown"
 local wsutil = require "wsapi.util"
+local unpack = unpack or table.unpack
 
 --
 -- Declares that this is module is an Orbit app
 --
 local blog = setmetatable(orbit.new(), { __index = _G })
-if _VERSION == "Lua 5.2" then
+if _VERSION >= "Lua 5.2" then
   _ENV = blog
 else
   setfenv(1, blog)
