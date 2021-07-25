@@ -187,15 +187,15 @@ _M.web_methods = {}
 local web_methods = _M.web_methods
 
 local function flatten(t)
-   local res = {}
-   for _, item in ipairs(t) do
-      if type(item) == "table" then
-	 res[#res + 1] = flatten(item)
-      else
-	 res[#res + 1] = item
-      end
-   end
-   return table.concat(res)
+  local res = {}
+  for _, item in ipairs(t) do
+    if type(item) == "table" then
+      res[#res + 1] = flatten(item)
+    else
+      res[#res + 1] = item
+    end
+  end
+  return table.concat(res)
 end
 
 local function make_tag(name, data, class)
@@ -220,185 +220,210 @@ local function make_tag(name, data, class)
 end
 
 function _M.new(app_module)
-   if type(app_module) == "string" then
-      app_module = { _NAME = app_module }
-   else
-      app_module = app_module or {}
-   end
-   for k, v in pairs(app_module_methods) do
-      app_module[k] = v
-   end
-   app_module.run = function (wsapi_env)
-		       return _M.run(app_module, wsapi_env)
-		    end
-   app_module.real_path = wsapi.app_path or "."
-   app_module.mapper = { default = true }
-   app_module.not_found = function (web)
-			     web.status = "404 Not Found"
-			     return [[<html>
-				   <head><title>Not Found</title></head>
-				      <body><p>Not found!</p></body></html>]]
-			  end
-   app_module.server_error = function (web, msg)
-				web.status = "500 Server Error"
-				return [[<html>
-				      <head><title>Server Error</title></head>
-					 <body><pre>]] .. msg .. [[</pre></body></html>]]
-				 end
-   app_module.reparse = REPARSE
-   app_module.dispatch_table = { get = {}, post = {}, put = {}, delete = {}, options = {} }
-   return app_module
+  if type(app_module) == "string" then
+    app_module = { _NAME = app_module }
+  else
+    app_module = app_module or {}
+  end
+  for k, v in pairs(app_module_methods) do
+    app_module[k] = v
+  end
+  app_module.run = function (wsapi_env)
+      return _M.run(app_module, wsapi_env)
+    end
+  app_module.real_path = wsapi.app_path or "."
+  app_module.mapper = { default = true }
+  app_module.not_found = function (web)
+      web.status = "404 Not Found"
+      return [[<html>
+        <head><title>Not Found</title></head>
+        <body><p>Not found!</p></body></html>]]
+    end
+  app_module.server_error = function (web, msg)
+      web.status = "500 Server Error"
+      return [[<html>
+        <head><title>Server Error</title></head>
+        <body><pre>]] .. msg .. [[</pre></body></html>]]
+    end
+  app_module.reparse = REPARSE
+  app_module.dispatch_table = {
+    get = {},
+    post = {},
+    put = {},
+    delete = {},
+    options = {}
+  }
+  return app_module
 end
 
 local function serve_file(app_module)
-   return function (web)
-	     local filename = web.real_path .. web.path_info
-	     return app_module:serve_static(web, filename)
-	  end
+  return function (web)
+    local filename = web.real_path .. web.path_info
+    return app_module:serve_static(web, filename)
+  end
 end
 
 function app_module_methods.dispatch_get(app_module, func, ...)
-   for _, pat in ipairs{ ... } do
-      table.insert(app_module.dispatch_table.get, { pattern = pat,
-		      handler = func })
-   end
+  for _, pat in ipairs{ ... } do
+    table.insert(app_module.dispatch_table.get, {
+      pattern = pat,
+      handler = func
+    })
+  end
 end
 
 function app_module_methods.dispatch_post(app_module, func, ...)
-   for _, pat in ipairs{ ... } do
-      table.insert(app_module.dispatch_table.post, { pattern = pat,
-		      handler = func })
-   end
+  for _, pat in ipairs{ ... } do
+    table.insert(app_module.dispatch_table.post, {
+      pattern = pat,
+      handler = func
+    })
+  end
 end
 
 function app_module_methods.dispatch_put(app_module, func, ...)
-   for _, pat in ipairs{ ... } do
-      table.insert(app_module.dispatch_table.put, { pattern = pat,
-		      handler = func })
-   end
+  for _, pat in ipairs{ ... } do
+    table.insert(app_module.dispatch_table.put, {
+      pattern = pat,
+      handler = func
+    })
+  end
 end
 
 function app_module_methods.dispatch_delete(app_module, func, ...)
-   for _, pat in ipairs{ ... } do
-      table.insert(app_module.dispatch_table.delete, { pattern = pat,
-		      handler = func })
-   end
+  for _, pat in ipairs{ ... } do
+    table.insert(app_module.dispatch_table.delete, {
+      pattern = pat,
+      handler = func
+    })
+  end
 end
 
 function app_module_methods.dispatch_options(app_module, func, ...)
-   for _, pat in ipairs{ ... } do
-      table.insert(app_module.dispatch_table.options, { pattern = pat,
-          handler = func })
-   end
+  for _, pat in ipairs{ ... } do
+    table.insert(app_module.dispatch_table.options, {
+      pattern = pat,
+      handler = func
+    })
+  end
 end
 
 function app_module_methods.dispatch_wsapi(app_module, func, ...)
   for _, pat in ipairs{ ... } do
     for _, tab in pairs(app_module.dispatch_table) do
-      table.insert(tab, { pattern = pat, handler = func, wsapi = true })
+      table.insert(tab, {
+        pattern = pat,
+        handler = func,
+        wsapi = true
+      })
     end
   end
 end
 
 function app_module_methods.dispatch_static(app_module, ...)
-   app_module:dispatch_get(serve_file(app_module), ...)
+  app_module:dispatch_get(serve_file(app_module), ...)
 end
 
 function app_module_methods.serve_static(app_module, web, filename)
-   local ext = string.match(filename, "%.([^%.]+)$")
-   if app_module.use_xsendfile then
+  local ext = string.match(filename, "%.([^%.]+)$")
+  if app_module.use_xsendfile then
+    web.headers["Content-Type"] = _M.mime_types[ext] or
+      "application/octet-stream"
+    web.headers["X-Sendfile"] = filename
+    return "xsendfile"
+  else
+    local file = io.open(filename, "rb")
+    if not file then
+      return app_module.not_found(web)
+    else
       web.headers["Content-Type"] = _M.mime_types[ext] or
-	 "application/octet-stream"
-      web.headers["X-Sendfile"] = filename
-      return "xsendfile"
-   else
-      local file = io.open(filename, "rb")
-      if not file then
-	 return app_module.not_found(web)
-      else
-	 web.headers["Content-Type"] = _M.mime_types[ext] or
-	    "application/octet-stream"
-	 local contents = file:read("*a")
-	 file:close()
-	 return contents
-      end
-   end
+        "application/octet-stream"
+      local contents = file:read("*a")
+      file:close()
+      return contents
+    end
+  end
 end
 
 local function newtag(name)
   local tag = {}
   setmetatable(tag, {
-                 __call = function (_, data)
-                            return make_tag(name, data)
-                          end,
-                 __index = function(_, class)
-                             return function (data)
-                                      return make_tag(name, data, class)
-                                    end
-                           end
-               })
+    __call = function (_, data)
+      return make_tag(name, data)
+    end,
+    __index = function(_, class)
+      return  function (data)
+        return make_tag(name, data, class)
+      end
+    end
+  })
   return tag
 end
 
 local function htmlify_func(func)
   local tags = {}
-  local env = { H = function (name)
-		      local tag = tags[name]
-		      if not tag then
-			tag = newtag(name)
-			tags[name] = tag
-		      end
-		      return tag
-		    end
-	      }
+  local env = {
+    H = function (name)
+      local tag = tags[name]
+      if not tag then
+        tag = newtag(name)
+        tags[name] = tag
+      end
+      return tag
+    end
+  }
   local old_env = getfenv(func)
-  setmetatable(env, { __index = function (env, name)
-				  if old_env[name] then
-				    return old_env[name]
-				  else
-				    local tag = newtag(name)
-				    rawset(env, name, tag)
-				    return tag
-				  end
-				end })
+  setmetatable(env, {
+    __index = function (env, name)
+      if old_env[name] then
+        return old_env[name]
+      else
+        local tag = newtag(name)
+        rawset(env, name, tag)
+        return tag
+      end
+    end
+  })
   setfenv(func, env)
 end
 
 function _M.htmlify(app_module, ...)
-   if type(app_module) == "function" then
-      htmlify_func(app_module)
-      for _, func in ipairs{...} do
-	htmlify_func(func)
+  if type(app_module) == "function" then
+    htmlify_func(app_module)
+    for _, func in ipairs{...} do
+      htmlify_func(func)
+    end
+  else
+    local patterns = { ... }
+    for _, patt in ipairs(patterns) do
+      if type(patt) == "function" then
+        htmlify_func(patt)
+      else
+        for name, func in pairs(app_module) do
+          if string.match(name, "^" .. patt .. "$")
+            and type(func) == "function"
+          then
+            htmlify_func(func)
+          end
+        end
       end
-   else
-      local patterns = { ... }
-      for _, patt in ipairs(patterns) do
-	if type(patt) == "function" then
-	  htmlify_func(patt)
-	else
-	  for name, func in pairs(app_module) do
-	    if string.match(name, "^" .. patt .. "$") and
-	         type(func) == "function" then
-	       htmlify_func(func)
-	    end
-	  end
-	end
-      end
-   end
+    end
+  end
 end
 
 app_module_methods.htmlify = _M.htmlify
 
 function app_module_methods.model(app_module, ...)
-   if app_module.mapper.default then
-      local table_prefix = (app_module._NAME and app_module._NAME .. "_") or ""
-      if not orm then
-	    orm = require "orbit.model"
-      end
-      app_module.mapper = orm.new(app_module.mapper.table_prefix or table_prefix,
-			app_module.mapper.conn, app_module.mapper.driver, app_module.mapper.logging)
-   end
-   return app_module.mapper:new(...)
+  if app_module.mapper.default then
+    local table_prefix = (app_module._NAME and app_module._NAME .. "_") or ""
+    if not orm then
+      orm = require "orbit.model"
+    end
+    app_module.mapper = orm.new(app_module.mapper.table_prefix or table_prefix,
+      app_module.mapper.conn, app_module.mapper.driver,
+      app_module.mapper.logging)
+  end
+  return app_module.mapper:new(...)
 end
 
 function web_methods:redirect(url)
@@ -470,8 +495,8 @@ end
 
 for name, func in pairs(wsutil) do
   web_methods[name] = function (self, ...)
-			return func(...)
-		      end
+    return func(...)
+  end
 end
 
 local function dispatcher(app_module, method, path, index)
@@ -483,26 +508,28 @@ local function dispatcher(app_module, method, path, index)
       local item = app_module.dispatch_table[method][index]
       local captures
       if type(item.pattern) == "string" then
-	captures = { string.match(path, "^" .. item.pattern .. "$") }
+        captures = { string.match(path, "^" .. item.pattern .. "$") }
       else
-	captures = { item.pattern:match(path) }
+        captures = { item.pattern:match(path) }
       end
       if #captures > 0 then
-	for i = 1, #captures do
-	  if type(captures[i]) == "string" then
-	    captures[i] = wsutil.url_decode(captures[i])
-	  end
-	end
-	return item.handler, captures, item.wsapi, index
+        for i = 1, #captures do
+          if type(captures[i]) == "string" then
+            captures[i] = wsutil.url_decode(captures[i])
+          end
+        end
+        return item.handler, captures, item.wsapi, index
       end
     end
   end
 end
 
 local function make_web_object(app_module, wsapi_env)
-  local web = { status = "200 Ok", response = "",
-		headers = { ["Content-Type"]= "text/html" },
-		cookies = {} }
+  local web = {
+    status = "200 Ok", response = "",
+    headers = { ["Content-Type"]= "text/html" },
+    cookies = {}
+  }
   setmetatable(web, { __index = web_methods })
   web.vars = wsapi_env
   web.prefix = app_module.prefix or wsapi_env.SCRIPT_NAME
@@ -515,15 +542,20 @@ local function make_web_object(app_module, wsapi_env)
   web.doc_root = wsapi_env.DOCUMENT_ROOT
   local req = wsreq.new(wsapi_env)
   local res = wsres.new(web.status, web.headers)
+
   web.set_cookie = function (_, name, value)
-		     res:set_cookie(name, value)
-		   end
+    res:set_cookie(name, value)
+  end
+
   web.delete_cookie = function (_, name, path)
-			res:delete_cookie(name, path)
-		      end
+    res:delete_cookie(name, path)
+  end
+
   web.path_info = req.path_info
   web.path_translated = wsapi_env.PATH_TRANSLATED
-  if web.path_translated == "" then web.path_translated = wsapi_env.SCRIPT_FILENAME end
+  if web.path_translated == "" then
+    web.path_translated = wsapi_env.SCRIPT_FILENAME
+  end
   web.script_name = wsapi_env.SCRIPT_NAME
   web.method = string.lower(req.method)
   web.input, web.cookies = req.params, req.cookies
@@ -533,14 +565,13 @@ end
 
 function _M.run(app_module, wsapi_env)
   local handler, captures, wsapi_handler, index = dispatcher(app_module,
-							     string.lower(wsapi_env.REQUEST_METHOD),
-							     wsapi_env.PATH_INFO)
+    string.lower(wsapi_env.REQUEST_METHOD), wsapi_env.PATH_INFO)
   handler = handler or app_module.not_found
   captures = captures or {}
   if wsapi_handler then
     local ok, status, headers, res = xpcall(function ()
-					      return handler(wsapi_env, unpack(captures))
-					    end, debug.traceback)
+      return handler(wsapi_env, unpack(captures))
+    end, debug.traceback)
     if ok then
       return status, headers, res
     else
@@ -550,25 +581,27 @@ function _M.run(app_module, wsapi_env)
   local web, res = make_web_object(app_module, wsapi_env)
   repeat
     local reparse = false
-    local ok, response = xpcall(function ()
-                                  return handler(web, unpack(captures))
-                                end, function(msg) return debug.traceback(msg) end)
+    local ok, response = xpcall(
+      function ()
+        return handler(web, unpack(captures))
+      end,
+      function(msg) return debug.traceback(msg) end
+    )
     if not ok then
       res.status = "500 Internal Server Error"
       res:write(app_module.server_error(web, response))
     else
       if response == REPARSE then
-	reparse = true
-	handler, captures, wsapi_handler, index = dispatcher(app_module,
-							     string.lower(wsapi_env.REQUEST_METHOD),
-							     wsapi_env.PATH_INFO, index)
-	handler, captures = handler or app_module.not_found, captures or {}
-	if wsapi_handler then
-	  error("cannot reparse to WSAPI handler")
-	end
+        reparse = true
+        handler, captures, wsapi_handler, index = dispatcher(app_module,
+          string.lower(wsapi_env.REQUEST_METHOD), wsapi_env.PATH_INFO, index)
+        handler, captures = handler or app_module.not_found, captures or {}
+        if wsapi_handler then
+          error("cannot reparse to WSAPI handler")
+        end
       else
-	res.status = web.status
-	res:write(response)
+        res.status = web.status
+        res:write(response)
       end
     end
   until not reparse
@@ -576,4 +609,3 @@ function _M.run(app_module, wsapi_env)
 end
 
 return _M
-

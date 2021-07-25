@@ -5,7 +5,12 @@ local orbit = require "orbit"
 -- Orbit applications are usually modules,
 -- orbit.new does the necessary initialization
 
-module("hello", package.seeall, orbit.new)
+local hello = orbit.new()
+if _VERSION >= "Lua 5.2" then
+  _ENV = hello
+else
+  setfenv(1, hello)
+end
 
 -- These are the controllers, each receives a web object
 -- that is the request/response, plus any extra captures from the

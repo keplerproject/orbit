@@ -1,12 +1,13 @@
 local _M = {}
+
 function _M.setfenv(func, env)
   local i = 1
   while true do
     local name = debug.getupvalue(func, i)
     if name == "_ENV" then
-      debug.upvaluejoin(func, i,(function()
+      debug.upvaluejoin(func, i, function()
         return env
-      end), 1)
+      end, 1)
       break
     elseif not name then
       break

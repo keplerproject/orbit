@@ -30,17 +30,17 @@ function _M.load(filename, contents)
   filename = filename or contents
   local template = template_cache[filename]
   if not template then
-     if not contents then
-       local file = io.open(filename)
-       if not file then
-	 return nil
-       end
-       contents = file:read("*a")
-       file:close()
-       if contents:sub(1,3) == BOM then contents = contents:sub(4) end
-     end
-     template = cosmo.compile(remove_shebang(contents))
-     template_cache[filename] = template
+    if not contents then
+      local file = io.open(filename)
+      if not file then
+        return nil
+      end
+      contents = file:read("*a")
+      file:close()
+      if contents:sub(1,3) == BOM then contents = contents:sub(4) end
+    end
+    template = cosmo.compile(remove_shebang(contents))
+    template_cache[filename] = template
   end
   return template
 end
@@ -48,15 +48,14 @@ end
 local function env_index(env, key)
   local val = _G[key]
   if not val and type(key) == "string" then
-    local template = 
-      load(env.web.real_path .. "/" .. key .. ".op")
+    local template = load(env.web.real_path .. "/" .. key .. ".op")
     if not template then return nil end
     return function (arg)
-	     arg = arg or {}
-	     if arg[1] then arg.it = arg[1] end
-	     local subt_env = setmetatable(arg, { __index = env })
-	     return template(subt_env)
-	   end
+      arg = arg or {}
+      if arg[1] then arg.it = arg[1] end
+      local subt_env = setmetatable(arg, { __index = env })
+      return template(subt_env)
+    end
   end
   return val
 end
@@ -85,13 +84,15 @@ local function make_env(web, initial)
     end
   end
   env["if"] = function (arg)
-		if type(arg[1]) == "function" then arg[1] = arg[1](select(2, unpack(arg))) end
-		if arg[1] then
-		  cosmo.yield{ it = arg[1], _template = 1 }
-		else
-		  cosmo.yield{ _template = 2 }
-		end
-	      end
+      if type(arg[1]) == "function" then
+        arg[1] = arg[1](select(2, unpack(arg)))
+      end
+      if arg[1] then
+        cosmo.yield{ it = arg[1], _template = 1 }
+      else
+        cosmo.yield{ _template = 2 }
+      end
+    end
   function env.redirect(target)
     if type(target) == "table" then target = target[1] end
     web:redirect(target)
@@ -145,14 +146,18 @@ end
 
 function _M.fill(web, template, env)
   if template then
-    local ok, res = xpcall(function () return template(make_env(web, env)) end,
-			   function (msg) 
-			     if type(msg) == "table" and msg[1] == abort then 
-			       return msg
-			     else 
-			       return traceback(msg) 
-			     end
-			   end)
+    local ok, res = xpcall(
+      function ()
+        return template(make_env(web, env))
+      end,
+      function (msg)
+        if type(msg) == "table" and msg[1] == abort then 
+          return msg
+        else
+          return traceback(msg) 
+        end
+      end
+    )
     if not ok and (type(res) ~= "table" or res[1] ~= abort) then
       error(res)
     elseif ok then
@@ -170,10 +175,10 @@ function _M.handle_get(web)
   if res then
     return res
   else
-     web.status = 404
-     return [[<html>
-	      <head><title>Not Found</title></head>
-	      <body><p>Not found!</p></body></html>]]
+    web.status = 404
+    return [[<html>
+      <head><title>Not Found</title></head>
+      <body><p>Not found!</p></body></html>]]
   end
 end
 
