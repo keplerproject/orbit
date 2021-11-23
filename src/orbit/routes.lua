@@ -34,7 +34,7 @@ local function cap_param(prefix, name, dot)
 end
 
 local param_pre = lpeg.C(slash_or_dot) * colon * 
-  peg.C((alpha + number + underscore)^1)
+  lpeg.C((alpha + number + underscore)^1)
 
 local param = (param_pre * #(forward_slash + -1) / cap_param) +
   (param_pre * #the_dot / function (prefix, name)
