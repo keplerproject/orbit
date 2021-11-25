@@ -5,9 +5,12 @@ local markdown = require "markdown"
 local orcache = require "orbit.cache"
 local cosmo = require "cosmo"
 local wsutil = require "wsapi.util"
+local unpack = unpack or table.unpack
 
-local toycms = setmetatable(orbit.new(), { __index = _G })
-if _VERSION == "Lua 5.2" then
+local toycms = setmetatable(orbit.new("toycms"), { __index = _G })
+toycms.cosmo = cosmo
+
+if _VERSION >= "Lua 5.2" then
   _ENV = toycms
 else
   setfenv(1, toycms)
@@ -25,10 +28,10 @@ mapper.conn = env:connect(unpack(database.conn_data))
 mapper.driver = database.driver
 
 models = {
-   post = toycms:model "toycms_post",
-   comment = toycms:model "toycms_comment",
-   section = toycms:model "toycms_section",
-   user = toycms:model "toycms_user"
+   post = toycms:model "post",
+   comment = toycms:model "comment",
+   section = toycms:model "section",
+   user = toycms:model "user"
 }
 
 cache = orcache.new(toycms, cache_path)

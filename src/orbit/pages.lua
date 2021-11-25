@@ -1,17 +1,17 @@
-
 local orbit = require "orbit"
 local model = require "orbit.model"
 local cosmo = require "cosmo"
 
 local io, string = io, string
-local setmetatable, loadstring, setfenv = setmetatable, loadstring, setfenv
+local setmetatable, loadstring = setmetatable, loadstring or load
+local setfenv = setfenv or require("orbit.envfunc").setfenv
 local type, error, tostring = type, error, tostring
 local print, pcall, xpcall, traceback = print, pcall, xpcall, debug.traceback
-local select, unpack = select, unpack
+local select, unpack = select, unpack or table.unpack
 
 local _G = _G
 
-module("orbit.pages", orbit.new)
+local _M = {}
 
 local template_cache = {}
 
@@ -26,21 +26,21 @@ local function splitpath(filename)
   return path, file
 end
 
-function load(filename, contents)
+function _M.load(filename, contents)
   filename = filename or contents
   local template = template_cache[filename]
   if not template then
-     if not contents then
-       local file = io.open(filename)
-       if not file then
-	 return nil
-       end
-       contents = file:read("*a")
-       file:close()
-       if contents:sub(1,3) == BOM then contents = contents:sub(4) end
-     end
-     template = cosmo.compile(remove_shebang(contents))
-     template_cache[filename] = template
+    if not contents then
+      local file = io.open(filename)
+      if not file then
+        return nil
+      end
+      contents = file:read("*a")
+      file:close()
+      if contents:sub(1,3) == BOM then contents = contents:sub(4) end
+    end
+    template = cosmo.compile(remove_shebang(contents))
+    template_cache[filename] = template
   end
   return template
 end
@@ -48,15 +48,14 @@ end
 local function env_index(env, key)
   local val = _G[key]
   if not val and type(key) == "string" then
-    local template = 
-      load(env.web.real_path .. "/" .. key .. ".op")
+    local template = load(env.web.real_path .. "/" .. key .. ".op")
     if not template then return nil end
     return function (arg)
-	     arg = arg or {}
-	     if arg[1] then arg.it = arg[1] end
-	     local subt_env = setmetatable(arg, { __index = env })
-	     return template(subt_env)
-	   end
+      arg = arg or {}
+      if arg[1] then arg.it = arg[1] end
+      local subt_env = setmetatable(arg, { __index = env })
+      return template(subt_env)
+    end
   end
   return val
 end
@@ -85,13 +84,15 @@ local function make_env(web, initial)
     end
   end
   env["if"] = function (arg)
-		if type(arg[1]) == "function" then arg[1] = arg[1](select(2, unpack(arg))) end
-		if arg[1] then
-		  cosmo.yield{ it = arg[1], _template = 1 }
-		else
-		  cosmo.yield{ _template = 2 }
-		end
-	      end
+      if type(arg[1]) == "function" then
+        arg[1] = arg[1](select(2, unpack(arg)))
+      end
+      if arg[1] then
+        cosmo.yield{ it = arg[1], _template = 1 }
+      else
+        cosmo.yield{ _template = 2 }
+      end
+    end
   function env.redirect(target)
     if type(target) == "table" then target = target[1] end
     web:redirect(target)
@@ -143,16 +144,20 @@ local function make_env(web, initial)
   return env
 end
 
-function fill(web, template, env)
+function _M.fill(web, template, env)
   if template then
-    local ok, res = xpcall(function () return template(make_env(web, env)) end,
-			   function (msg) 
-			     if type(msg) == "table" and msg[1] == abort then 
-			       return msg
-			     else 
-			       return traceback(msg) 
-			     end
-			   end)
+    local ok, res = xpcall(
+      function ()
+        return template(make_env(web, env))
+      end,
+      function (msg)
+        if type(msg) == "table" and msg[1] == abort then 
+          return msg
+        else
+          return traceback(msg) 
+        end
+      end
+    )
     if not ok and (type(res) ~= "table" or res[1] ~= abort) then
       error(res)
     elseif ok then
@@ -163,20 +168,20 @@ function fill(web, template, env)
   end
 end
 
-function handle_get(web)
+function _M.handle_get(web)
   local filename = web.path_translated
   web.real_path = splitpath(filename)
   local res = fill(web, load(filename))
   if res then
     return res
   else
-     web.status = 404
-     return [[<html>
-	      <head><title>Not Found</title></head>
-	      <body><p>Not found!</p></body></html>]]
+    web.status = 404
+    return [[<html>
+      <head><title>Not Found</title></head>
+      <body><p>Not found!</p></body></html>]]
   end
 end
 
-handle_post = handle_get
+_M.handle_post = _M.handle_get
 
 return _M
